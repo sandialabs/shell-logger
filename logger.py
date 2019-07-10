@@ -11,13 +11,16 @@ import common_functions as cf
 
 class LoggerEncoder(json.JSONEncoder):
     """
-    This is a helper class to make the Logger class JSON serializable.  This
-    particular class is used in the process of saving Logger objects to JSON.
+    This is a helper class to make the :class:`Logger` class JSON serializable.
+    This particular class is used in the process of saving :class:`Logger`
+    objects to JSON.
 
-    Usage:
+    Usage::
+
         import json
         with open('path_to_json_file', 'w') as jf:
             json.dump(data, jf, cls=LoggerEncoder)
+
     """
     def default(self, obj):
         if isinstance(obj, Logger):
@@ -38,19 +41,25 @@ class LoggerEncoder(json.JSONEncoder):
 
 class LoggerDecoder(json.JSONDecoder):
     """
-    This is a helper class to make the Logger class JSON serializable.  This
-    particular class is used in the process of retrieving Logger objects from
-    JSON.
+    This is a helper class to make the :class:`Logger` class JSON serializable.
+    This particular class is used in the process of retrieving :class:`Logger`
+    objects from JSON.
 
-    Usage:
+    Usage::
+
         import json
         with open('path_to_json_file', 'r') as jf:
             logger = json.load(jf, cls=LoggerDecoder)
+
     """
     def __init__(self):
         json.JSONDecoder.__init__(self, object_hook=self.dict_to_object)
 
     def dict_to_object(self, obj):
+        """
+        This converts data dictionaries given by the JSONDecoder into objects
+        of type :class:`Logger`, :class:`datetime.datetime`, etc.
+        """
         if '__type__' not in obj:
             return obj
         elif obj['__type__'] == 'Logger':
@@ -65,11 +74,13 @@ class LoggerDecoder(json.JSONDecoder):
 class Logger():
     """
     This class will keep track of commands run in the shell, their durations,
-    descriptions, stdout, stderr, and return codes.  When the 'finalize' method
-    is called, the Logger object will aggregate all the data from its commands
-    and child Logger objects (see example below) into both JSON and HTML files.
+    descriptions, ``stdout``, ``stderr``, and ``return_code``.  When the
+    :func:`finalize` method is called, the :class:`Logger` object will
+    aggregate all the data from its commands and child :class:`Logger` objects
+    (see example below) into both JSON and HTML files.
 
-    Example:
+    Example::
+
         > Parent Logger Object Name
             Duration: 18h 20m 35s
           > cmd1  (Click arrow '>' to expand for more details)
@@ -81,28 +92,34 @@ class Logger():
               > cmd1
         etc...
 
-    Note:  Because some stdout/stderr streams can be quite long, they will be
-        written to files in a temporary directory.  Once the finalize method is
-        called, they will be aggregated in an HTML file.  The JSON file will
-        contain references to the stdout/stderr files so that an HTML file can
-        be recreated again later if needed.
+    Note:
+        Because some ``stdout``/``stderr`` streams can be quite long, they will
+        be written to files in a temporary directory
+        (``log_dir/tmp/YYYY-MM-DD_hh:mm:ss/``).  Once the :func:`finalize`
+        method is called, they will be aggregated in an HTML file
+        (``log_dir/html_file``).  The JSON file (``log_dir/json_file``) will
+        contain references to the ``stdout``/``stderr`` files so that an HTML
+        file can be recreated again later if needed.
 
     Attributes:
         top_dict (dict):  A dictionary containing the following:
-            'name' (str):  The name of the Logger object.
-            'log' (list):  A list containing log entries and child Logger
-                objects in the order they were created.
-            'init_time' (datetime):  The time this Logger object was created.
-            'done_time' (datetime):  The time this Logger object is done with
-                its commands/messages.
-        log_dir (str):  Path to where the logs are stored for the parent Logger
-            and all its children.
+
+            - **name** (`str`):  The name of the :class:`Logger` object.
+            - **log** (`list`):  A list containing log entries and child
+              :class:`Logger` objects in the order they were created.
+            - **init_time** (`datetime`):  The time this :class:`Logger` object
+              was created.
+            - **done_time** (`datetime`):  The time this :class:`Logger` object
+              is done with its commands/messages.
+
+        log_dir (str):  Path to where the logs are stored for the parent
+            :class:`Logger` and all its children.
         tmp_dir (str):  Path to temporary directory where in-progress log
             files are stored.
         html_file (str):  Path to main HTML file for the parent and
-            children Logger objects.
-        indent (int):  The indentation level of this Logger object. The
-            parent has a level 0. Each successive child's indent is
+            children :class:`Logger` objects.
+        indent (int):  The indentation level of this :class:`Logger` object.
+            The parent has a level 0. Each successive child's indent is
             increased by 1.
     """
 
@@ -117,14 +134,14 @@ class Logger():
                 give to child Logger objects in order to keep things in the
                 same directory.
             html_file (str):  Path to main HTML file for the parent and
-                children Logger objects. If None (default), this is the parent
-                Logger object, and it will need to create the file.
+                children Logger objects. If ``None`` (default), this is the
+                parent Logger object, and it will need to create the file.
             indent (int):  The indentation level of this Logger object. The
                 parent has a level 0. Each successive child's indent is
                 increased by 1.
             top_dict (dict):  Optionally provide the top_dict for this Logger
                 object.  This is mainly used when importing Logger objects from
-                a JSON file.  For general usage, leave this as None.
+                a JSON file.  For general usage, leave this as ``None``.
         """
 
         # Misc
@@ -186,24 +203,25 @@ class Logger():
 
     def update_done_time(self):
         """
-        Allows the top_dict['done_time'] to be updated before finalize is
-        called. This is especially useful for child Logger objects who might
-        finish their commands before the parent finalizes everything.
+        Allows the ``top_dict['done_time']`` to be updated before
+        :func:`finalize` is called. This is especially useful for child
+        :class:`Logger` objects who might finish their commands before the
+        parent finalizes everything.
         """
         self.top_dict['done_time'] = datetime.datetime.now()
 
     def add_child(self, child_name):
         """
-        Creates and returns a 'child' Logger object. This will be one step
-        indented in the tree of the output log (see example in class
+        Creates and returns a 'child' :class:`Logger` object. This will be one
+        step indented in the tree of the output log (see example in class
         docstring). The total time for this child will be recorded when the
-        'finalize' method is called in the child object.
+        :func:`finalize` method is called in the child object.
 
         Parameters:
-            child_name (str):  Name of the child Logger object
+            child_name (str):  Name of the child :class:`Logger` object.
 
         Returns:
-            Logger:  Child logger object
+            Logger:  Child :class:`Logger` object.
         """
 
         # Create the child object and add it to the list of children.
@@ -218,8 +236,8 @@ class Logger():
         Format a time delta object.
 
         Parameters:
-            tdelta (datetime.timedelta): Time delta object
-            fmt (str): Delta format string. Use like datetime.strftime
+            tdelta (datetime.timedelta): Time delta object.
+            fmt (str): Delta format string. Use like :func:`datetime.strftime`.
 
         Returns:
             str: String with the formatted time delta.
@@ -257,8 +275,8 @@ class Logger():
     def log(self, msg, cmd, cwd, live_stdout=False, live_stderr=False,
             return_info=False):
         """
-        Add something to the log. To conserve memory, stdout and stderr will be
-        written to the files as it is being generated.
+        Add something to the log. To conserve memory, ``stdout`` and ``stderr``
+        will be written to the files as it is being generated.
 
         Parameters:
             msg (str):  Message to be recorded with the command. This could be
@@ -266,20 +284,20 @@ class Logger():
             cmd (str, list):  Shell command to be executed.
             cwd (str):  Path to the working directory of the command to be
                 executed.
-            live_stdout (bool):  Print stdout as it is being produced as
+            live_stdout (bool):  Print ``stdout`` as it is being produced as
                 well as saving it to the file.
-            live_stderr (bool):  Print stderr as it is being produced as
+            live_stderr (bool):  Print ``stderr`` as it is being produced as
                 well as saving it to the file.
-            return_info (bool):  If set to true, stdout, stderr, and
-                return_code will be stored and returned in a dictionary.
-                Consider leaving this set to False if you anticipate your
-                command producing large stdout/stderr streams that could cause
-                memory issues.
+            return_info (bool):  If set to ``True``, ``stdout``, ``stderr``,
+                and ``return_code`` will be stored and returned in a
+                dictionary.  Consider leaving this set to ``False`` if you
+                anticipate your command producing large ``stdout``/``stderr``
+                streams that could cause memory issues.
 
         Returns:
-            dict:  A dictionary containing 'stdout', 'stderr', and
-                'return_code' keys.  If return_info is set to False, the
-                'stdout' and 'stderr' values will be None
+            dict:  A dictionary containing `stdout`, `stderr`, and
+            `return_code` keys.  If `return_info` is set to ``False``,
+            the `stdout` and `stderr` values will be ``None``.
         """
 
         start_time = datetime.datetime.now()
@@ -304,8 +322,6 @@ class Logger():
             'cmd_id': cmd_id,
             'cwd': str(cwd),
             'return_code': 0,
-            'stdout_line_count': 0,
-            'stderr_line_count': 0,
         }
 
         # Create & open files for stdout and stderr
@@ -325,32 +341,20 @@ class Logger():
                     if live_stdout:
                         print(result['stdout'], end='')
                     if return_info:
-                        stdout += result['stdout']
+                        # Generally, '\r' characters aren't wanted here
+                        clean_stdout = re.sub('\r', '', result['stdout'])
+                        stdout += clean_stdout
                     out.write(result['stdout'])
 
-                    # Lines can be broken by '\r\n', '\r', or '\n'
-                    if '\r\n' in result['stdout']:
-                        ln_count = result['stdout'].count('\r\n')
-                    elif '\r' in result['stdout']:
-                        ln_count = result['stdout'].count('\r')
-                    else:
-                        ln_count = result['stdout'].count('\n')
-                    log['stdout_line_count'] += ln_count
                 elif result['stderr'] is not None:
                     if live_stderr:
                         print(result['stderr'], end='', file=sys.stderr)
                     if return_info:
-                        stderr += result['stderr']
+                        # Generally, '\r' characters aren't wanted here
+                        clean_stderr = re.sub('\r', '', result['stderr'])
+                        stderr += clean_stderr
                     err.write(result['stderr'])
 
-                    # Lines can be broken by '\r\n', '\r', or '\n'
-                    if '\r\n' in result['stderr']:
-                        ln_count = result['stderr'].count('\r\n')
-                    elif '\r' in result['stderr']:
-                        ln_count = result['stderr'].count('\r')
-                    else:
-                        ln_count = result['stderr'].count('\n')
-                    log['stderr_line_count'] += ln_count
                 # Execution is finished when stdout & stderr are both None
                 else:
                     log['return_code'] = result['return_code']
@@ -370,10 +374,11 @@ class Logger():
 
     def finalize(self):
         """
-        This method iterates through each entry in this Logger object's log
-        list and appends corresponding HTML text to the main HTML file. For
-        each entry, the stdout/stderr are copied from their respective files in
-        the tmp_dir, and then the tmp_dir files are removed.
+        This method iterates through each entry in this :class:`Logger`
+        object's log list and appends corresponding HTML text to the main HTML
+        file. For each entry, the ``stdout``/``stderr`` are copied from their
+        respective files in the ``tmp_dir``, and then the ``tmp_dir`` files are
+        removed.
         """
 
         for log in self.top_dict['log']:
@@ -453,8 +458,7 @@ class Logger():
             stdout_path = os.path.join(self.tmp_dir, cmd_id + '_stdout')
             with open(stdout_path, 'r') as out,\
                     open(self.html_file, 'a') as html:
-                for j in range(log['stdout_line_count']):
-                    line = out.readline()
+                for line in out:
                     html_line = ' '*i + "      <br>" + line
                     html.write(html_line)
 
@@ -471,8 +475,7 @@ class Logger():
             stderr_path = os.path.join(self.tmp_dir, cmd_id + '_stderr')
             with open(stderr_path, 'r') as err,\
                     open(self.html_file, 'a') as html:
-                for j in range(log['stderr_line_count']):
-                    line = err.readline()
+                for line in err:
                     html_line = ' '*i + "      <br>" + line
                     html.write(html_line)
 
