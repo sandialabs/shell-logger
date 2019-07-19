@@ -10,52 +10,53 @@ sys.path.insert(0, build_script_dir)
 from logger import Logger, LoggerDecoder
 
 
-def test_initialization_creates_tmp_dir(tmpdir):
+def test_initialization_creates_tmp_dir():
     """
-    Verify the initialization of a parent Logger object creates a temporary
-    directory (log_dir/tmp) if not already created.
+    Verify the initialization of a parent :class:`Logger` object creates a
+    temporary directory (``log_dir/tmp``) if not already created.
 
     Also, ensure a specific directory for this logging session is created
-    inside of the temporary directory (cwd/tmp/%Y-%m-%d_%H:%M:%S).
+    inside of the temporary directory (``cwd/tmp/%Y-%m-%d_%H:%M:%S``).
     """
 
-    Logger('test', tmpdir)
-    assert os.path.exists(tmpdir.join('tmp'))
+    cwd = os.getcwd()
+    Logger('test', cwd)
+    assert os.path.exists(os.path.join(cwd, 'tmp'))
 
     # Use wildcards (*) to match the end of the path.
     today = datetime.datetime.now().strftime("%Y-%m-%d")
-    wildcard_path = str(tmpdir.join(f'tmp/{today}*'))
+    wildcard_path = str(os.path.join(cwd, f'tmp/{today}*'))
     path = glob.glob(wildcard_path)[0]
     assert os.path.exists(path)
 
 
-def test_initialization_creates_html_file(tmpdir):
+def test_initialization_creates_html_file():
     """
-    Verify the initialization of a parent Logger object creates a starting HTML
-    file in the log_dir.
+    Verify the initialization of a parent :class:`Logger` object creates a
+    starting HTML file in the :attr:`log_dir`.
     """
 
-    Logger('test', tmpdir)
-    assert os.path.exists(tmpdir.join('test.html'))
+    Logger('test', os.getcwd())
+    assert os.path.exists(os.path.join(os.getcwd(), 'test.html'))
 
 
 @pytest.fixture()
-def logger(tmpdir):
+def logger():
     """
-    This fixture creates a Logger object with some sample data to be used in
-    tests.  It first creates a sample Logger object.  Then it logs a command
-    (whose stdout is 'Hello world' and stderr is 'Hello world error').  Next,
-    it adds a child Logger object and prints something using that child logger.
+    **@pytest.fixture()**
+
+    This fixture creates a :class:`Logger` object with some sample data to be
+    used in tests.  It first creates a sample :class:`Logger` object.  Then it
+    logs a command (whose ``stdout`` is ``'Hello world'`` and ``stderr`` is
+    ``'Hello world error'``).  Next, it adds a child :class:`Logger` object and
+    prints something using that child logger.
 
     Returns:
-        Logger:  The parent Logger object described above.
+        Logger:  The parent :class:`Logger` object described above.
     """
 
-    # Make the tmpdir an actual path, not the pytest LocalPath type.
-    tmpdir = os.path.abspath(tmpdir)
-
     # Initialize.
-    logger = Logger('Parent', tmpdir)
+    logger = Logger('Parent', os.getcwd())
 
     # Run command.
     #            stdout          ;        stderr
@@ -71,8 +72,9 @@ def logger(tmpdir):
 
 def test_log_method_creates_tmp_stdout_stderr_files(logger):
     """
-    Verify that logging a command will create files in the Logger object's
-    tmp_dir corresponding to the stdout and stderr of the command.
+    Verify that logging a command will create files in the :class:`Logger`
+    object's :attr:`tmp_dir` corresponding to the ``stdout`` and ``stderr`` of
+    the command.
     """
 
     # Get the paths for the stdout/stderr files.
@@ -93,15 +95,17 @@ def test_log_method_creates_tmp_stdout_stderr_files(logger):
 
 
 @pytest.mark.parametrize('return_info', [True, False])
-def test_log_method_return_info_works_correctly(tmpdir, return_info):
+def test_log_method_return_info_works_correctly(return_info):
     """
-    Verify that when return_info=True, we receive a dictionary that contains
-    the stdout and stderr of the command, as well as the return_code, and when
-    return_info=False, we receive the return_code, but stdout and stderr are
-    None.
+    **@pytest.mark.parametrize('return_info', [True, False])**
+
+    Verify that when ``return_info=True``, we receive a dictionary that
+    contains the ``stdout`` and ``stderr`` of the command, as well as the
+    ``return_code``, and when ``return_info=False``, we receive the
+    ``return_code``, but ``stdout`` and ``stderr`` are ``None``.
     """
 
-    logger = Logger("Test", os.path.abspath(tmpdir))
+    logger = Logger("Test", os.getcwd())
 
     #            stdout          ;        stderr
     cmd = "echo 'Hello world out'; echo 'Hello world error' 1>&2"
@@ -119,15 +123,14 @@ def test_log_method_return_info_works_correctly(tmpdir, return_info):
 
 @pytest.mark.parametrize('live_stdout', [True, False])
 @pytest.mark.parametrize('live_stderr', [True, False])
-def test_log_method_live_stdout_stderr_works_correctly(capsys, tmpdir,
-                                                       live_stdout,
+def test_log_method_live_stdout_stderr_works_correctly(capsys, live_stdout,
                                                        live_stderr):
     """
-    Verify that the live_stdout and live_stdout flags work as expected for the
-    log method.
+    Verify that the ``live_stdout`` and ``live_stdout`` flags work as expected
+    for the :func:`log` method.
     """
 
-    logger = Logger("Test", os.path.abspath(tmpdir))
+    logger = Logger("Test", os.getcwd())
 
     #            stdout          ;        stderr
     cmd = "echo 'Hello world out'; echo 'Hello world error' 1>&2"
@@ -148,9 +151,9 @@ def test_log_method_live_stdout_stderr_works_correctly(capsys, tmpdir,
 
 def test_finalize_keeps_tmp_stdout_stderr_files(logger):
     """
-    Verify that the finalize method does not delete the temporary stdout/stderr
-    files.  We want to keep these for a bit in case the HTML file needs to be
-    recreated.
+    Verify that the :func:`finalize` method does not delete the temporary
+    ``stdout``/``stderr`` files.  We want to keep these for a bit in case the
+    HTML file needs to be recreated.
     """
 
     # Get the paths for the stdout/stderr files.
@@ -171,7 +174,8 @@ def test_finalize_keeps_tmp_stdout_stderr_files(logger):
 
 def test_finalize_creates_JSON_with_correct_information(logger):
     """
-    Verify that the finalize method creates a JSON file with the proper data.
+    Verify that the :func:`finalize` method creates a JSON file with the proper
+    data.
     """
 
     logger.finalize()
@@ -207,7 +211,8 @@ def test_finalize_creates_JSON_with_correct_information(logger):
 
 def test_finalize_creates_HTML_with_correct_information(logger):
     """
-    Verify that the finalize method creates an HTML file with the proper data.
+    Verify that the :func:`finalize` method creates an HTML file with the
+    proper data.
     """
 
     logger.finalize()
@@ -237,7 +242,7 @@ def test_finalize_creates_HTML_with_correct_information(logger):
 def test_JSON_file_can_reproduce_HTML_file(logger):
     """
     Verify that a JSON file can properly recreate the original HTML file
-    created when finalize is callled.
+    created when :func:`finalize` is called.
     """
 
     logger.finalize()
