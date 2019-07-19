@@ -160,7 +160,7 @@ class Logger():
         # log_dir
         # -------
         if not os.path.exists(log_dir):
-            os.mkdir(log_dir)
+            os.makedirs(log_dir)
 
         # tmp_dir
         # -------
@@ -169,11 +169,11 @@ class Logger():
         if tmp_dir is None:
             top_tmp_dir = os.path.join(log_dir, 'tmp')
             if not os.path.exists(top_tmp_dir):
-                os.mkdir(top_tmp_dir)
+                os.makedirs(top_tmp_dir)
             now = datetime.datetime.now().strftime("%Y-%m-%d_%H:%M:%S")
             self.tmp_dir = os.path.join(top_tmp_dir, now)
             if not os.path.exists(self.tmp_dir):
-                os.mkdir(self.tmp_dir)
+                os.makedirs(self.tmp_dir)
         else:
             self.tmp_dir = tmp_dir
 
