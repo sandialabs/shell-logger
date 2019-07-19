@@ -1,9 +1,11 @@
 #!/usr/bin/env python3
 import datetime
+from distutils.dir_util import copy_tree
 import json
 import os
 import random
 import re
+import shutil
 import string
 import sys
 import common_functions as cf
@@ -152,7 +154,7 @@ class Logger():
             self.top_dict = {'name': name, 'log': [],
                              'init_time': datetime.datetime.now(),
                              'done_time': datetime.datetime.now()}
-        self.log_dir = log_dir
+        self.log_dir = os.path.abspath(log_dir)
         self.indent = indent
 
         # log_dir
@@ -230,6 +232,40 @@ class Logger():
         self.top_dict['log'].append(child)
 
         return child
+
+    def change_log_dir(self, new_log_dir):
+        """
+        Change the :attr:`log_dir` of this :class:`Logger` object and all
+        children recursively.
+
+        Warning:
+            Only run this method on the top-level parent :class:`Logger`
+            object!  Otherwise, parents and children in a tree will have
+            different :attr:`log_dir` 's and things will break.
+
+        Parameters:
+            new_log_dir (str):  Path to the new :attr:`log_dir`.
+        """
+
+        abs_new_log_dir = os.path.abspath(new_log_dir)
+
+        # This only gets executed once by the top-level parent Logger object.
+        if os.path.exists(self.log_dir):
+            copy_tree(self.log_dir, abs_new_log_dir)
+            shutil.rmtree(self.log_dir)
+
+        # Change the tmp_dir, html_file, and log_dir for every child Logger
+        # recursively.
+        self.tmp_dir = os.path.join(abs_new_log_dir,
+                                    os.path.relpath(self.tmp_dir,
+                                                    self.log_dir))
+        self.html_file = os.path.join(abs_new_log_dir,
+                                      os.path.relpath(self.html_file,
+                                                      self.log_dir))
+        self.log_dir = os.path.abspath(new_log_dir)
+        for log in self.top_dict['log']:
+            if isinstance(log, Logger):
+                log.change_log_dir(new_log_dir)
 
     def strfdelta(self, tdelta, fmt):
         """
