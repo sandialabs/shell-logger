@@ -206,11 +206,25 @@ class Logger():
     def update_done_time(self):
         """
         Allows the ``top_dict['done_time']`` to be updated before
-        :func:`finalize` is called. This is especially useful for child
+        :func:`finalize` is called.  This is especially useful for child
         :class:`Logger` objects who might finish their commands before the
         parent finalizes everything.
         """
         self.top_dict['done_time'] = datetime.datetime.now()
+
+    def duration(self):
+        """
+        Returns the duration from the beginning of the :class:`Logger` object's
+        creation until now.
+
+        Returns:
+            str:  Duration in the format ``%Hh %Mm %Ss``.
+        """
+        self.update_done_time()
+        dur = self.top_dict['done_time'] - self.top_dict['init_time']
+        dur_str = self.strfdelta(dur, "{hrs}h {min}m {sec}s")
+
+        return dur_str
 
     def add_child(self, child_name):
         """
@@ -425,11 +439,7 @@ class Logger():
             # ------------
             if isinstance(log, Logger):
                 # Get the duration of this Logger's commands
-                if log.top_dict['init_time'] == log.top_dict['done_time']:
-                    log.top_dict['done_time'] = datetime.datetime.now()
-                duration = log.top_dict['done_time'] -\
-                    log.top_dict['init_time']
-                duration = self.strfdelta(duration, "{hrs}h {min}m {sec}s")
+                duration = self.duration()
 
                 # First print the header text.
                 html_str = (
