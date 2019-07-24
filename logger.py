@@ -379,6 +379,9 @@ class Logger():
         stderr_path = os.path.join(self.tmp_dir, cmd_id + '_stderr')
 
         with open(stdout_path, 'a') as out, open(stderr_path, 'a') as err:
+            # Print the command to be executed.
+            print(cmd_str)
+
             generator = cf.run_cmd_generator(cmd, cwd)
 
             if return_info:
