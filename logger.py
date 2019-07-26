@@ -393,6 +393,8 @@ class Logger():
                 if result['stdout'] is not None:
                     if live_stdout:
                         print(result['stdout'], end='')
+                        # Just to be sure it's printing out right.
+                        sys.stdout.flush()
                     if return_info:
                         # Generally, '\r' characters aren't wanted here
                         clean_stdout = re.sub('\r', '', result['stdout'])
@@ -402,6 +404,8 @@ class Logger():
                 elif result['stderr'] is not None:
                     if live_stderr:
                         print(result['stderr'], end='', file=sys.stderr)
+                        # Just to be sure it's printing out right.
+                        sys.stderr.flush()
                     if return_info:
                         # Generally, '\r' characters aren't wanted here
                         clean_stderr = re.sub('\r', '', result['stderr'])
