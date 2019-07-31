@@ -65,9 +65,13 @@ class LoggerDecoder(json.JSONDecoder):
         if '__type__' not in obj:
             return obj
         elif obj['__type__'] == 'Logger':
-            logger = Logger(obj['top_dict']['name'], obj['log_dir'],
+            init_time = datetime.datetime.strptime(obj['init_time']['value'],
+                                                   obj['init_time']['format'])
+            done_time = datetime.datetime.strptime(obj['done_time']['value'],
+                                                   obj['done_time']['format'])
+            logger = Logger(obj['name'], obj['log_dir'],
                             obj['tmp_dir'], obj['html_file'], obj['indent'],
-                            obj['top_dict'])
+                            obj['log'], init_time, done_time)
             return logger
         elif obj['__type__'] == 'datetime':
             return datetime.datetime.strptime(obj['value'], obj['format'])
@@ -104,18 +108,15 @@ class Logger():
         file can be recreated again later if needed.
 
     Attributes:
-        top_dict (dict):  A dictionary containing the following:
-
-            - **name** (`str`):  The name of the :class:`Logger` object.
-            - **log** (`list`):  A list containing log entries and child
-              :class:`Logger` objects in the order they were created.
-            - **init_time** (`datetime`):  The time this :class:`Logger` object
-              was created.
-            - **done_time** (`datetime`):  The time this :class:`Logger` object
-              is done with its commands/messages.
-
+        done_time (datetime):  The time this :class:`Logger` object is done
+            with its commands/messages.
+        init_time (datetime):  The time this :class:`Logger` object was
+            created.
+        log (list):  A list containing log entries and child.
+            :class:`Logger` objects in the order they were created.
         log_dir (str):  Path to where the logs are stored for the parent
             :class:`Logger` and all its children.
+        name (str):  The name of the :class:`Logger` object.
         tmp_dir (str):  Path to temporary directory where in-progress log
             files are stored.
         html_file (str):  Path to main HTML file for the parent and
@@ -126,7 +127,7 @@ class Logger():
     """
 
     def __init__(self, name, log_dir, tmp_dir=None, html_file=None, indent=0,
-                 top_dict=None):
+                 log=[], init_time=None, done_time=None):
         """
         Parameters:
             name (str):  Name to give to this Logger object.
@@ -141,24 +142,33 @@ class Logger():
             indent (int):  The indentation level of this Logger object. The
                 parent has a level 0. Each successive child's indent is
                 increased by 1.
-            top_dict (dict):  Optionally provide the top_dict for this Logger
-                object.  This is mainly used when importing Logger objects from
-                a JSON file.  For general usage, leave this as ``None``.
+            log (list):  Optionally provide an existing log list to the
+                :class:`Logger` object.  This is mainly used when importing
+                :class:`Logger` objects from a JSON file, and can generally be
+                left at the default value - an empty list.
+            init_time (datetime):  Optionally provide an init_time to the
+                :class:`Logger` object.  This is mainly used when importing
+                :class:`Logger` objects from a JSON file, and can generally be
+                left at the default value - the current time.
+            done_time (datetime):  Optionally provide a done_time to the
+                :class:`Logger` object.  This is mainly used when importing
+                :class:`Logger` objects from a JSON file, and can generally be
+                left at the default value - the current time.
         """
 
         # Misc
         # ----
-        if top_dict is not None:
-            self.top_dict = top_dict
-        else:
-            self.top_dict = {'name': name, 'log': [],
-                             'init_time': datetime.datetime.now(),
-                             'done_time': datetime.datetime.now()}
-        self.log_dir = os.path.abspath(log_dir)
+        self.name = name
         self.indent = indent
+        self.log = log
+        self.init_time = datetime.datetime.now() if not init_time else\
+            init_time
+        self.done_time = datetime.datetime.now() if not done_time else\
+            done_time
 
         # log_dir
         # -------
+        self.log_dir = log_dir
         if not os.path.exists(log_dir):
             os.makedirs(log_dir)
 
@@ -197,7 +207,7 @@ class Logger():
             # and it needs to create the main HTML file.
             self.html_file = os.path.join(self.log_dir, name.replace(' ', '_')
                                           + '.html')
-            html_text = f"<h1>{self.top_dict['name']} Log</h1>"
+            html_text = f"<h1>{self.name} Log</h1>"
 
             # Write the file.
             with open(self.html_file, 'w') as f:
@@ -205,12 +215,12 @@ class Logger():
 
     def update_done_time(self):
         """
-        Allows the ``top_dict['done_time']`` to be updated before
+        Allows the ``done_time`` to be updated before
         :func:`finalize` is called.  This is especially useful for child
         :class:`Logger` objects who might finish their commands before the
         parent finalizes everything.
         """
-        self.top_dict['done_time'] = datetime.datetime.now()
+        self.done_time = datetime.datetime.now()
 
     def duration(self):
         """
@@ -221,7 +231,7 @@ class Logger():
             str:  Duration in the format ``%Hh %Mm %Ss``.
         """
         self.update_done_time()
-        dur = self.top_dict['done_time'] - self.top_dict['init_time']
+        dur = self.done_time - self.init_time
         dur_str = self.strfdelta(dur, "{hrs}h {min}m {sec}s")
 
         return dur_str
@@ -243,7 +253,7 @@ class Logger():
         # Create the child object and add it to the list of children.
         child = Logger(child_name, self.log_dir, tmp_dir=self.tmp_dir,
                        html_file=self.html_file, indent=self.indent+1)
-        self.top_dict['log'].append(child)
+        self.log.append(child)
 
         return child
 
@@ -277,7 +287,7 @@ class Logger():
                                       os.path.relpath(self.html_file,
                                                       self.log_dir))
         self.log_dir = os.path.abspath(new_log_dir)
-        for log in self.top_dict['log']:
+        for log in self.log:
             if isinstance(log, Logger):
                 log.change_log_dir(new_log_dir)
 
@@ -320,7 +330,7 @@ class Logger():
             'timestamp': str(datetime.datetime.now()),
             'cmd': None
         }
-        self.top_dict['log'].append(log)
+        self.log.append(log)
 
     def log(self, msg, cmd, cwd, live_stdout=False, live_stderr=False,
             return_info=False):
@@ -420,7 +430,7 @@ class Logger():
         end_time = datetime.datetime.now()
         log['duration'] = self.strfdelta(end_time-start_time,
                                          "{hrs}h {min}m {sec}s")
-        self.top_dict['log'].append(log)
+        self.log.append(log)
 
         if return_info:
             return {'return_code': log['return_code'], 'stdout': stdout,
@@ -438,7 +448,7 @@ class Logger():
         removed.
         """
 
-        for log in self.top_dict['log']:
+        for log in self.log:
             # Each indent is 2 spaces
             i = self.indent * 2
 
@@ -454,7 +464,7 @@ class Logger():
                     ' '*i + "<details>\n" +
                     ' '*i + "  <summary>\n" +
                     ' '*i + "    <b><font " +
-                    f"size='6'>{log.top_dict['name']}</font></b>\n" +
+                    f"size='6'>{log.name}</font></b>\n" +
                     ' '*i + f"    <br>Duration: {duration}\n" +
                     ' '*i + "  </summary>"
                 )
@@ -545,7 +555,7 @@ class Logger():
         # ---------------------------------
         if self.indent == 0:  # Parent
             # Save everything to a JSON file
-            json_file = self.top_dict['name'].replace(' ', '_') + '.json'
+            json_file = self.name.replace(' ', '_') + '.json'
             json_file = os.path.join(self.log_dir, json_file)
 
             with open(json_file, 'w') as jf:

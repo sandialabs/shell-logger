@@ -78,7 +78,7 @@ def test_log_method_creates_tmp_stdout_stderr_files(logger):
     """
 
     # Get the paths for the stdout/stderr files.
-    cmd_id = logger.top_dict['log'][0]['cmd_id']
+    cmd_id = logger.log[0]['cmd_id']
     stdout_file = os.path.join(logger.tmp_dir, cmd_id + '_stdout')
     stderr_file = os.path.join(logger.tmp_dir, cmd_id + '_stderr')
 
@@ -157,7 +157,7 @@ def test_finalize_keeps_tmp_stdout_stderr_files(logger):
     """
 
     # Get the paths for the stdout/stderr files.
-    cmd_id = logger.top_dict['log'][0]['cmd_id']
+    cmd_id = logger.log[0]['cmd_id']
     stdout_file = os.path.join(logger.tmp_dir, cmd_id + '_stdout')
     stderr_file = os.path.join(logger.tmp_dir, cmd_id + '_stderr')
 
@@ -191,22 +191,22 @@ def test_finalize_creates_JSON_with_correct_information(logger):
     assert logger.tmp_dir == loaded_logger.tmp_dir
     assert logger.html_file == loaded_logger.html_file
     assert logger.indent == loaded_logger.indent
-    assert logger.top_dict['name'] == loaded_logger.top_dict['name']
-    assert logger.top_dict['init_time'] == loaded_logger.top_dict['init_time']
-    assert logger.top_dict['done_time'] == loaded_logger.top_dict['done_time']
-    assert logger.top_dict['log'][0] == loaded_logger.top_dict['log'][0]
+    assert logger.name == loaded_logger.name
+    assert logger.init_time == loaded_logger.init_time
+    assert logger.done_time == loaded_logger.done_time
+    assert logger.log[0] == loaded_logger.log[0]
 
     # Child Logger
-    child = logger.top_dict['log'][1]
-    loaded_child = loaded_logger.top_dict['log'][1]
+    child = logger.log[1]
+    loaded_child = loaded_logger.log[1]
     assert child.log_dir == loaded_child.log_dir
     assert child.tmp_dir == loaded_child.tmp_dir
     assert child.html_file == loaded_child.html_file
     assert child.indent == loaded_child.indent
-    assert child.top_dict['name'] == loaded_child.top_dict['name']
-    assert child.top_dict['init_time'] == loaded_child.top_dict['init_time']
-    assert child.top_dict['done_time'] == loaded_child.top_dict['done_time']
-    assert child.top_dict['log'][0] == loaded_child.top_dict['log'][0]
+    assert child.name == loaded_child.name
+    assert child.init_time == loaded_child.init_time
+    assert child.done_time == loaded_child.done_time
+    assert child.log[0] == loaded_child.log[0]
 
 
 def test_finalize_creates_HTML_with_correct_information(logger):
@@ -225,8 +225,8 @@ def test_finalize_creates_HTML_with_correct_information(logger):
 
     # Command info.
     assert "<b>test cmd</b>" in html_text
-    assert f"Duration: {logger.top_dict['log'][0]['duration']}" in html_text
-    assert f"Time:</b> {logger.top_dict['log'][0]['timestamp']}" in html_text
+    assert f"Duration: {logger.log[0]['duration']}" in html_text
+    assert f"Time:</b> {logger.log[0]['timestamp']}" in html_text
     assert "Command:</b> echo 'Hello world out'; "\
         "echo 'Hello world error' 1>&2" in html_text
     assert f"CWD:</b> {os.getcwd()}" in html_text
