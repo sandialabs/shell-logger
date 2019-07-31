@@ -70,7 +70,7 @@ class LoggerDecoder(json.JSONDecoder):
             done_time = datetime.datetime.strptime(obj['done_time']['value'],
                                                    obj['done_time']['format'])
             logger = Logger(obj['name'], obj['log_dir'],
-                            obj['tmp_dir'], obj['html_file'], obj['indent'],
+                            obj['strm_dir'], obj['html_file'], obj['indent'],
                             obj['log'], init_time, done_time)
             return logger
         elif obj['__type__'] == 'datetime':
@@ -117,8 +117,8 @@ class Logger():
         log_dir (str):  Path to where the logs are stored for the parent
             :class:`Logger` and all its children.
         name (str):  The name of the :class:`Logger` object.
-        tmp_dir (str):  Path to temporary directory where in-progress log
-            files are stored.
+        strm_dir (str):  Path to directory where ``stdout``/``stderr`` stream
+            logs are stored.
         html_file (str):  Path to main HTML file for the parent and
             children :class:`Logger` objects.
         indent (int):  The indentation level of this :class:`Logger` object.
@@ -126,16 +126,16 @@ class Logger():
             increased by 1.
     """
 
-    def __init__(self, name, log_dir, tmp_dir=None, html_file=None, indent=0,
+    def __init__(self, name, log_dir, strm_dir=None, html_file=None, indent=0,
                  log=[], init_time=None, done_time=None):
         """
         Parameters:
             name (str):  Name to give to this Logger object.
             log_dir (str):  Path to directory where log files will be stored.
-            tmp_dir (str):  Path to temporary directory where in-progress log
-                files are stored. This is helpful for parent Logger objects to
-                give to child Logger objects in order to keep things in the
-                same directory.
+            strm_dir (str):  Path to directory where ``stdout``/``stderr``
+                stream logs are stored.  This is helpful for parent Logger
+                objects to give to child Logger objects in order to keep things
+                in the same directory.
             html_file (str):  Path to main HTML file for the parent and
                 children Logger objects. If ``None`` (default), this is the
                 parent Logger object, and it will need to create the file.
@@ -168,24 +168,21 @@ class Logger():
 
         # log_dir
         # -------
-        self.log_dir = log_dir
+        self.log_dir = os.path.abspath(log_dir)
         if not os.path.exists(log_dir):
             os.makedirs(log_dir)
 
-        # tmp_dir
+        # strm_dir
         # -------
-        # If there isn't a tmp_dir given by the parent Logger, this is the
-        # parent. Create the tmp_dir.
-        if tmp_dir is None:
-            top_tmp_dir = os.path.join(log_dir, 'tmp')
-            if not os.path.exists(top_tmp_dir):
-                os.makedirs(top_tmp_dir)
-            now = datetime.datetime.now().strftime("%Y-%m-%d_%H:%M:%S")
-            self.tmp_dir = os.path.join(top_tmp_dir, now)
-            if not os.path.exists(self.tmp_dir):
-                os.makedirs(self.tmp_dir)
+        # If there isn't a strm_dir given by the parent Logger, this is the
+        # parent. Create the strm_dir.
+        if strm_dir is None:
+            now = datetime.datetime.now().strftime("%Y-%m-%d_%H%M%S")
+            self.strm_dir = os.path.join(self.log_dir, now)
+            if not os.path.exists(self.strm_dir):
+                os.makedirs(self.strm_dir)
         else:
-            self.tmp_dir = tmp_dir
+            self.strm_dir = strm_dir
 
         # html_file
         # ---------
@@ -251,7 +248,7 @@ class Logger():
         """
 
         # Create the child object and add it to the list of children.
-        child = Logger(child_name, self.log_dir, tmp_dir=self.tmp_dir,
+        child = Logger(child_name, self.log_dir, strm_dir=self.strm_dir,
                        html_file=self.html_file, indent=self.indent+1)
         self.log.append(child)
 
@@ -278,10 +275,10 @@ class Logger():
             copy_tree(self.log_dir, abs_new_log_dir)
             shutil.rmtree(self.log_dir)
 
-        # Change the tmp_dir, html_file, and log_dir for every child Logger
+        # Change the strm_dir, html_file, and log_dir for every child Logger
         # recursively.
-        self.tmp_dir = os.path.join(abs_new_log_dir,
-                                    os.path.relpath(self.tmp_dir,
+        self.strm_dir = os.path.join(abs_new_log_dir,
+                                     os.path.relpath(self.strm_dir,
                                                     self.log_dir))
         self.html_file = os.path.join(abs_new_log_dir,
                                       os.path.relpath(self.html_file,
@@ -385,8 +382,11 @@ class Logger():
         }
 
         # Create & open files for stdout and stderr
-        stdout_path = os.path.join(self.tmp_dir, cmd_id + '_stdout')
-        stderr_path = os.path.join(self.tmp_dir, cmd_id + '_stderr')
+        time_str = start_time.strftime("%Y-%m-%d_%H%M%S")
+        stdout_path = os.path.join(self.strm_dir,
+                                   f"{cmd_id}_{time_str}_stdout")
+        stderr_path = os.path.join(self.strm_dir,
+                                   f"{cmd_id}_{time_str}_stdout")
 
         with open(stdout_path, 'a') as out, open(stderr_path, 'a') as err:
             # Print the command to be executed.
@@ -444,8 +444,7 @@ class Logger():
         This method iterates through each entry in this :class:`Logger`
         object's log list and appends corresponding HTML text to the main HTML
         file. For each entry, the ``stdout``/``stderr`` are copied from their
-        respective files in the ``tmp_dir``, and then the ``tmp_dir`` files are
-        removed.
+        respective files in the ``strm_dir``.
         """
 
         for log in self.log:
@@ -518,7 +517,8 @@ class Logger():
 
             # Append the stdout of this command to the HTML file
             cmd_id = log['cmd_id']
-            stdout_path = os.path.join(self.tmp_dir, cmd_id + '_stdout')
+            stdout_path = os.path.join(self.strm_dir,
+                                       f"{cmd_id}_{time_str}_stdout")
             with open(stdout_path, 'r') as out,\
                     open(self.html_file, 'a') as html:
                 for line in out:
@@ -535,7 +535,8 @@ class Logger():
                 html.write(html_str)
 
             # Append the stderr of this command to the HTML file
-            stderr_path = os.path.join(self.tmp_dir, cmd_id + '_stderr')
+            stderr_path = os.path.join(self.strm_dir,
+                                       f"{cmd_id}_{time_str}_stdout")
             with open(stderr_path, 'r') as err,\
                     open(self.html_file, 'a') as html:
                 for line in err:
@@ -556,7 +557,7 @@ class Logger():
         if self.indent == 0:  # Parent
             # Save everything to a JSON file
             json_file = self.name.replace(' ', '_') + '.json'
-            json_file = os.path.join(self.log_dir, json_file)
+            json_file = os.path.join(self.strm_dir, json_file)
 
             with open(json_file, 'w') as jf:
                 json.dump(self, jf, cls=LoggerEncoder)
