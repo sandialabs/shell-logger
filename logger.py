@@ -65,13 +65,9 @@ class LoggerDecoder(json.JSONDecoder):
         if '__type__' not in obj:
             return obj
         elif obj['__type__'] == 'Logger':
-            init_time = datetime.datetime.strptime(obj['init_time']['value'],
-                                                   obj['init_time']['format'])
-            done_time = datetime.datetime.strptime(obj['done_time']['value'],
-                                                   obj['done_time']['format'])
             logger = Logger(obj['name'], obj['log_dir'],
                             obj['strm_dir'], obj['html_file'], obj['indent'],
-                            obj['log'], init_time, done_time)
+                            obj['log'], obj['init_time'], obj['done_time'])
             return logger
         elif obj['__type__'] == 'datetime':
             return datetime.datetime.strptime(obj['value'], obj['format'])
@@ -555,9 +551,50 @@ class Logger():
         # Final steps (Only for the parent)
         # ---------------------------------
         if self.indent == 0:  # Parent
-            # Save everything to a JSON file
+            # Save everything to a JSON file in the timestamped strm_dir
             json_file = self.name.replace(' ', '_') + '.json'
             json_file = os.path.join(self.strm_dir, json_file)
 
             with open(json_file, 'w') as jf:
                 json.dump(self, jf, cls=LoggerEncoder)
+
+            # Create a script in the strm_dir that makes it easy to recreate
+            # the HTML file for that specific timestamp.
+            script = (
+                "#!/usr/bin/env python3\n" +
+                "import json\n" +
+                "import os\n" +
+                "import sys\n\n" +
+                "path = os.path.join(os.path.dirname(os.path.dirname(os." +
+                "path.abspath(__file__))), 'utils')\n" +
+                "sys.path.append(path)\n" +
+                "from logger import Logger\n" +
+                "from logger import LoggerDecoder\n\n" +
+                "# Load the JSON data.\n" +
+                f"json_file = '{json_file}'\n" +
+                "if os.path.exists(json_file):\n" +
+                "    with open(json_file, 'r') as jf:\n " +
+                "       loaded_logger = json.load(jf, cls=LoggerDecoder)\n\n" +
+                "# Call finalize on the loaded Logger object, creating the"
+                "HTML.\n" +
+                "loaded_logger.finalize()"
+            )
+            script_file = os.path.join(self.strm_dir, "make_html_logs.py")
+            with open(script_file, 'w') as sc:
+                sc.write(script)
+            os.chmod(script_file, 0o755)  # Make it executable
+
+            # Copy logger.py and common_functions.py to the strm_dir so the
+            # script can import this module.
+            if not os.path.exists(os.path.join(self.log_dir, 'utils')):
+                os.mkdir(os.path.join(self.log_dir, 'utils'))
+
+            logger_py = os.path.join(os.getcwd(), "logger.py")
+            new_location = os.path.join(self.log_dir, "utils/logger.py")
+            if not os.path.exists(new_location):
+                shutil.copyfile(logger_py, new_location)
+
+            common_functions_py = os.path.join(os.getcwd(), "common_functions.py")
+            new_location = os.path.join(self.log_dir, "utils/common_functions.py")
+            if not os.path.exists(new_location):
+                shutil.copyfile(common_functions_py, new_location)
