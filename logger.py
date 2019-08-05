@@ -156,7 +156,7 @@ class Logger():
         # ----
         self.name = name
         self.indent = indent
-        self.log = log
+        self.log_book = log
         self.init_time = datetime.datetime.now() if not init_time else\
             init_time
         self.done_time = datetime.datetime.now() if not done_time else\
@@ -246,7 +246,7 @@ class Logger():
         # Create the child object and add it to the list of children.
         child = Logger(child_name, self.log_dir, strm_dir=self.strm_dir,
                        html_file=self.html_file, indent=self.indent+1)
-        self.log.append(child)
+        self.log_book.append(child)
 
         return child
 
@@ -280,7 +280,7 @@ class Logger():
                                       os.path.relpath(self.html_file,
                                                       self.log_dir))
         self.log_dir = os.path.abspath(new_log_dir)
-        for log in self.log:
+        for log in self.log_book:
             if isinstance(log, Logger):
                 log.change_log_dir(new_log_dir)
 
@@ -323,7 +323,7 @@ class Logger():
             'timestamp': str(datetime.datetime.now()),
             'cmd': None
         }
-        self.log.append(log)
+        self.log_book.append(log)
 
     def log(self, msg, cmd, cwd, live_stdout=False, live_stderr=False,
             return_info=False):
@@ -426,7 +426,7 @@ class Logger():
         end_time = datetime.datetime.now()
         log['duration'] = self.strfdelta(end_time-start_time,
                                          "{hrs}h {min}m {sec}s")
-        self.log.append(log)
+        self.log_book.append(log)
 
         if return_info:
             return {'return_code': log['return_code'], 'stdout': stdout,
@@ -443,7 +443,7 @@ class Logger():
         respective files in the ``strm_dir``.
         """
 
-        for log in self.log:
+        for log in self.log_book:
             # Each indent is 2 spaces
             i = self.indent * 2
 
