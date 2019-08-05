@@ -123,7 +123,7 @@ class Logger():
     """
 
     def __init__(self, name, log_dir, strm_dir=None, html_file=None, indent=0,
-                 log=[], init_time=None, done_time=None):
+                 log=None, init_time=None, done_time=None):
         """
         Parameters:
             name (str):  Name to give to this Logger object.
@@ -156,7 +156,7 @@ class Logger():
         # ----
         self.name = name
         self.indent = indent
-        self.log_book = log
+        self.log_book = log if log is not None else []
         self.init_time = datetime.datetime.now() if not init_time else\
             init_time
         self.done_time = datetime.datetime.now() if not done_time else\
@@ -244,8 +244,8 @@ class Logger():
         """
 
         # Create the child object and add it to the list of children.
-        child = Logger(child_name, self.log_dir, strm_dir=self.strm_dir,
-                       html_file=self.html_file, indent=self.indent+1)
+        child = Logger(child_name, self.log_dir, self.strm_dir, self.html_file,
+                       self.indent+1)
         self.log_book.append(child)
 
         return child
@@ -275,7 +275,7 @@ class Logger():
         # recursively.
         self.strm_dir = os.path.join(abs_new_log_dir,
                                      os.path.relpath(self.strm_dir,
-                                                    self.log_dir))
+                                                     self.log_dir))
         self.html_file = os.path.join(abs_new_log_dir,
                                       os.path.relpath(self.html_file,
                                                       self.log_dir))
@@ -370,7 +370,7 @@ class Logger():
         log = {
             'msg': msg,
             'duration': None,
-            'timestamp': str(start_time),
+            'timestamp': start_time.strftime("%Y-%m-%d_%H%M%S"),
             'cmd': cmd_str,
             'cmd_id': cmd_id,
             'cwd': str(cwd),
@@ -382,7 +382,7 @@ class Logger():
         stdout_path = os.path.join(self.strm_dir,
                                    f"{cmd_id}_{time_str}_stdout")
         stderr_path = os.path.join(self.strm_dir,
-                                   f"{cmd_id}_{time_str}_stdout")
+                                   f"{cmd_id}_{time_str}_stderr")
 
         with open(stdout_path, 'a') as out, open(stderr_path, 'a') as err:
             # Print the command to be executed.
@@ -513,8 +513,8 @@ class Logger():
 
             # Append the stdout of this command to the HTML file
             cmd_id = log['cmd_id']
-            stdout_path = os.path.join(self.strm_dir,
-                                       f"{cmd_id}_{time_str}_stdout")
+            stdout_path = os.path.join(self.strm_dir, f"{cmd_id}_"
+                                       f"{log['timestamp']}_stdout")
             with open(stdout_path, 'r') as out,\
                     open(self.html_file, 'a') as html:
                 for line in out:
@@ -531,8 +531,8 @@ class Logger():
                 html.write(html_str)
 
             # Append the stderr of this command to the HTML file
-            stderr_path = os.path.join(self.strm_dir,
-                                       f"{cmd_id}_{time_str}_stdout")
+            stderr_path = os.path.join(self.strm_dir, f"{cmd_id}_"
+                                       f"{log['timestamp']}_stderr")
             with open(stderr_path, 'r') as err,\
                     open(self.html_file, 'a') as html:
                 for line in err:
@@ -594,7 +594,9 @@ class Logger():
             if not os.path.exists(new_location):
                 shutil.copyfile(logger_py, new_location)
 
-            common_functions_py = os.path.join(os.getcwd(), "common_functions.py")
-            new_location = os.path.join(self.log_dir, "utils/common_functions.py")
+            common_functions_py = os.path.join(os.getcwd(),
+                                               "common_functions.py")
+            new_location = os.path.join(self.log_dir,
+                                        "utils/common_functions.py")
             if not os.path.exists(new_location):
                 shutil.copyfile(common_functions_py, new_location)
