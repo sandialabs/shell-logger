@@ -388,13 +388,12 @@ class Logger():
             # Print the command to be executed.
             print(cmd_str)
 
-            generator = cf.run_cmd_generator(cmd, cwd)
-
             if return_info:
                 stdout = ''
                 stderr = ''
 
             # Write to stdout/stderr files as text is being returned.
+            generator = cf.run_cmd_generator(cmd, cwd)
             for result in generator:
                 if result['stdout'] is not None:
                     if live_stdout:
