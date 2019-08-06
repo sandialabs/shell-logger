@@ -1,5 +1,3 @@
-import datetime
-import glob
 import json
 import os
 import pytest
@@ -10,24 +8,16 @@ sys.path.insert(0, build_script_dir)
 from logger import Logger, LoggerDecoder
 
 
-def test_initialization_creates_tmp_dir():
+def test_initialization_creates_strm_dir():
     """
     Verify the initialization of a parent :class:`Logger` object creates a
-    temporary directory (``log_dir/tmp``) if not already created.
-
-    Also, ensure a specific directory for this logging session is created
-    inside of the temporary directory (``cwd/tmp/%Y-%m-%d_%H:%M:%S``).
+    temporary directory (``log_dir/%Y-%m-%d_%H%M%S``) if not already created.
     """
 
     cwd = os.getcwd()
-    Logger('test', cwd)
-    assert os.path.exists(os.path.join(cwd, 'tmp'))
-
-    # Use wildcards (*) to match the end of the path.
-    today = datetime.datetime.now().strftime("%Y-%m-%d")
-    wildcard_path = str(os.path.join(cwd, f'tmp/{today}*'))
-    path = glob.glob(wildcard_path)[0]
-    assert os.path.exists(path)
+    logger = Logger('test', cwd)
+    timestamp = logger.init_time.strftime("%Y-%m-%d_%H%M%S")
+    assert os.path.exists(os.path.join(cwd, timestamp))
 
 
 def test_initialization_creates_html_file():
@@ -73,14 +63,15 @@ def logger():
 def test_log_method_creates_tmp_stdout_stderr_files(logger):
     """
     Verify that logging a command will create files in the :class:`Logger`
-    object's :attr:`tmp_dir` corresponding to the ``stdout`` and ``stderr`` of
+    object's :attr:`strm_dir` corresponding to the ``stdout`` and ``stderr`` of
     the command.
     """
 
     # Get the paths for the stdout/stderr files.
-    cmd_id = logger.log[0]['cmd_id']
-    stdout_file = os.path.join(logger.tmp_dir, cmd_id + '_stdout')
-    stderr_file = os.path.join(logger.tmp_dir, cmd_id + '_stderr')
+    cmd_id = logger.log_book[0]['cmd_id']
+    cmd_ts = logger.log_book[0]['timestamp']
+    stdout_file = os.path.join(logger.strm_dir, f"{cmd_ts}_{cmd_id}_stdout")
+    stderr_file = os.path.join(logger.strm_dir, f"{cmd_ts}_{cmd_id}_stderr")
 
     assert os.path.exists(stdout_file)
     assert os.path.exists(stderr_file)
@@ -134,19 +125,18 @@ def test_log_method_live_stdout_stderr_works_correctly(capsys, live_stdout,
 
     #            stdout          ;        stderr
     cmd = "echo 'Hello world out'; echo 'Hello world error' 1>&2"
-    logger.log("test cmd", cmd, os.getcwd(), live_stdout=live_stdout,
-               live_stderr=live_stderr)
+    logger.log("test cmd", cmd, os.getcwd(), live_stdout, live_stderr)
     out, err = capsys.readouterr()
 
     if live_stdout:
-        assert "Hello world out" in out
+        assert "\nHello world out\n" in out
     else:
-        assert out == ''
+        assert "\nHello world out\n" not in out
 
     if live_stderr:
-        assert "Hello world error" in err
+        assert "Hello world error\n" in err
     else:
-        assert err == ''
+        assert "Hello world error\n" not in out
 
 
 def test_finalize_keeps_tmp_stdout_stderr_files(logger):
@@ -157,9 +147,10 @@ def test_finalize_keeps_tmp_stdout_stderr_files(logger):
     """
 
     # Get the paths for the stdout/stderr files.
-    cmd_id = logger.log[0]['cmd_id']
-    stdout_file = os.path.join(logger.tmp_dir, cmd_id + '_stdout')
-    stderr_file = os.path.join(logger.tmp_dir, cmd_id + '_stderr')
+    cmd_id = logger.log_book[0]['cmd_id']
+    cmd_ts = logger.log_book[0]['timestamp']
+    stdout_file = os.path.join(logger.strm_dir, f"{cmd_ts}_{cmd_id}_stdout")
+    stderr_file = os.path.join(logger.strm_dir, f"{cmd_ts}_{cmd_id}_stderr")
 
     # Make sure they exist before finalize is called.
     assert os.path.exists(stdout_file)
@@ -181,32 +172,32 @@ def test_finalize_creates_JSON_with_correct_information(logger):
     logger.finalize()
 
     # Load from JSON.
-    json_file = os.path.join(logger.log_dir, 'Parent.json')
+    json_file = os.path.join(logger.strm_dir, 'Parent.json')
     assert os.path.exists(json_file)
     with open(json_file, 'r') as jf:
         loaded_logger = json.load(jf, cls=LoggerDecoder)
 
     # Parent Logger
     assert logger.log_dir == loaded_logger.log_dir
-    assert logger.tmp_dir == loaded_logger.tmp_dir
+    assert logger.strm_dir == loaded_logger.strm_dir
     assert logger.html_file == loaded_logger.html_file
     assert logger.indent == loaded_logger.indent
     assert logger.name == loaded_logger.name
     assert logger.init_time == loaded_logger.init_time
     assert logger.done_time == loaded_logger.done_time
-    assert logger.log[0] == loaded_logger.log[0]
+    assert logger.log_book[0] == loaded_logger.log_book[0]
 
     # Child Logger
-    child = logger.log[1]
-    loaded_child = loaded_logger.log[1]
+    child = logger.log_book[1]
+    loaded_child = loaded_logger.log_book[1]
     assert child.log_dir == loaded_child.log_dir
-    assert child.tmp_dir == loaded_child.tmp_dir
+    assert child.strm_dir == loaded_child.strm_dir
     assert child.html_file == loaded_child.html_file
     assert child.indent == loaded_child.indent
     assert child.name == loaded_child.name
     assert child.init_time == loaded_child.init_time
     assert child.done_time == loaded_child.done_time
-    assert child.log[0] == loaded_child.log[0]
+    assert child.log_book[0] == loaded_child.log_book[0]
 
 
 def test_finalize_creates_HTML_with_correct_information(logger):
@@ -225,8 +216,8 @@ def test_finalize_creates_HTML_with_correct_information(logger):
 
     # Command info.
     assert "<b>test cmd</b>" in html_text
-    assert f"Duration: {logger.log[0]['duration']}" in html_text
-    assert f"Time:</b> {logger.log[0]['timestamp']}" in html_text
+    assert f"Duration: {logger.log_book[0]['duration']}" in html_text
+    assert f"Time:</b> {logger.log_book[0]['timestamp']}" in html_text
     assert "Command:</b> echo 'Hello world out'; "\
         "echo 'Hello world error' 1>&2" in html_text
     assert f"CWD:</b> {os.getcwd()}" in html_text
@@ -257,7 +248,7 @@ def test_JSON_file_can_reproduce_HTML_file(logger):
     os.remove(html_file)
 
     # Load the JSON data.
-    json_file = os.path.join(logger.log_dir, 'Parent.json')
+    json_file = os.path.join(logger.strm_dir, 'Parent.json')
     assert os.path.exists(json_file)
     with open(json_file, 'r') as jf:
         loaded_logger = json.load(jf, cls=LoggerDecoder)

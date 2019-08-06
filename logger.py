@@ -67,7 +67,8 @@ class LoggerDecoder(json.JSONDecoder):
         elif obj['__type__'] == 'Logger':
             logger = Logger(obj['name'], obj['log_dir'],
                             obj['strm_dir'], obj['html_file'], obj['indent'],
-                            obj['log'], obj['init_time'], obj['done_time'])
+                            obj['log_book'], obj['init_time'],
+                            obj['done_time'], obj['duration'])
             return logger
         elif obj['__type__'] == 'datetime':
             return datetime.datetime.strptime(obj['value'], obj['format'])
@@ -106,6 +107,8 @@ class Logger():
     Attributes:
         done_time (datetime):  The time this :class:`Logger` object is done
             with its commands/messages.
+        duration (str):  String formatted duration of this :class:`Logger`,
+            updated when the :func:`finalize` method is called.
         init_time (datetime):  The time this :class:`Logger` object was
             created.
         log (list):  A list containing log entries and child.
@@ -123,7 +126,7 @@ class Logger():
     """
 
     def __init__(self, name, log_dir, strm_dir=None, html_file=None, indent=0,
-                 log=None, init_time=None, done_time=None):
+                 log=None, init_time=None, done_time=None, duration=None):
         """
         Parameters:
             name (str):  Name to give to this Logger object.
@@ -161,6 +164,7 @@ class Logger():
             init_time
         self.done_time = datetime.datetime.now() if not done_time else\
             done_time
+        self.duration = duration
 
         # log_dir
         # -------
@@ -215,40 +219,26 @@ class Logger():
         """
         self.done_time = datetime.datetime.now()
 
-    def duration(self):
+    def __update_duration(self):
         """
-        Returns the duration from the beginning of the :class:`Logger` object's
-        creation until now.
-
-        Returns:
-            str:  Duration in the format ``%Hh %Mm %Ss``.
+        Updates the `duration` attribute with the time from the beginning of
+        the :class:`Logger` object's creation until now.
         """
         self.update_done_time()
         dur = self.done_time - self.init_time
-        dur_str = self.strfdelta(dur, "{hrs}h {min}m {sec}s")
+        self.duration = self.strfdelta(dur, "{hrs}h {min}m {sec}s")
 
-        return dur_str
-
-    def add_child(self, child_name):
+    def check_duration(self):
         """
-        Creates and returns a 'child' :class:`Logger` object. This will be one
-        step indented in the tree of the output log (see example in class
-        docstring). The total time for this child will be recorded when the
-        :func:`finalize` method is called in the child object.
-
-        Parameters:
-            child_name (str):  Name of the child :class:`Logger` object.
+        Returns the current duration from the beginning of the :class:`Logger`
+        object's creation until now.
 
         Returns:
-            Logger:  Child :class:`Logger` object.
+            str:  Duration from this object's creation until now as a string.
         """
-
-        # Create the child object and add it to the list of children.
-        child = Logger(child_name, self.log_dir, self.strm_dir, self.html_file,
-                       self.indent+1)
-        self.log_book.append(child)
-
-        return child
+        now = datetime.datetime.now()
+        dur = now - self.init_time
+        return self.strfdelta(dur, "{hrs}h {min}m {sec}s")
 
     def change_log_dir(self, new_log_dir):
         """
@@ -283,6 +273,27 @@ class Logger():
         for log in self.log_book:
             if isinstance(log, Logger):
                 log.change_log_dir(new_log_dir)
+
+    def add_child(self, child_name):
+        """
+        Creates and returns a 'child' :class:`Logger` object. This will be one
+        step indented in the tree of the output log (see example in class
+        docstring). The total time for this child will be recorded when the
+        :func:`finalize` method is called in the child object.
+
+        Parameters:
+            child_name (str):  Name of the child :class:`Logger` object.
+
+        Returns:
+            Logger:  Child :class:`Logger` object.
+        """
+
+        # Create the child object and add it to the list of children.
+        child = Logger(child_name, self.log_dir, self.strm_dir, self.html_file,
+                       self.indent+1)
+        self.log_book.append(child)
+
+        return child
 
     def strfdelta(self, tdelta, fmt):
         """
@@ -449,8 +460,9 @@ class Logger():
             # Child Logger
             # ------------
             if isinstance(log, Logger):
-                # Get the duration of this Logger's commands
-                duration = self.duration()
+                # Update the duration of this Logger's commands
+                if not self.duration:
+                    self.__update_duration()
 
                 # First print the header text.
                 html_str = (
@@ -459,7 +471,7 @@ class Logger():
                     ' '*i + "  <summary>\n" +
                     ' '*i + "    <b><font " +
                     f"size='6'>{log.name}</font></b>\n" +
-                    ' '*i + f"    <br>Duration: {duration}\n" +
+                    ' '*i + f"    <br>Duration: {self.duration}\n" +
                     ' '*i + "  </summary>"
                 )
                 with open(self.html_file, 'a') as html:
@@ -530,7 +542,7 @@ class Logger():
                 html.write(html_str)
 
             # Append the stderr of this command to the HTML file
-            stderr = os.path.join(self.strm_dir, f"{log['timestamp']}_"
+            stderr_path = os.path.join(self.strm_dir, f"{log['timestamp']}_"
                                        f"{cmd_id}_stderr")
             with open(stderr_path, 'r') as err,\
                     open(self.html_file, 'a') as html:
