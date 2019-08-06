@@ -380,9 +380,9 @@ class Logger():
         # Create & open files for stdout and stderr
         time_str = start_time.strftime("%Y-%m-%d_%H%M%S")
         stdout_path = os.path.join(self.strm_dir,
-                                   f"{cmd_id}_{time_str}_stdout")
+                                   f"{time_str}_{cmd_id}_stdout")
         stderr_path = os.path.join(self.strm_dir,
-                                   f"{cmd_id}_{time_str}_stderr")
+                                   f"{time_str}_{cmd_id}_stderr")
 
         with open(stdout_path, 'a') as out, open(stderr_path, 'a') as err:
             # Print the command to be executed.
@@ -513,8 +513,8 @@ class Logger():
 
             # Append the stdout of this command to the HTML file
             cmd_id = log['cmd_id']
-            stdout_path = os.path.join(self.strm_dir, f"{cmd_id}_"
-                                       f"{log['timestamp']}_stdout")
+            stdout_path = os.path.join(self.strm_dir, f"{log['timestamp']}_"
+                                       f"{cmd_id}_stdout")
             with open(stdout_path, 'r') as out,\
                     open(self.html_file, 'a') as html:
                 for line in out:
@@ -531,8 +531,8 @@ class Logger():
                 html.write(html_str)
 
             # Append the stderr of this command to the HTML file
-            stderr_path = os.path.join(self.strm_dir, f"{cmd_id}_"
-                                       f"{log['timestamp']}_stderr")
+            stderr = os.path.join(self.strm_dir, f"{log['timestamp']}_"
+                                       f"{cmd_id}_stderr")
             with open(stderr_path, 'r') as err,\
                     open(self.html_file, 'a') as html:
                 for line in err:
