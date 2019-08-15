@@ -337,7 +337,7 @@ class Logger():
         self.log_book.append(log)
 
     def log(self, msg, cmd, cwd, live_stdout=False, live_stderr=False,
-            return_info=False):
+            return_info=False, verbose=False):
         """
         Add something to the log. To conserve memory, ``stdout`` and ``stderr``
         will be written to the files as it is being generated.
@@ -357,6 +357,7 @@ class Logger():
                 dictionary.  Consider leaving this set to ``False`` if you
                 anticipate your command producing large ``stdout``/``stderr``
                 streams that could cause memory issues.
+            verbose (bool):  Print the command before it is executed.
 
         Returns:
             dict:  A dictionary containing `stdout`, `stderr`, and
@@ -397,7 +398,8 @@ class Logger():
 
         with open(stdout_path, 'a') as out, open(stderr_path, 'a') as err:
             # Print the command to be executed.
-            print(cmd_str)
+            if verbose:
+                print(cmd_str)
 
             if return_info:
                 stdout = ''
@@ -600,13 +602,14 @@ class Logger():
             if not os.path.exists(os.path.join(self.log_dir, 'utils')):
                 os.mkdir(os.path.join(self.log_dir, 'utils'))
 
-            logger_py = __file__
+            logger_py = os.path.join(os.path.dirname(os.path.realpath(
+                __file__)), "logger.py")
             new_location = os.path.join(self.log_dir, "utils/logger.py")
             if not os.path.exists(new_location):
                 shutil.copyfile(logger_py, new_location)
 
-            common_functions_py = os.path.join(os.path.dirname(__file__),
-                                               "common_functions.py")
+            common_functions_py = os.path.join(os.path.dirname(
+                os.path.realpath(__file__)), "common_functions.py")
             new_location = os.path.join(self.log_dir,
                                         "utils/common_functions.py")
             if not os.path.exists(new_location):
