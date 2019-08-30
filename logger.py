@@ -600,12 +600,12 @@ class Logger():
             if not os.path.exists(os.path.join(self.log_dir, 'utils')):
                 os.mkdir(os.path.join(self.log_dir, 'utils'))
 
-            logger_py = os.path.join(os.getcwd(), "logger.py")
+            logger_py = __file__
             new_location = os.path.join(self.log_dir, "utils/logger.py")
             if not os.path.exists(new_location):
                 shutil.copyfile(logger_py, new_location)
 
-            common_functions_py = os.path.join(os.getcwd(),
+            common_functions_py = os.path.join(os.path.dirname(__file__),
                                                "common_functions.py")
             new_location = os.path.join(self.log_dir,
                                         "utils/common_functions.py")
