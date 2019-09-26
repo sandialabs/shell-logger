@@ -567,7 +567,7 @@ class Logger():
             json_file = os.path.join(self.strm_dir, json_file)
 
             with open(json_file, 'w') as jf:
-                json.dump(self, jf, cls=LoggerEncoder)
+                json.dump(self, jf, cls=LoggerEncoder, sort_keys=True, indent=4)
 
             # Create a script in the strm_dir that makes it easy to recreate
             # the HTML file for that specific timestamp.
