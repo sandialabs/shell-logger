@@ -570,7 +570,7 @@ class Logger():
             if not os.path.exists(new_location):
                 shutil.copyfile(self.html_file, new_location)
             os.remove(self.html_file)
-            new_name = f"{self.name.replace(' ', '_')}_latest_run.html"
+            new_name = f"{self.name.replace(' ', '_')}.html"
             self.html_file = os.path.join(os.path.dirname(self.html_file), new_name)
             os.symlink(new_location, self.html_file)
 
