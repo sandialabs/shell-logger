@@ -564,6 +564,16 @@ class Logger():
         # Final steps (Only for the parent)
         # ---------------------------------
         if self.indent == 0:  # Parent
+            # Copy HTML file to strm_dir and symlink self.html_file to the copy
+            curr_html_file = os.path.basename(self.html_file)
+            new_location = os.path.join(self.strm_dir, curr_html_file)
+            if not os.path.exists(new_location):
+                shutil.copyfile(self.html_file, new_location)
+            os.remove(self.html_file)
+            new_name = f"{self.name.replace(' ', '_')}_latest_run.html"
+            self.html_file = os.path.join(os.path.dirname(self.html_file), new_name)
+            os.symlink(new_location, self.html_file)
+
             # Save everything to a JSON file in the timestamped strm_dir
             json_file = self.name.replace(' ', '_') + '.json'
             json_file = os.path.join(self.strm_dir, json_file)
@@ -572,7 +582,7 @@ class Logger():
                 json.dump(self, jf, cls=LoggerEncoder, sort_keys=True, indent=4)
 
             # Create a script in the strm_dir that makes it easy to recreate
-            # the HTML file for that specific timestamp.
+            # the HTML file for that specific timestamp. This is a backup.
             script = (
                 "#!/usr/bin/env python3\n" +
                 "import json\n" +

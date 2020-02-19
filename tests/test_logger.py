@@ -209,7 +209,7 @@ def test_finalize_creates_HTML_with_correct_information(logger):
     logger.finalize()
 
     # Load the HTML file.
-    html_file = os.path.join(logger.log_dir, 'Parent.html')
+    html_file = os.path.join(logger.strm_dir, 'Parent.html')
     assert os.path.exists(html_file)
     with open(html_file, 'r') as hf:
         html_text = hf.read()
@@ -228,6 +228,23 @@ def test_finalize_creates_HTML_with_correct_information(logger):
 
     # Child Logger
     assert "Child</font></b>\n" in html_text
+
+
+def test_log_dir_HTML_symlinks_to_strm_dir_HTML(logger):
+    """
+    Verify that the :func:`finalize` method symlinks log_dir/html_file to
+    strm_dir/html_file.
+    """
+
+    logger.finalize()
+
+    # Load the HTML file.
+    html_file = os.path.join(logger.strm_dir, 'Parent.html')
+    html_symlink = os.path.join(logger.log_dir, 'Parent_latest_run.html')
+    assert os.path.exists(html_file)
+    assert os.path.exists(html_symlink)
+
+    assert os.path.realpath(html_symlink) == html_file
 
 
 def test_JSON_file_can_reproduce_HTML_file(logger):
