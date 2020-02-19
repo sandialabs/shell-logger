@@ -210,6 +210,117 @@ class Logger():
             with open(self.html_file, 'w') as f:
                 f.write(html_text)
 
+    def log(self, msg, cmd, cwd, live_stdout=False, live_stderr=False,
+            return_info=False, verbose=False):
+        """
+        Add something to the log. To conserve memory, ``stdout`` and ``stderr``
+        will be written to the files as it is being generated.
+
+        Parameters:
+            msg (str):  Message to be recorded with the command. This could be
+                documentation of what your command is doing and its purpose.
+            cmd (str, list):  Shell command to be executed.
+            cwd (str):  Path to the working directory of the command to be
+                executed.
+            live_stdout (bool):  Print ``stdout`` as it is being produced as
+                well as saving it to the file.
+            live_stderr (bool):  Print ``stderr`` as it is being produced as
+                well as saving it to the file.
+            return_info (bool):  If set to ``True``, ``stdout``, ``stderr``,
+                and ``return_code`` will be stored and returned in a
+                dictionary.  Consider leaving this set to ``False`` if you
+                anticipate your command producing large ``stdout``/``stderr``
+                streams that could cause memory issues.
+            verbose (bool):  Print the command before it is executed.
+
+        Returns:
+            dict:  A dictionary containing `stdout`, `stderr`, and
+            `return_code` keys.  If `return_info` is set to ``False``,
+            the `stdout` and `stderr` values will be ``None``.
+        """
+
+        start_time = datetime.datetime.now()
+
+        # Create a unique command ID that will be used to find the location
+        # of the stdout/stderr files in the temporary directory during
+        # finalization.
+        cmd_id = 'cmd_' + ''.join(random.choice(string.ascii_lowercase)
+                                  for i in range(9))
+
+        # Create a string form of the command to be stored.
+        if isinstance(cmd, list):
+            cmd_str = ' '.join(cmd)
+        else:
+            cmd_str = cmd
+
+        log = {
+            'msg': msg,
+            'duration': None,
+            'timestamp': start_time.strftime("%Y-%m-%d_%H%M%S"),
+            'cmd': cmd_str,
+            'cmd_id': cmd_id,
+            'cwd': str(cwd),
+            'return_code': 0,
+        }
+
+        # Create & open files for stdout and stderr
+        time_str = start_time.strftime("%Y-%m-%d_%H%M%S")
+        stdout_path = os.path.join(self.strm_dir,
+                                   f"{time_str}_{cmd_id}_stdout")
+        stderr_path = os.path.join(self.strm_dir,
+                                   f"{time_str}_{cmd_id}_stderr")
+
+        with open(stdout_path, 'a') as out, open(stderr_path, 'a') as err:
+            # Print the command to be executed.
+            if verbose:
+                print(cmd_str)
+
+            if return_info:
+                stdout = ''
+                stderr = ''
+
+            # Write to stdout/stderr files as text is being returned.
+            generator = cf.run_cmd_generator(cmd, cwd)
+            for result in generator:
+                if result['stdout'] is not None:
+                    if live_stdout:
+                        print(result['stdout'], end='')
+                        # Just to be sure it's printing out right.
+                        sys.stdout.flush()
+                    if return_info:
+                        # Generally, '\r' characters aren't wanted here
+                        clean_stdout = re.sub('\r', '', result['stdout'])
+                        stdout += clean_stdout
+                    out.write(result['stdout'])
+
+                elif result['stderr'] is not None:
+                    if live_stderr:
+                        print(result['stderr'], end='', file=sys.stderr)
+                        # Just to be sure it's printing out right.
+                        sys.stderr.flush()
+                    if return_info:
+                        # Generally, '\r' characters aren't wanted here
+                        clean_stderr = re.sub('\r', '', result['stderr'])
+                        stderr += clean_stderr
+                    err.write(result['stderr'])
+
+                # Execution is finished when stdout & stderr are both None
+                else:
+                    log['return_code'] = result['return_code']
+
+        # Update a few things.
+        end_time = datetime.datetime.now()
+        log['duration'] = self.strfdelta(end_time-start_time,
+                                         "{hrs}h {min}m {sec}s")
+        self.log_book.append(log)
+
+        if return_info:
+            return {'return_code': log['return_code'], 'stdout': stdout,
+                    'stderr': stderr}
+        else:
+            return {'return_code': log['return_code'], 'stdout': None,
+                    'stderr': None}
+
     def update_done_time(self):
         """
         Allows the ``done_time`` to be updated before
@@ -336,117 +447,6 @@ class Logger():
         }
         self.log_book.append(log)
 
-    def log(self, msg, cmd, cwd, live_stdout=False, live_stderr=False,
-            return_info=False, verbose=False):
-        """
-        Add something to the log. To conserve memory, ``stdout`` and ``stderr``
-        will be written to the files as it is being generated.
-
-        Parameters:
-            msg (str):  Message to be recorded with the command. This could be
-                documentation of what your command is doing and its purpose.
-            cmd (str, list):  Shell command to be executed.
-            cwd (str):  Path to the working directory of the command to be
-                executed.
-            live_stdout (bool):  Print ``stdout`` as it is being produced as
-                well as saving it to the file.
-            live_stderr (bool):  Print ``stderr`` as it is being produced as
-                well as saving it to the file.
-            return_info (bool):  If set to ``True``, ``stdout``, ``stderr``,
-                and ``return_code`` will be stored and returned in a
-                dictionary.  Consider leaving this set to ``False`` if you
-                anticipate your command producing large ``stdout``/``stderr``
-                streams that could cause memory issues.
-            verbose (bool):  Print the command before it is executed.
-
-        Returns:
-            dict:  A dictionary containing `stdout`, `stderr`, and
-            `return_code` keys.  If `return_info` is set to ``False``,
-            the `stdout` and `stderr` values will be ``None``.
-        """
-
-        start_time = datetime.datetime.now()
-
-        # Create a unique command ID that will be used to find the location
-        # of the stdout/stderr files in the temporary directory during
-        # finalization.
-        cmd_id = 'cmd_' + ''.join(random.choice(string.ascii_lowercase)
-                                  for i in range(9))
-
-        # Create a string form of the command to be stored.
-        if isinstance(cmd, list):
-            cmd_str = ' '.join(cmd)
-        else:
-            cmd_str = cmd
-
-        log = {
-            'msg': msg,
-            'duration': None,
-            'timestamp': start_time.strftime("%Y-%m-%d_%H%M%S"),
-            'cmd': cmd_str,
-            'cmd_id': cmd_id,
-            'cwd': str(cwd),
-            'return_code': 0,
-        }
-
-        # Create & open files for stdout and stderr
-        time_str = start_time.strftime("%Y-%m-%d_%H%M%S")
-        stdout_path = os.path.join(self.strm_dir,
-                                   f"{time_str}_{cmd_id}_stdout")
-        stderr_path = os.path.join(self.strm_dir,
-                                   f"{time_str}_{cmd_id}_stderr")
-
-        with open(stdout_path, 'a') as out, open(stderr_path, 'a') as err:
-            # Print the command to be executed.
-            if verbose:
-                print(cmd_str)
-
-            if return_info:
-                stdout = ''
-                stderr = ''
-
-            # Write to stdout/stderr files as text is being returned.
-            generator = cf.run_cmd_generator(cmd, cwd)
-            for result in generator:
-                if result['stdout'] is not None:
-                    if live_stdout:
-                        print(result['stdout'], end='')
-                        # Just to be sure it's printing out right.
-                        sys.stdout.flush()
-                    if return_info:
-                        # Generally, '\r' characters aren't wanted here
-                        clean_stdout = re.sub('\r', '', result['stdout'])
-                        stdout += clean_stdout
-                    out.write(result['stdout'])
-
-                elif result['stderr'] is not None:
-                    if live_stderr:
-                        print(result['stderr'], end='', file=sys.stderr)
-                        # Just to be sure it's printing out right.
-                        sys.stderr.flush()
-                    if return_info:
-                        # Generally, '\r' characters aren't wanted here
-                        clean_stderr = re.sub('\r', '', result['stderr'])
-                        stderr += clean_stderr
-                    err.write(result['stderr'])
-
-                # Execution is finished when stdout & stderr are both None
-                else:
-                    log['return_code'] = result['return_code']
-
-        # Update a few things.
-        end_time = datetime.datetime.now()
-        log['duration'] = self.strfdelta(end_time-start_time,
-                                         "{hrs}h {min}m {sec}s")
-        self.log_book.append(log)
-
-        if return_info:
-            return {'return_code': log['return_code'], 'stdout': stdout,
-                    'stderr': stderr}
-        else:
-            return {'return_code': log['return_code'], 'stdout': None,
-                    'stderr': None}
-
     def finalize(self):
         """
         This method iterates through each entry in this :class:`Logger`
@@ -564,53 +564,19 @@ class Logger():
         # Final steps (Only for the parent)
         # ---------------------------------
         if self.indent == 0:  # Parent
+            # Copy HTML file to strm_dir and symlink self.html_file to the copy
+            curr_html_file = os.path.basename(self.html_file)
+            new_location = os.path.join(self.strm_dir, curr_html_file)
+            if not os.path.exists(new_location):
+                shutil.copyfile(self.html_file, new_location)
+            os.remove(self.html_file)
+            new_name = f"{self.name.replace(' ', '_')}.html"
+            self.html_file = os.path.join(os.path.dirname(self.html_file), new_name)
+            os.symlink(new_location, self.html_file)
+
             # Save everything to a JSON file in the timestamped strm_dir
             json_file = self.name.replace(' ', '_') + '.json'
             json_file = os.path.join(self.strm_dir, json_file)
 
             with open(json_file, 'w') as jf:
                 json.dump(self, jf, cls=LoggerEncoder, sort_keys=True, indent=4)
-
-            # Create a script in the strm_dir that makes it easy to recreate
-            # the HTML file for that specific timestamp.
-            script = (
-                "#!/usr/bin/env python3\n" +
-                "import json\n" +
-                "import os\n" +
-                "import sys\n\n" +
-                "path = os.path.join(os.path.dirname(os.path.dirname(os." +
-                "path.abspath(__file__))), 'utils')\n" +
-                "sys.path.append(path)\n" +
-                "from logger import Logger\n" +
-                "from logger import LoggerDecoder\n\n" +
-                "# Load the JSON data.\n" +
-                f"json_file = '{json_file}'\n" +
-                "if os.path.exists(json_file):\n" +
-                "    with open(json_file, 'r') as jf:\n " +
-                "       loaded_logger = json.load(jf, cls=LoggerDecoder)\n\n" +
-                "# Call finalize on the loaded Logger object, creating the"
-                "HTML.\n" +
-                "loaded_logger.finalize()"
-            )
-            script_file = os.path.join(self.strm_dir, "make_html_logs.py")
-            with open(script_file, 'w') as sc:
-                sc.write(script)
-            os.chmod(script_file, 0o755)  # Make it executable
-
-            # Copy logger.py and common_functions.py to the strm_dir so the
-            # script can import this module.
-            if not os.path.exists(os.path.join(self.log_dir, 'utils')):
-                os.mkdir(os.path.join(self.log_dir, 'utils'))
-
-            logger_py = os.path.join(os.path.dirname(os.path.realpath(
-                __file__)), "logger.py")
-            new_location = os.path.join(self.log_dir, "utils/logger.py")
-            if not os.path.exists(new_location):
-                shutil.copyfile(logger_py, new_location)
-
-            common_functions_py = os.path.join(os.path.dirname(
-                os.path.realpath(__file__)), "common_functions.py")
-            new_location = os.path.join(self.log_dir,
-                                        "utils/common_functions.py")
-            if not os.path.exists(new_location):
-                shutil.copyfile(common_functions_py, new_location)
