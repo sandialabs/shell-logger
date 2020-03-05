@@ -177,7 +177,7 @@ class Logger():
         # If there isn't a strm_dir given by the parent Logger, this is the
         # parent. Create the strm_dir.
         if strm_dir is None:
-            now = datetime.datetime.now().strftime("%Y-%m-%d_%H%M%S")
+            now = datetime.datetime.now().strftime("%Y-%m-%d_%H.%M.%S.%f")
             self.strm_dir = os.path.join(self.log_dir, now)
             if not os.path.exists(self.strm_dir):
                 os.makedirs(self.strm_dir)
