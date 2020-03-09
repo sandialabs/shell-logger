@@ -1,6 +1,7 @@
 import json
 import os
 import pytest
+import re
 import sys
 
 build_script_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -16,7 +17,7 @@ def test_initialization_creates_strm_dir():
 
     cwd = os.getcwd()
     logger = Logger('test', cwd)
-    timestamp = logger.init_time.strftime("%Y-%m-%d_%H%M%S")
+    timestamp = logger.init_time.strftime("%Y-%m-%d_%H.%M.%S.%f")
     assert os.path.exists(os.path.join(cwd, timestamp))
 
 
@@ -129,14 +130,14 @@ def test_log_method_live_stdout_stderr_works_correctly(capsys, live_stdout,
     out, err = capsys.readouterr()
 
     if live_stdout:
-        assert "\nHello world out\n" in out
+        assert re.search(r"^Hello world out(\r)?\n", out) is not None
     else:
-        assert "\nHello world out\n" not in out
+        assert re.search(r"^Hello world out(\r)?\n", out) is None
 
     if live_stderr:
-        assert "Hello world error\n" in err
+        assert re.search(r"^Hello world error(\r)?\n", err) is not None
     else:
-        assert "Hello world error\n" not in out
+        assert re.search(r"^Hello world error(\r)?\n", err) is None
 
 
 def test_finalize_keeps_tmp_stdout_stderr_files(logger):
@@ -240,7 +241,7 @@ def test_log_dir_HTML_symlinks_to_strm_dir_HTML(logger):
 
     # Load the HTML file.
     html_file = os.path.join(logger.strm_dir, 'Parent.html')
-    html_symlink = os.path.join(logger.log_dir, 'Parent_latest_run.html')
+    html_symlink = os.path.join(logger.log_dir, 'Parent.html')
     assert os.path.exists(html_file)
     assert os.path.exists(html_symlink)
 
