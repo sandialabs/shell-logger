@@ -159,13 +159,14 @@ class Logger():
         # Misc
         # ----
         self.name = name
-        self.indent = indent
         self.log_book = log if log is not None else []
         self.init_time = datetime.datetime.now() if not init_time else\
             init_time
         self.done_time = datetime.datetime.now() if not done_time else\
             done_time
         self.duration = duration
+        self.indent = indent
+        self.is_parent = True if self.indent == 0 else False
 
         # log_dir
         # -------
@@ -211,8 +212,8 @@ class Logger():
             with open(self.html_file, 'w') as f:
                 f.write(html_text)
 
-    def log(self, msg, cmd, cwd, live_stdout=False, live_stderr=False,
-            return_info=False, verbose=False):
+    def log(self, msg, cmd, cwd=os.getcwd(), live_stdout=False,
+            live_stderr=False, return_info=False, verbose=False):
         """
         Add something to the log. To conserve memory, ``stdout`` and ``stderr``
         will be written to the files as it is being generated.
@@ -457,15 +458,14 @@ class Logger():
         """
 
         for log in self.log_book:
-            # Each indent is 2 spaces
-            i = self.indent * 2
+            i = self.indent * 2  # Each indent is 2 spaces
 
             # Child Logger
             # ------------
             if isinstance(log, Logger):
                 # Update the duration of this Logger's commands
-                if not self.duration:
-                    self.__update_duration()
+                if log.duration is None:
+                    log.__update_duration()
 
                 # First print the header text.
                 html_str = (
@@ -474,7 +474,7 @@ class Logger():
                     ' '*i + "  <summary>\n" +
                     ' '*i + "    <b><font " +
                     f"size='6'>{log.name}</font></b>\n" +
-                    ' '*i + f"    <br>Duration: {self.duration}\n" +
+                    ' '*i + f"    <br>Duration: {log.duration}\n" +
                     ' '*i + "  </summary>"
                 )
                 with open(self.html_file, 'a') as html:
@@ -564,7 +564,7 @@ class Logger():
 
         # Final steps (Only for the parent)
         # ---------------------------------
-        if self.indent == 0:  # Parent
+        if self.is_parent:
             # Create a symlink in log_dir to the HTML file in strm_dir.
             curr_html_file = os.path.basename(self.html_file)
             new_location = os.path.join(self.log_dir, curr_html_file)

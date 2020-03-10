@@ -140,6 +140,30 @@ def test_log_method_live_stdout_stderr_works_correctly(capsys, live_stdout,
         assert re.search(r"^Hello world error(\r)?\n", err) is None
 
 
+def test_child_logger_duration_displayed_correctly_in_HTML(logger):
+    """
+    Verify that the overview of child loggers in the HTML file displays the
+    correct child logger duration, not the entire log's duration.
+    """
+
+    child2 = logger.add_child("Child 2")
+    child2.log("Wait 0.005s", ["sleep", "0.005"])
+
+    child3 = logger.add_child("Child 3")
+    child3.log("Wait 0.006s", ["sleep", "0.006"])
+
+    logger.finalize()
+
+    with open(logger.html_file, 'r') as hf:
+        html_text = hf.read()
+
+    assert child2.duration is not None
+    assert f"<br>Duration: {child2.duration}\n" in html_text
+
+    assert child3.duration is not None
+    assert f"<br>Duration: {child3.duration}\n" in html_text
+
+
 def test_finalize_keeps_tmp_stdout_stderr_files(logger):
     """
     Verify that the :func:`finalize` method does not delete the temporary
