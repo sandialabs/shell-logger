@@ -8,6 +8,7 @@ import re
 import shutil
 import string
 import sys
+import tempfile
 import common_functions as cf
 
 
@@ -202,7 +203,7 @@ class Logger():
         else:
             # If there isn't an HTML file, this is that parent Logger object,
             # and it needs to create the main HTML file.
-            self.html_file = os.path.join(self.log_dir, name.replace(' ', '_')
+            self.html_file = os.path.join(self.strm_dir, name.replace(' ', '_')
                                           + '.html')
             html_text = f"<h1>{self.name} Log</h1>"
 
@@ -564,15 +565,12 @@ class Logger():
         # Final steps (Only for the parent)
         # ---------------------------------
         if self.indent == 0:  # Parent
-            # Copy HTML file to strm_dir and symlink self.html_file to the copy
+            # Create a symlink in log_dir to the HTML file in strm_dir.
             curr_html_file = os.path.basename(self.html_file)
-            new_location = os.path.join(self.strm_dir, curr_html_file)
-            if not os.path.exists(new_location):
-                shutil.copyfile(self.html_file, new_location)
-            os.remove(self.html_file)
-            new_name = f"{self.name.replace(' ', '_')}.html"
-            self.html_file = os.path.join(os.path.dirname(self.html_file), new_name)
-            os.symlink(new_location, self.html_file)
+            new_location = os.path.join(self.log_dir, curr_html_file)
+            temp_link_name = tempfile.mktemp(dir=self.log_dir)
+            os.symlink(self.html_file, temp_link_name)
+            os.replace(temp_link_name, new_location)
 
             # Save everything to a JSON file in the timestamped strm_dir
             json_file = self.name.replace(' ', '_') + '.json'
