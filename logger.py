@@ -179,10 +179,8 @@ class Logger():
         # If there isn't a strm_dir given by the parent Logger, this is the
         # parent. Create the strm_dir.
         if strm_dir is None:
-            now = self.init_time.strftime("%Y-%m-%d_%H.%M.%S.%f")
-            self.strm_dir = os.path.join(self.log_dir, now)
-            if not os.path.exists(self.strm_dir):
-                os.makedirs(self.strm_dir)
+            now = self.init_time.strftime("%Y-%m-%d_%H.%M.%S.%f_")
+            self.strm_dir = tempfile.mkdtemp(dir=self.log_dir, prefix=now)
         else:
             self.strm_dir = strm_dir
 
