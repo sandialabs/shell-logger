@@ -1,10 +1,11 @@
 import json
 import os
+import pathlib
 import pytest
 import re
 import sys
 
-build_script_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+build_script_dir = pathlib.Path(__file__).resolve().parent.parent
 sys.path.insert(0, build_script_dir)
 from logger import Logger, LoggerDecoder
 
@@ -18,7 +19,7 @@ def test_initialization_creates_strm_dir():
     cwd = os.getcwd()
     logger = Logger('test', cwd)
     timestamp = logger.init_time.strftime("%Y-%m-%d_%H.%M.%S.%f")
-    assert os.path.exists(os.path.join(cwd, timestamp))
+    assert (cwd / timestamp).exists()
 
 
 def test_initialization_creates_html_file():
@@ -28,7 +29,7 @@ def test_initialization_creates_html_file():
     """
 
     Logger('test', os.getcwd())
-    assert os.path.exists(os.path.join(os.getcwd(), 'test.html'))
+    assert (pathlib.Path(os.getcwd()) / 'test.html').exists()
 
 
 @pytest.fixture()
@@ -52,7 +53,7 @@ def logger():
     # Run command.
     #            stdout          ;        stderr
     cmd = "echo 'Hello world out'; echo 'Hello world error' 1>&2"
-    logger.log("test cmd", cmd, os.getcwd())
+    logger.log("test cmd", cmd, Path(os.getcwd()))
 
     # Add child and print statement.
     child_logger = logger.add_child("Child")
@@ -71,11 +72,11 @@ def test_log_method_creates_tmp_stdout_stderr_files(logger):
     # Get the paths for the stdout/stderr files.
     cmd_id = logger.log_book[0]['cmd_id']
     cmd_ts = logger.log_book[0]['timestamp']
-    stdout_file = os.path.join(logger.strm_dir, f"{cmd_ts}_{cmd_id}_stdout")
-    stderr_file = os.path.join(logger.strm_dir, f"{cmd_ts}_{cmd_id}_stderr")
+    stdout_file = logger.strm_dir / f"{cmd_ts}_{cmd_id}_stdout"
+    stderr_file = logger.strm_dir / f"{cmd_ts}_{cmd_id}_stderr"
 
-    assert os.path.exists(stdout_file)
-    assert os.path.exists(stderr_file)
+    assert stdout_file.exist()
+    assert stderr_file.exist()
 
     # Make sure the information written to these files is correct.
     with open(stdout_file, 'r') as out, open(stderr_file, 'r') as err:
@@ -174,18 +175,18 @@ def test_finalize_keeps_tmp_stdout_stderr_files(logger):
     # Get the paths for the stdout/stderr files.
     cmd_id = logger.log_book[0]['cmd_id']
     cmd_ts = logger.log_book[0]['timestamp']
-    stdout_file = os.path.join(logger.strm_dir, f"{cmd_ts}_{cmd_id}_stdout")
-    stderr_file = os.path.join(logger.strm_dir, f"{cmd_ts}_{cmd_id}_stderr")
+    stdout_file = logger.strm_dir / f"{cmd_ts}_{cmd_id}_stdout"
+    stderr_file = logger.strm_dir / f"{cmd_ts}_{cmd_id}_stderr"
 
     # Make sure they exist before finalize is called.
-    assert os.path.exists(stdout_file)
-    assert os.path.exists(stderr_file)
+    assert stdout_file.exists()
+    assert stderr_file.exists()
 
     logger.finalize()
 
     # Make sure they exist after finalize is called.
-    assert os.path.exists(stdout_file)
-    assert os.path.exists(stderr_file)
+    assert stdout_file.exists()
+    assert stderr_file.exists()
 
 
 def test_finalize_creates_JSON_with_correct_information(logger):
@@ -197,8 +198,8 @@ def test_finalize_creates_JSON_with_correct_information(logger):
     logger.finalize()
 
     # Load from JSON.
-    json_file = os.path.join(logger.strm_dir, 'Parent.json')
-    assert os.path.exists(json_file)
+    json_file = logger.strm_dir / "Parent.json"
+    assert json_file.exists()
     with open(json_file, 'r') as jf:
         loaded_logger = json.load(jf, cls=LoggerDecoder)
 
@@ -234,8 +235,8 @@ def test_finalize_creates_HTML_with_correct_information(logger):
     logger.finalize()
 
     # Load the HTML file.
-    html_file = os.path.join(logger.strm_dir, 'Parent.html')
-    assert os.path.exists(html_file)
+    html_file = logger.strm_dir / "Parent.html"
+    assert html_file.exists()
     with open(html_file, 'r') as hf:
         html_text = hf.read()
 
@@ -264,12 +265,12 @@ def test_log_dir_HTML_symlinks_to_strm_dir_HTML(logger):
     logger.finalize()
 
     # Load the HTML file.
-    html_file = os.path.join(logger.strm_dir, 'Parent.html')
-    html_symlink = os.path.join(logger.log_dir, 'Parent.html')
-    assert os.path.exists(html_file)
-    assert os.path.exists(html_symlink)
+    html_file = logger.strm_dir / "Parent.html"
+    html_symlink = logger.log_dir / "Parent.html"
+    assert html_file.exists()
+    assert html_symlink.exists()
 
-    assert os.path.realpath(html_symlink) == html_file
+    assert html_symlink.resolve() == html_file
 
 
 def test_JSON_file_can_reproduce_HTML_file(logger):
@@ -281,17 +282,17 @@ def test_JSON_file_can_reproduce_HTML_file(logger):
     logger.finalize()
 
     # Load the original HTML file's contents.
-    html_file = os.path.join(logger.log_dir, 'Parent.html')
-    assert os.path.exists(html_file)
+    html_file = logger.log_dir / "Parent.html"
+    assert html_file.exists()
     with open(html_file, 'r') as hf:
         original_html = hf.read()
 
     # Delete the HTML file.
-    os.remove(html_file)
+    html_file.unlink()
 
     # Load the JSON data.
-    json_file = os.path.join(logger.strm_dir, 'Parent.json')
-    assert os.path.exists(json_file)
+    json_file = logger.strm_dir / "Parent.json"
+    assert json_file.exists()
     with open(json_file, 'r') as jf:
         loaded_logger = json.load(jf, cls=LoggerDecoder)
 
@@ -299,7 +300,7 @@ def test_JSON_file_can_reproduce_HTML_file(logger):
     loaded_logger.finalize()
 
     # Load the new HTML file's contents and compare.
-    assert os.path.exists(html_file)
+    assert html_file.exists()
     with open(html_file, 'r') as hf:
         new_html = hf.read()
 

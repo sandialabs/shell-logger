@@ -170,9 +170,9 @@ class Logger():
 
         # log_dir
         # -------
-        self.log_dir = os.path.abspath(log_dir)
-        if not os.path.exists(log_dir):
-            os.makedirs(log_dir)
+        self.log_dir = pathlib.Path(log_dir).resolve()
+        if not log_dir.exists():
+            log_dir.mkdir(parents=True, exist_ok=True)
 
         # strm_dir
         # -------
@@ -180,19 +180,20 @@ class Logger():
         # parent. Create the strm_dir.
         if strm_dir is None:
             now = self.init_time.strftime("%Y-%m-%d_%H.%M.%S.%f_")
-            self.strm_dir = tempfile.mkdtemp(dir=self.log_dir, prefix=now)
+            self.strm_dir =
+                pathlib.Path(tempfile.mkdtemp(dir=self.log_dir, prefix=now))
         else:
-            self.strm_dir = strm_dir
+            self.strm_dir = pathlib.Path(strm_dir)
 
         # html_file
         # ---------
         if html_file is not None:
-            self.html_file = html_file
+            self.html_file = pathlib.Path(html_file)
 
             # Usually, this is only the case if loading from a JSON file when
             # the HTML file has been removed.
-            if not os.path.exists(html_file):
-                logger_name = html_file.split('/')[-1]
+            if not html_file.exists():
+                logger_name = html_file.name
                 logger_name = re.match("(.*).html$", logger_name).group(1)
                 html_text = f"<h1>{logger_name} Log</h1>"
 
@@ -202,8 +203,7 @@ class Logger():
         else:
             # If there isn't an HTML file, this is that parent Logger object,
             # and it needs to create the main HTML file.
-            self.html_file = os.path.join(self.strm_dir, name.replace(' ', '_')
-                                          + '.html')
+            self.html_file = self.strm_dir / (name.replace(' ', '_') + '.html')
             html_text = f"<h1>{self.name} Log</h1>"
 
             # Write the file.
@@ -265,10 +265,8 @@ class Logger():
 
         # Create & open files for stdout and stderr
         time_str = start_time.strftime("%Y-%m-%d_%H%M%S")
-        stdout_path = os.path.join(self.strm_dir,
-                                   f"{time_str}_{cmd_id}_stdout")
-        stderr_path = os.path.join(self.strm_dir,
-                                   f"{time_str}_{cmd_id}_stderr")
+        stdout_path = self.strm_dir / f"{time_str}_{cmd_id}_stdout"
+        stderr_path = self.strm_dir / f"{time_str}_{cmd_id}_stderr"
 
         with open(stdout_path, 'a') as out, open(stderr_path, 'a') as err:
             # Print the command to be executed.
@@ -365,22 +363,20 @@ class Logger():
             new_log_dir (str):  Path to the new :attr:`log_dir`.
         """
 
-        abs_new_log_dir = os.path.abspath(new_log_dir)
+        abs_new_log_dir = pathlib.Path(new_log_dir).resolve()
 
         # This only gets executed once by the top-level parent Logger object.
-        if os.path.exists(self.log_dir):
+        if self.log_dir.exists():
             copy_tree(self.log_dir, abs_new_log_dir)
             shutil.rmtree(self.log_dir)
 
         # Change the strm_dir, html_file, and log_dir for every child Logger
         # recursively.
-        self.strm_dir = os.path.join(abs_new_log_dir,
-                                     os.path.relpath(self.strm_dir,
-                                                     self.log_dir))
-        self.html_file = os.path.join(abs_new_log_dir,
-                                      os.path.relpath(self.html_file,
-                                                      self.log_dir))
-        self.log_dir = os.path.abspath(new_log_dir)
+        self.strm_dir = abs_new_log_dir / os.path.relpath(self.strm_dir,
+                                                          self.log_dir)
+        self.html_file = abs_new_log_dir / os.path.relpath(self.html_file,
+                                                           self.log_dir)
+        self.log_dir = pathlib.Path(new_log_dir).abspath()
         for log in self.log_book:
             if isinstance(log, Logger):
                 log.change_log_dir(new_log_dir)
@@ -525,8 +521,7 @@ class Logger():
 
             # Append the stdout of this command to the HTML file
             cmd_id = log['cmd_id']
-            stdout_path = os.path.join(self.strm_dir, f"{log['timestamp']}_"
-                                       f"{cmd_id}_stdout")
+            stdout_path = self.strm_dir / f"{log['timestamp']}_{cmd_id}_stdout"
             with open(stdout_path, 'r') as out,\
                     open(self.html_file, 'a') as html:
                 for line in out:
@@ -543,8 +538,7 @@ class Logger():
                 html.write(html_str)
 
             # Append the stderr of this command to the HTML file
-            stderr_path = os.path.join(self.strm_dir, f"{log['timestamp']}_"
-                                       f"{cmd_id}_stderr")
+            stderr_path = self.strm_dir / f"{log['timestamp']}_{cmd_id}_stderr"
             with open(stderr_path, 'r') as err,\
                     open(self.html_file, 'a') as html:
                 for line in err:
@@ -564,15 +558,15 @@ class Logger():
         # ---------------------------------
         if self.is_parent:
             # Create a symlink in log_dir to the HTML file in strm_dir.
-            curr_html_file = os.path.basename(self.html_file)
-            new_location = os.path.join(self.log_dir, curr_html_file)
-            temp_link_name = tempfile.mktemp(dir=self.log_dir)
-            os.symlink(self.html_file, temp_link_name)
-            os.replace(temp_link_name, new_location)
+            curr_html_file = self.html_file.name
+            new_location = self.log_dir / curr_html_file
+            temp_link_name = pathlib.Path(tempfile.mktemp(dir=self.log_dir))
+            temp_link_name.symlink_to(self.html_file)
+            pathlib.Path(temp_link_name).replace(new_location)
 
             # Save everything to a JSON file in the timestamped strm_dir
             json_file = self.name.replace(' ', '_') + '.json'
-            json_file = os.path.join(self.strm_dir, json_file)
+            json_file = self.strm_dir / json_file
 
             with open(json_file, 'w') as jf:
                 json.dump(self, jf, cls=LoggerEncoder, sort_keys=True, indent=4)
