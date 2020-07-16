@@ -38,6 +38,12 @@ class LoggerEncoder(json.JSONEncoder):
                 'format': '%Y-%m-%d_%H:%M:%S:%f'
             }
             return time
+        elif isinstance(obj, pathlib.Path):
+            path = {
+                '__type__': 'Path'
+                'value': str(obj),
+            }
+            return path
         else:
             # Call JSONEncoder's implementation
             return json.JSONEncoder.default(self, obj)
@@ -74,6 +80,8 @@ class LoggerDecoder(json.JSONDecoder):
             return logger
         elif obj['__type__'] == 'datetime':
             return datetime.datetime.strptime(obj['value'], obj['format'])
+        elif obj['__type__'] == 'Path':
+            return pathlib.Path(obj['value'])
 
 
 class Logger():
