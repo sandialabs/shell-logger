@@ -180,8 +180,9 @@ class Logger():
         # parent. Create the strm_dir.
         if strm_dir is None:
             now = self.init_time.strftime("%Y-%m-%d_%H.%M.%S.%f_")
-            self.strm_dir =
+            self.strm_dir = (
                 pathlib.Path(tempfile.mkdtemp(dir=self.log_dir, prefix=now))
+            )
         else:
             self.strm_dir = pathlib.Path(strm_dir)
 
