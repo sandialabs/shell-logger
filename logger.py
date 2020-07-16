@@ -40,8 +40,8 @@ class LoggerEncoder(json.JSONEncoder):
             return time
         elif isinstance(obj, pathlib.Path):
             path = {
-                '__type__': 'Path'
-                'value': str(obj),
+                '__type__': 'Path',
+                'value': str(obj)
             }
             return path
         else:
