@@ -1,11 +1,10 @@
 import json
 import os
-import pathlib
 import pytest
 import re
 import sys
-
-build_script_dir = pathlib.Path(__file__).resolve().parent.parent
+from pathlib import Path
+build_script_dir = Path(__file__).resolve().parent.parent
 sys.path.insert(0, build_script_dir)
 from logger import Logger, LoggerDecoder
 
@@ -16,7 +15,7 @@ def test_initialization_creates_strm_dir():
     temporary directory (``log_dir/%Y-%m-%d_%H%M%S``) if not already created.
     """
 
-    cwd = os.getcwd()
+    cwd = Path.cwd()
     logger = Logger('test', cwd)
     timestamp = logger.init_time.strftime("%Y-%m-%d_%H.%M.%S.%f")
     assert (cwd / timestamp).exists()
@@ -28,8 +27,8 @@ def test_initialization_creates_html_file():
     starting HTML file in the :attr:`log_dir`.
     """
 
-    Logger('test', os.getcwd())
-    assert (pathlib.Path(os.getcwd()) / 'test.html').exists()
+    Logger('test', Path.cwd())
+    assert (Path.cwd() / 'test.html').exists()
 
 
 @pytest.fixture()
@@ -48,12 +47,12 @@ def logger():
     """
 
     # Initialize.
-    logger = Logger('Parent', os.getcwd())
+    logger = Logger('Parent', Path.cwd())
 
     # Run command.
     #            stdout          ;        stderr
     cmd = "echo 'Hello world out'; echo 'Hello world error' 1>&2"
-    logger.log("test cmd", cmd, Path(os.getcwd()))
+    logger.log("test cmd", cmd, Path.cwd())
 
     # Add child and print statement.
     child_logger = logger.add_child("Child")
@@ -98,11 +97,11 @@ def test_log_method_return_info_works_correctly(return_info):
     ``return_code``, but ``stdout`` and ``stderr`` are ``None``.
     """
 
-    logger = Logger("Test", os.getcwd())
+    logger = Logger("Test", Path.cwd())
 
     #            stdout          ;        stderr
     cmd = "echo 'Hello world out'; echo 'Hello world error' 1>&2"
-    result = logger.log("test cmd", cmd, os.getcwd(), return_info=return_info)
+    result = logger.log("test cmd", cmd, Path.cwd(), return_info=return_info)
 
     if return_info:
         assert "Hello world out" in result['stdout']
@@ -123,11 +122,11 @@ def test_log_method_live_stdout_stderr_works_correctly(capsys, live_stdout,
     for the :func:`log` method.
     """
 
-    logger = Logger("Test", os.getcwd())
+    logger = Logger("Test", Path.cwd())
 
     #            stdout          ;        stderr
     cmd = "echo 'Hello world out'; echo 'Hello world error' 1>&2"
-    logger.log("test cmd", cmd, os.getcwd(), live_stdout, live_stderr)
+    logger.log("test cmd", cmd, Path.cwd(), live_stdout, live_stderr)
     out, err = capsys.readouterr()
 
     if live_stdout:
@@ -246,7 +245,7 @@ def test_finalize_creates_HTML_with_correct_information(logger):
     assert f"Time:</b> {logger.log_book[0]['timestamp']}" in html_text
     assert "Command:</b> echo 'Hello world out'; "\
         "echo 'Hello world error' 1>&2" in html_text
-    assert f"CWD:</b> {os.getcwd()}" in html_text
+    assert f"CWD:</b> {Path.cwd()}" in html_text
     assert "Return Code:</b> 0" in html_text
 
     # Print statement.
