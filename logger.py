@@ -3,7 +3,6 @@ import datetime
 from distutils.dir_util import copy_tree
 import json
 import os
-import pathlib
 import random
 import re
 import shutil
@@ -11,6 +10,7 @@ import string
 import sys
 import tempfile
 import common_functions as cf
+from pathlib import Path
 
 
 class LoggerEncoder(json.JSONEncoder):
@@ -220,7 +220,7 @@ class Logger():
             with open(self.html_file, 'w') as f:
                 f.write(html_text)
 
-    def log(self, msg, cmd, cwd=os.getcwd(), live_stdout=False,
+    def log(self, msg, cmd, cwd=Path.cwd(), live_stdout=False,
             live_stderr=False, return_info=False, verbose=False):
         """
         Add something to the log. To conserve memory, ``stdout`` and ``stderr``
@@ -230,7 +230,7 @@ class Logger():
             msg (str):  Message to be recorded with the command. This could be
                 documentation of what your command is doing and its purpose.
             cmd (str, list):  Shell command to be executed.
-            cwd (str):  Path to the working directory of the command to be
+            cwd (Path):  Path to the working directory of the command to be
                 executed.
             live_stdout (bool):  Print ``stdout`` as it is being produced as
                 well as saving it to the file.
@@ -269,7 +269,7 @@ class Logger():
             'timestamp': start_time.strftime("%Y-%m-%d_%H%M%S"),
             'cmd': cmd_str,
             'cmd_id': cmd_id,
-            'cwd': str(cwd),
+            'cwd': cwd,
             'return_code': 0,
         }
 
