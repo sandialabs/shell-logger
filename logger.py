@@ -38,7 +38,7 @@ class LoggerEncoder(json.JSONEncoder):
                 'format': '%Y-%m-%d_%H:%M:%S:%f'
             }
             return time
-        elif isinstance(obj, pathlib.Path):
+        elif isinstance(obj, Path):
             path = {
                 '__type__': 'Path',
                 'value': str(obj)
@@ -81,7 +81,7 @@ class LoggerDecoder(json.JSONDecoder):
         elif obj['__type__'] == 'datetime':
             return datetime.datetime.strptime(obj['value'], obj['format'])
         elif obj['__type__'] == 'Path':
-            return pathlib.Path(obj['value'])
+            return Path(obj['value'])
 
 
 class Logger():
@@ -123,12 +123,12 @@ class Logger():
             created.
         log (list):  A list containing log entries and child.
             :class:`Logger` objects in the order they were created.
-        log_dir (str):  Path to where the logs are stored for the parent
+        log_dir (Path):  Path to where the logs are stored for the parent
             :class:`Logger` and all its children.
         name (str):  The name of the :class:`Logger` object.
-        strm_dir (str):  Path to directory where ``stdout``/``stderr`` stream
+        strm_dir (Path):  Path to directory where ``stdout``/``stderr`` stream
             logs are stored.
-        html_file (str):  Path to main HTML file for the parent and
+        html_file (Path):  Path to main HTML file for the parent and
             children :class:`Logger` objects.
         indent (int):  The indentation level of this :class:`Logger` object.
             The parent has a level 0. Each successive child's indent is
@@ -140,12 +140,12 @@ class Logger():
         """
         Parameters:
             name (str):  Name to give to this Logger object.
-            log_dir (str):  Path to directory where log files will be stored.
-            strm_dir (str):  Path to directory where ``stdout``/``stderr``
+            log_dir (Path):  Path to directory where log files will be stored.
+            strm_dir (Path):  Path to directory where ``stdout``/``stderr``
                 stream logs are stored.  This is helpful for parent Logger
                 objects to give to child Logger objects in order to keep things
                 in the same directory.
-            html_file (str):  Path to main HTML file for the parent and
+            html_file (Path):  Path to main HTML file for the parent and
                 children Logger objects. If ``None`` (default), this is the
                 parent Logger object, and it will need to create the file.
             indent (int):  The indentation level of this Logger object. The
@@ -179,7 +179,7 @@ class Logger():
 
         # log_dir
         # -------
-        self.log_dir = pathlib.Path(log_dir).resolve()
+        self.log_dir = log_dir.resolve()
         if not log_dir.exists():
             log_dir.mkdir(parents=True, exist_ok=True)
 
@@ -189,36 +189,31 @@ class Logger():
         # parent. Create the strm_dir.
         if strm_dir is None:
             now = self.init_time.strftime("%Y-%m-%d_%H.%M.%S.%f_")
-            self.strm_dir = (
-                pathlib.Path(tempfile.mkdtemp(dir=self.log_dir, prefix=now))
-            )
+            self.strm_dir = Path(tempfile.mkdtemp(dir=self.log_dir,
+                                                  prefix=now))
         else:
-            self.strm_dir = pathlib.Path(strm_dir)
+            self.strm_dir = strm_dir.resolve()
 
         # html_file
         # ---------
         if html_file is not None:
-            self.html_file = pathlib.Path(html_file)
+            self.html_file = html_file.resolve()
 
             # Usually, this is only the case if loading from a JSON file when
             # the HTML file has been removed.
-            if not html_file.exists():
-                logger_name = html_file.name
+            if not self.html_file.exists():
+                logger_name = self.html_file.name
                 logger_name = re.match("(.*).html$", logger_name).group(1)
                 html_text = f"<h1>{logger_name} Log</h1>"
-
-                # Write the file.
-                with open(self.html_file, 'w') as f:
-                    f.write(html_text)
         else:
             # If there isn't an HTML file, this is that parent Logger object,
             # and it needs to create the main HTML file.
             self.html_file = self.strm_dir / (name.replace(' ', '_') + '.html')
             html_text = f"<h1>{self.name} Log</h1>"
 
-            # Write the file.
-            with open(self.html_file, 'w') as f:
-                f.write(html_text)
+        # Write the file.
+        with open(self.html_file, 'w') as f:
+            f.write(html_text)
 
     def log(self, msg, cmd, cwd=Path.cwd(), live_stdout=False,
             live_stderr=False, return_info=False, verbose=False):
@@ -370,26 +365,22 @@ class Logger():
             different :attr:`log_dir` 's and things will break.
 
         Parameters:
-            new_log_dir (str):  Path to the new :attr:`log_dir`.
+            new_log_dir (Path):  Path to the new :attr:`log_dir`.
         """
-
-        abs_new_log_dir = pathlib.Path(new_log_dir).resolve()
 
         # This only gets executed once by the top-level parent Logger object.
         if self.log_dir.exists():
-            copy_tree(self.log_dir, abs_new_log_dir)
+            copy_tree(self.log_dir, new_log_dir)
             shutil.rmtree(self.log_dir)
 
         # Change the strm_dir, html_file, and log_dir for every child Logger
         # recursively.
-        self.strm_dir = abs_new_log_dir / os.path.relpath(self.strm_dir,
-                                                          self.log_dir)
-        self.html_file = abs_new_log_dir / os.path.relpath(self.html_file,
-                                                           self.log_dir)
-        self.log_dir = pathlib.Path(new_log_dir).abspath()
+        self.strm_dir = new_log_dir / self.strm_dir.relative_to(self.log_dir)
+        self.html_file = new_log_dir / self.html_file.relative_to(self.log_dir)
+        self.log_dir = new_log_dir.resolve()
         for log in self.log_book:
             if isinstance(log, Logger):
-                log.change_log_dir(new_log_dir)
+                log.change_log_dir(self.log_dir)
 
     def add_child(self, child_name):
         """
@@ -570,9 +561,9 @@ class Logger():
             # Create a symlink in log_dir to the HTML file in strm_dir.
             curr_html_file = self.html_file.name
             new_location = self.log_dir / curr_html_file
-            temp_link_name = pathlib.Path(tempfile.mktemp(dir=self.log_dir))
+            temp_link_name = Path(tempfile.mktemp(dir=self.log_dir))
             temp_link_name.symlink_to(self.html_file)
-            pathlib.Path(temp_link_name).replace(new_location)
+            temp_link_name.replace(new_location)
 
             # Save everything to a JSON file in the timestamped strm_dir
             json_file = self.name.replace(' ', '_') + '.json'
