@@ -196,6 +196,7 @@ class Logger():
 
         # html_file
         # ---------
+        html_text = "<h1>"
         if html_file is not None:
             self.html_file = html_file.resolve()
 
@@ -204,12 +205,13 @@ class Logger():
             if not self.html_file.exists():
                 logger_name = self.html_file.name
                 logger_name = re.match("(.*).html$", logger_name).group(1)
-                html_text = f"<h1>{logger_name} Log</h1>"
+                html_text += logger_name
         else:
             # If there isn't an HTML file, this is that parent Logger object,
             # and it needs to create the main HTML file.
             self.html_file = self.strm_dir / (name.replace(' ', '_') + '.html')
-            html_text = f"<h1>{self.name} Log</h1>"
+            html_text += self.name
+        html_text += " Log</h1>"
 
         # Write the file.
         with open(self.html_file, 'w') as f:
