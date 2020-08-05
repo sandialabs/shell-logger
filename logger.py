@@ -256,9 +256,9 @@ class Logger():
 
         # Create a string form of the command to be stored.
         if isinstance(cmd, list):
-            cmd_str = ' '.join(cmd)
+            cmd_str = ' '.join(str(x) for x in cmd)
         else:
-            cmd_str = cmd
+            cmd_str = str(cmd)
 
         log = {
             'msg': msg,
