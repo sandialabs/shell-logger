@@ -218,7 +218,8 @@ class Logger():
             f.write(html_text)
 
     def log(self, msg, cmd, cwd=Path.cwd(), live_stdout=False,
-            live_stderr=False, return_info=False, verbose=False):
+            live_stderr=False, return_info=False, verbose=False,
+            stdin_redirect=True):
         """
         Add something to the log. To conserve memory, ``stdout`` and ``stderr``
         will be written to the files as it is being generated.
@@ -239,6 +240,8 @@ class Logger():
                 anticipate your command producing large ``stdout``/``stderr``
                 streams that could cause memory issues.
             verbose (bool):  Print the command before it is executed.
+            stdin_redirect (bool): Flag to toggle whether or not we redirect
+                stdin to /dev/null or not (default: True)
 
         Returns:
             dict:  A dictionary containing `stdout`, `stderr`, and
@@ -285,7 +288,11 @@ class Logger():
                 stderr = ''
 
             # Write to stdout/stderr files as text is being returned.
-            generator = cf.run_cmd_generator(cmd, cwd)
+            generator = cf.run_cmd_generator(
+                cmd,
+                cwd,
+                stdin_redirect=stdin_redirect,
+            )
             for result in generator:
                 if result['stdout'] is not None:
                     if live_stdout:
