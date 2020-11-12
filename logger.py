@@ -240,8 +240,11 @@ class Logger():
                 anticipate your command producing large ``stdout``/``stderr``
                 streams that could cause memory issues.
             verbose (bool):  Print the command before it is executed.
-            stdin_redirect (bool): Flag to toggle whether or not we redirect
-                stdin to /dev/null or not (default: True)
+            stdin_redirect (bool):  Whether or not to redirect ``stdin`` to
+                ``/dev/null``.  We do this by default to handle issues that
+                arise when the ``cmd`` involves mpi; however, in some cases
+                (e.g., involving ``bsub``) the redirect causes problems, and we
+                need the flexibility to revert back to standard behavior.
 
         Returns:
             dict:  A dictionary containing `stdout`, `stderr`, and
