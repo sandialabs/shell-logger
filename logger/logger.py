@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+
+from collections.abc import Iterable, Mapping
 import datetime
 from distutils.dir_util import copy_tree
 import json
@@ -9,7 +11,7 @@ import shutil
 import string
 import sys
 import tempfile
-import common_functions as cf
+from textwrap import indent
 from pathlib import Path
 
 
@@ -28,10 +30,24 @@ class LoggerEncoder(json.JSONEncoder):
     """
     def default(self, obj):
         if isinstance(obj, Logger):
-            logger_dict = obj.__dict__
-            logger_dict.update({'__type__': 'Logger'})
-            return logger_dict
-        elif isinstance(obj, datetime.datetime):
+            logger = {
+                **{'__type__': 'Logger'},
+                **{k:self.default(v) for k, v in obj.__dict__.items()}
+            }
+            return logger
+        elif isinstance(obj, (int, float, str, bytes)):
+            return obj
+        elif isinstance(obj, Mapping):
+            return { k:self.default(v) for k, v in obj.items() }
+        elif isinstance(obj, tuple):
+            tup = {
+                '__type__': 'tuple',
+                'items': obj
+            }
+            return tup
+        elif isinstance(obj, Iterable):
+            return [ self.default(x) for x in obj ]
+        elif isinstance(obj, datetime):
             time = {
                 '__type__': 'datetime',
                 'value': obj.strftime('%Y-%m-%d_%H:%M:%S:%f'),
@@ -44,6 +60,8 @@ class LoggerEncoder(json.JSONEncoder):
                 'value': str(obj)
             }
             return path
+        elif obj is None:
+            return None
         else:
             # Call JSONEncoder's implementation
             return json.JSONEncoder.default(self, obj)
@@ -79,12 +97,25 @@ class LoggerDecoder(json.JSONDecoder):
                             obj['done_time'], obj['duration'])
             return logger
         elif obj['__type__'] == 'datetime':
-            return datetime.datetime.strptime(obj['value'], obj['format'])
+            return datetime.strptime(obj['value'], obj['format'])
         elif obj['__type__'] == 'Path':
             return Path(obj['value'])
+        elif obj['__type__'] == 'tuple':
+            return tuple(obj['items'])
 
 
-class Logger():
+from .classes import Trace, StatsCollector, Stat, traceCollector, statsCollectors
+from .util import makeSVGLineChart, runCommandWithConsole, nestedSimpleNamespaceToDict
+from datetime import datetime
+from os import getcwd, chdir, name as osname
+from psutil import disk_partitions, disk_usage, cpu_percent, virtual_memory
+from random import choice
+from string import ascii_lowercase
+from subprocess import run
+from time import time
+from types import SimpleNamespace
+
+class Logger:
     """
     This class will keep track of commands run in the shell, their durations,
     descriptions, ``stdout``, ``stderr``, and ``return_code``.  When the
@@ -135,8 +166,9 @@ class Logger():
             increased by 1.
     """
 
-    def __init__(self, name, log_dir, strm_dir=None, html_file=None, indent=0,
-                 log=None, init_time=None, done_time=None, duration=None):
+    def __init__(self, name, log_dir=Path.cwd(), strm_dir=None, html_file=None,
+                 indent=0, log=None, init_time=None, done_time=None,
+                 duration=None):
         """
         Parameters:
             name (str):  Name to give to this Logger object.
@@ -169,10 +201,8 @@ class Logger():
         # ----
         self.name = name
         self.log_book = log if log is not None else []
-        self.init_time = datetime.datetime.now() if not init_time else\
-            init_time
-        self.done_time = datetime.datetime.now() if not done_time else\
-            done_time
+        self.init_time = datetime.now() if not init_time else init_time
+        self.done_time = datetime.now() if not done_time else done_time
         self.duration = duration
         self.indent = indent
         self.is_parent = True if self.indent == 0 else False
@@ -217,124 +247,6 @@ class Logger():
         with open(self.html_file, 'w') as f:
             f.write(html_text)
 
-    def log(self, msg, cmd, cwd=Path.cwd(), live_stdout=False,
-            live_stderr=False, return_info=False, verbose=False,
-            stdin_redirect=True):
-        """
-        Add something to the log. To conserve memory, ``stdout`` and ``stderr``
-        will be written to the files as it is being generated.
-
-        Parameters:
-            msg (str):  Message to be recorded with the command. This could be
-                documentation of what your command is doing and its purpose.
-            cmd (str, list):  Shell command to be executed.
-            cwd (Path):  Path to the working directory of the command to be
-                executed.
-            live_stdout (bool):  Print ``stdout`` as it is being produced as
-                well as saving it to the file.
-            live_stderr (bool):  Print ``stderr`` as it is being produced as
-                well as saving it to the file.
-            return_info (bool):  If set to ``True``, ``stdout``, ``stderr``,
-                and ``return_code`` will be stored and returned in a
-                dictionary.  Consider leaving this set to ``False`` if you
-                anticipate your command producing large ``stdout``/``stderr``
-                streams that could cause memory issues.
-            verbose (bool):  Print the command before it is executed.
-            stdin_redirect (bool):  Whether or not to redirect ``stdin`` to
-                ``/dev/null``.  We do this by default to handle issues that
-                arise when the ``cmd`` involves mpi; however, in some cases
-                (e.g., involving ``bsub``) the redirect causes problems, and we
-                need the flexibility to revert back to standard behavior.
-
-        Returns:
-            dict:  A dictionary containing `stdout`, `stderr`, and
-            `return_code` keys.  If `return_info` is set to ``False``,
-            the `stdout` and `stderr` values will be ``None``.
-        """
-
-        start_time = datetime.datetime.now()
-
-        # Create a unique command ID that will be used to find the location
-        # of the stdout/stderr files in the temporary directory during
-        # finalization.
-        cmd_id = 'cmd_' + ''.join(random.choice(string.ascii_lowercase)
-                                  for i in range(9))
-
-        # Create a string form of the command to be stored.
-        if isinstance(cmd, list):
-            cmd_str = ' '.join(str(x) for x in cmd)
-        else:
-            cmd_str = str(cmd)
-
-        log = {
-            'msg': msg,
-            'duration': None,
-            'timestamp': start_time.strftime("%Y-%m-%d_%H%M%S"),
-            'cmd': cmd_str,
-            'cmd_id': cmd_id,
-            'cwd': cwd,
-            'return_code': 0,
-        }
-
-        # Create & open files for stdout and stderr
-        time_str = start_time.strftime("%Y-%m-%d_%H%M%S")
-        stdout_path = self.strm_dir / f"{time_str}_{cmd_id}_stdout"
-        stderr_path = self.strm_dir / f"{time_str}_{cmd_id}_stderr"
-
-        with open(stdout_path, 'a') as out, open(stderr_path, 'a') as err:
-            # Print the command to be executed.
-            if verbose:
-                print(cmd_str)
-
-            if return_info:
-                stdout = ''
-                stderr = ''
-
-            # Write to stdout/stderr files as text is being returned.
-            generator = cf.run_cmd_generator(
-                cmd,
-                cwd,
-                stdin_redirect=stdin_redirect,
-            )
-            for result in generator:
-                if result['stdout'] is not None:
-                    if live_stdout:
-                        print(result['stdout'], end='')
-                        # Just to be sure it's printing out right.
-                        sys.stdout.flush()
-                    if return_info:
-                        # Generally, '\r' characters aren't wanted here
-                        clean_stdout = re.sub('\r', '', result['stdout'])
-                        stdout += clean_stdout
-                    out.write(result['stdout'])
-
-                elif result['stderr'] is not None:
-                    if live_stderr:
-                        print(result['stderr'], end='', file=sys.stderr)
-                        # Just to be sure it's printing out right.
-                        sys.stderr.flush()
-                    if return_info:
-                        # Generally, '\r' characters aren't wanted here
-                        clean_stderr = re.sub('\r', '', result['stderr'])
-                        stderr += clean_stderr
-                    err.write(result['stderr'])
-
-                # Execution is finished when stdout & stderr are both None
-                else:
-                    log['return_code'] = result['return_code']
-
-        # Update a few things.
-        end_time = datetime.datetime.now()
-        log['duration'] = self.strfdelta(end_time-start_time,
-                                         "{hrs}h {min}m {sec}s")
-        self.log_book.append(log)
-
-        if return_info:
-            return {'return_code': log['return_code'], 'stdout': stdout,
-                    'stderr': stderr}
-        else:
-            return {'return_code': log['return_code'], 'stdout': None,
-                    'stderr': None}
 
     def update_done_time(self):
         """
@@ -343,7 +255,7 @@ class Logger():
         :class:`Logger` objects who might finish their commands before the
         parent finalizes everything.
         """
-        self.done_time = datetime.datetime.now()
+        self.done_time = datetime.now()
 
     def __update_duration(self):
         """
@@ -362,7 +274,7 @@ class Logger():
         Returns:
             str:  Duration from this object's creation until now as a string.
         """
-        now = datetime.datetime.now()
+        now = datetime.now()
         dur = now - self.init_time
         return self.strfdelta(dur, "{hrs}h {min}m {sec}s")
 
@@ -451,7 +363,7 @@ class Logger():
         print(msg, end=end)
         log = {
             'msg': msg,
-            'timestamp': str(datetime.datetime.now()),
+            'timestamp': str(datetime.now()),
             'cmd': None
         }
         self.log_book.append(log)
@@ -533,30 +445,102 @@ class Logger():
                 html.write(html_str)
 
             # Append the stdout of this command to the HTML file
-            cmd_id = log['cmd_id']
-            stdout_path = self.strm_dir / f"{log['timestamp']}_{cmd_id}_stdout"
-            with open(stdout_path, 'r') as out,\
-                    open(self.html_file, 'a') as html:
-                for line in out:
-                    html_line = ' '*i + "      <br>" + line
+            with open(self.html_file, 'a') as html:
+                for line in log["stdout"].split("\n"):
+                    html_line = ' '*i + "      <br>" + line + "\n"
                     html.write(html_line)
 
             # Append HTML text between end of stdout and beginning of stderr.
             html_str = (
                 ' '*i + "    </li>\n" +
                 ' '*i + "    <li>\n" +
-                ' '*i + "      <b>stderr:</b><br>\n"
+                ' '*i + "      <b>stderr:</b>\n"
             )
             with open(self.html_file, 'a') as html:
                 html.write(html_str)
 
             # Append the stderr of this command to the HTML file
-            stderr_path = self.strm_dir / f"{log['timestamp']}_{cmd_id}_stderr"
-            with open(stderr_path, 'r') as err,\
-                    open(self.html_file, 'a') as html:
-                for line in err:
-                    html_line = ' '*i + "      <br>" + line
+            with open(self.html_file, 'a') as html:
+                for line in log["stderr"].split("\n"):
+                    html_line = ' '*i + "      <br>" + line + "\n"
                     html.write(html_line)
+
+            # Append HTML text between end of stderr and beginning of trace.
+            if log["trace"]:
+                html_str = (
+                    ' '*i + "    </li>\n" +
+                    ' '*i + "    <li>\n" +
+                    ' '*i + "      <b>trace:</b><br>\n" +
+                    ' '*i + "      <pre>\n"
+                )
+                with open(self.html_file, 'a') as html:
+                    html.write(html_str)
+
+                # Append the trace of this command to the HTML file
+                with open(self.html_file, 'a') as html:
+                    for line in log["trace"].split("\n"):
+                        html_line = ' '*i + "        " + line + "\n"
+                        html.write(html_line)
+                with open(self.html_file, 'a') as html:
+                    html.write(' '*i + "      </pre>\n")
+
+            # Append HTML text between end of trace and beginning of
+            # Memory Usage.
+            if log["stats"]:
+                if log["stats"]["memory"]:
+                    html_str = (
+                        ' '*i + "    </li>\n" +
+                        ' '*i + "    <li>\n" +
+                        ' '*i + "      <b>Memory Usage:</b><br>\n"
+                    )
+                    with open(self.html_file, 'a') as html:
+                        html.write(html_str)
+
+                    # Append the memory usage of this command to
+                    # the HTML file
+                    with open(self.html_file, 'a') as html:
+                        svg = log["stats"]["memory"]["svg"]
+                        html.write(indent(svg, ' '*(i+8)))
+                if log["stats"]["cpu"]:
+                    html_str = (
+                        ' '*i + "    </li>\n" +
+                        ' '*i + "    <li>\n" +
+                        ' '*i + "      <b>CPU Usage:</b><br>\n"
+                    )
+                    with open(self.html_file, 'a') as html:
+                        html.write(html_str)
+
+                    # Append the CPU usage of this command to
+                    # the HTML file
+                    with open(self.html_file, 'a') as html:
+                        svg = log["stats"]["cpu"]["svg"]
+                        html.write(indent(svg, ' '*(i+8)))
+                if log["stats"]["disk"]:
+                    html_str = (
+                        ' '*i + "    </li>\n" +
+                        ' '*i + "    <li>\n" +
+                        ' '*i + "      <b>Disk Usage:</b><br>\n" +
+                        ' '*i + '      <ul style="list-style-type:none;">\n'
+                    )
+                    with open(self.html_file, 'a') as html:
+                        html.write(html_str)
+
+                    # Append the disk usage of this command to
+                    # the HTML file
+                    # Note: we sort because JSON deserialization may change
+                    # the ordering of the map.
+                    for disk, stats in sorted(log["stats"]["disk"].items()):
+                        with open(self.html_file, 'a') as html:
+                            svg = stats["svg"]
+                            html_str = (
+                                ' '*i + "        <li>" +
+                                f"Volume {disk}:<br>\n" +
+                                indent(svg, ' '*(i+10)) +
+                                ' '*i + "        </li>\n"
+                            )
+                            html.write(html_str)
+                    with open(self.html_file, 'a') as html:
+                        html.write(' '*i + "      </ul>\n")
 
             # Append concluding HTML for this command to the HTML file.
             html_str = (
@@ -583,3 +567,211 @@ class Logger():
 
             with open(json_file, 'w') as jf:
                 json.dump(self, jf, cls=LoggerEncoder, sort_keys=True, indent=4)
+
+    def log(self, msg, cmd, cwd=None, live_stdout=False,
+            live_stderr=False, return_info=False, verbose=False,
+            stdin_redirect=True, **kwargs):
+        """
+        Add something to the log. 
+
+        Parameters:
+            msg (str):  Message to be recorded with the command. This could be
+                documentation of what your command is doing and its purpose.
+            cmd (str, list):  Shell command to be executed.
+            cwd (Path):  Path to the working directory of the command to be
+                executed.
+            live_stdout (bool):  Print ``stdout`` as it is being produced as
+                well as saving it to the file.
+            live_stderr (bool):  Print ``stderr`` as it is being produced as
+                well as saving it to the file.
+            return_info (bool):  If set to ``True``, ``stdout``, ``stderr``,
+                and ``return_code`` will be stored and returned in a
+                dictionary.  Consider leaving this set to ``False`` if you
+                anticipate your command producing large ``stdout``/``stderr``
+                streams that could cause memory issues.
+            verbose (bool):  Print the command before it is executed.
+            stdin_redirect (bool):  Whether or not to redirect ``stdin`` to
+                ``/dev/null``.  We do this by default to handle issues that
+                arise when the ``cmd`` involves mpi; however, in some cases
+                (e.g., involving ``bsub``) the redirect causes problems, and we
+                need the flexibility to revert back to standard behavior.
+
+        Returns:
+            dict:  A dictionary containing `stdout`, `stderr`, and
+            `return_code` keys.  If `return_info` is set to ``False``,
+            the `stdout` and `stderr` values will be ``None``.
+        """
+
+        start_time = datetime.now()
+
+        if isinstance(cmd, list):
+            cmd_str = ' '.join(str(x) for x in cmd)
+        else:
+            cmd_str = str(cmd)
+
+        log = {
+            'msg': msg,
+            'duration': None,
+            'timestamp': start_time.strftime("%Y-%m-%d_%H%M%S"),
+            'cmd': cmd_str,
+            'cwd': cwd,
+            'return_code': 0,
+        }
+
+        if verbose:
+            print(cmd_str)
+
+        result = self.run(cmd_str,
+                          quietStdout=not live_stdout,
+                          quietStderr=not live_stderr,
+                          devnull_stdin=stdin_redirect,
+                          pwd=cwd,
+                          **kwargs)
+
+        hrs = int(result.wall / 3600000)
+        min = int(result.wall / 60000) % 60
+        sec = int(result.wall / 1000) % 60
+        log["duration"] = f"{hrs}h {min}m {sec}s"
+        log["return_code"] = result.returncode
+        log = {**log, **nestedSimpleNamespaceToDict(result)}
+
+        self.log_book.append(log)
+
+        if return_info:
+            return {'return_code': log['return_code'],
+                    'stdout': result.stdout, 'stderr': result.stderr}
+        else:
+            return {'return_code': log['return_code'], 'stdout': None,
+                    'stderr': None}
+
+    def run(self, command, **kwargs):
+        oldPWD = getcwd()
+        if kwargs.get("pwd"):
+            chdir(kwargs.get("pwd"))
+        auxInfo = auxiliaryInformation()
+        traceOutput, stats, completedProcess = runCommand(command, **kwargs)
+        setattr(completedProcess, "trace", traceOutput)
+        setattr(completedProcess, "stats", stats)
+        if kwargs.get("pwd"):
+            chdir(oldPWD)
+        return SimpleNamespace(**completedProcess.__dict__, **auxInfo.__dict__)
+
+def auxiliaryInformation():
+    return SimpleNamespace(
+        pwd = auxiliaryCommandOutput(posix="pwd", nt="cd", strip=True),
+        environment = auxiliaryCommandOutput(posix="env", nt="set"),
+        umask = auxiliaryCommandOutput(posix="umask", strip=True),
+        user = auxiliaryCommandOutput(posix="whoami", nt="whoami", strip=True),
+        group = auxiliaryCommandOutput(posix="id -gn", strip=True),
+        shell = auxiliaryCommandOutput(posix="printenv SHELL", strip=True),
+        ulimit = auxiliaryCommandOutput(posix="ulimit -a")
+    )
+
+def auxiliaryCommandOutput(**kwargs):
+    stdout = None
+    if osname in kwargs:
+        c = run(kwargs[osname], capture_output=True, shell=True, check=True)
+        stdout = c.stdout.decode()
+    if stdout and kwargs.get("strip"):
+        stdout = stdout.strip()
+    return stdout
+
+def runCommand(command, **kwargs):
+    completedProcess, traceOutput = None, None
+    collectors = statsCollectors(**kwargs)
+    stats = {} if len(collectors) > 0 else None
+    for collector in collectors:
+        collector.start()
+    if "trace" in kwargs:
+        traceOutput, completedProcess = trace(command, **kwargs)
+    else:
+        completedProcess = runCommandWithConsole(command, **kwargs)
+    for collector in collectors:
+        stats[collector.statName] = collector.finish()
+    return traceOutput, stats, completedProcess
+
+def trace(command, **kwargs):
+    trace = traceCollector(command, **kwargs)
+    traceResult = trace()
+    return traceResult.traceOutput, traceResult.completedProcess
+
+@Trace.subclass
+class Strace(Trace):
+    traceName = "strace"
+    def __init__(self, command, **kwargs):
+        super().__init__(command)
+        self.summary = True if kwargs.get("summary") else False
+        self.expression = kwargs.get("expression")
+    @property
+    def traceArgs(self):
+        args = f"strace -f -o {self.outputPath}"
+        if self.summary:
+            args += " -c"
+        if self.expression:
+            args += f" -e '{self.expression}'"
+        return args
+
+@Trace.subclass
+class Ltrace(Trace):
+    traceName = "ltrace"
+    def __init__(self, command, **kwargs):
+        super().__init__(command)
+        self.summary = True if kwargs.get("summary") else False
+        self.expression = kwargs.get("expression")
+    @property
+    def traceArgs(self):
+        args = f"ltrace -C -f -o {self.outputPath}"
+        if self.summary:
+            args += " -c"
+        if self.expression:
+            args += f" -e '{self.expression}'"
+        return args
+
+@StatsCollector.subclass
+class DiskStatsCollector(StatsCollector):
+    statName = "disk"
+    def __init__(self, interval, manager):
+        super().__init__(interval, manager)
+        self.stats = manager.dict()
+        self.mountpoints = [ p.mountpoint for p in disk_partitions() ]
+        for m in self.mountpoints:
+            self.stats[m] = manager.list()
+    def collect(self):
+        timestamp = round(time() * 1000)
+        for m in self.mountpoints:
+            self.stats[m].append((timestamp, disk_usage(m).percent))
+    def unproxiedStats(self):
+        def makeStat(stat):
+            data = list(stat)
+            svg = makeSVGLineChart(data)
+            return Stat(data, svg)
+        return { k:makeStat(v) for k, v in self.stats.items() }
+
+@StatsCollector.subclass
+class CPUStatsCollector(StatsCollector):
+    statName = "cpu"
+    def __init__(self, interval, manager):
+        super().__init__(interval, manager)
+        self.stats = manager.list()
+    def collect(self):
+        timestamp = round(time() * 1000)
+        self.stats.append((timestamp, cpu_percent(interval=None)))
+    def unproxiedStats(self):
+        data = list(self.stats)
+        svg = makeSVGLineChart(data)
+        return Stat(data, svg)
+
+@StatsCollector.subclass
+class MemoryStatsCollector(StatsCollector):
+    statName = "memory"
+    def __init__(self, interval, manager):
+        super().__init__(interval, manager)
+        self.stats = manager.list()
+    def collect(self):
+        timestamp = round(time() * 1000)
+        self.stats.append((timestamp, virtual_memory().percent))
+    def unproxiedStats(self):
+        data = list(self.stats)
+        svg = makeSVGLineChart(data)
+        return Stat(data, svg)
+
