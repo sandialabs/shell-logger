@@ -240,9 +240,6 @@ def test_JSON_file_can_reproduce_HTML_file(logger):
 
     assert original_html == new_html
 
-from os import name as osname, uname
-from time import time
-
 def test_stdout():
     logger = Logger(stack()[0][3], Path.cwd())
     assert logger.run(":").stdout == ""
@@ -265,34 +262,34 @@ def test_stderr():
 def test_console():
     logger = Logger(stack()[0][3], Path.cwd())
     command = "echo stdout ; echo stderr 1>&2"
-    if osname == "posix":
+    if os.name == "posix":
         command = "echo stdout ; echo stderr 1>&2"
-    elif osname == "nt":
+    elif os.name == "nt":
         command = "echo stdout & echo stderr 1>&2"
     else:
-        print(f"Warning: os.name is unrecognized: {osname}; test may fail.")
+        print(f"Warning: os.name is unrecognized: {os.name}; test may fail.")
     assert logger.run(command).console == "stdout\nstderr\n"
 
 def test_consoleBackwards():
     logger = Logger(stack()[0][3], Path.cwd())
     command = "echo stderr 1>&2 ; echo stdout"
-    if osname == "posix":
+    if os.name == "posix":
         command = "echo stderr 1>&2 ; echo stdout"
-    elif osname == "nt":
+    elif os.name == "nt":
         command = "echo stderr 1>&2 & echo stdout"
     else:
-        print(f"Warning: os.name is unrecognized: {osname}; test may fail.")
+        print(f"Warning: os.name is unrecognized: {os.name}; test may fail.")
     assert logger.run(command).console == "stderr\nstdout\n"
 
 def test_timing():
     logger = Logger(stack()[0][3], Path.cwd())
     command = "sleep 1"
-    if osname == "posix":
+    if os.name == "posix":
         command = "sleep 1"
-    elif osname == "nt":
+    elif os.name == "nt":
         command = "timeout /nobreak /t 1"
     else:
-        print(f"Warning: os.name is unrecognized: {osname}; test may fail.")
+        print(f"Warning: os.name is unrecognized: {os.name}; test may fail.")
     result = logger.run(command)
     assert result.wall >= 1000
     assert result.wall < 2000
@@ -305,58 +302,58 @@ def test_auxiliaryData():
     result = logger.run(":")
     assert "PATH=" in result.environment
     assert logger.run("whoami").stdout.strip() == result.user
-    if osname == "posix":
+    if os.name == "posix":
         assert len(result.umask) == 3 or len(result.umask) == 4
         assert logger.run("id -gn").stdout.strip() == result.group
         assert logger.run("printenv SHELL").stdout.strip() == result.shell
         assert logger.run("ulimit -a").stdout == result.ulimit
     else:
-        print(f"Warning: os.name is not 'posix': {osname}; umask, "
+        print(f"Warning: os.name is not 'posix': {os.name}; umask, "
                "group, shell, and ulimit not tested.")
 
 def test_workingDirectory():
     logger = Logger(stack()[0][3], Path.cwd())
     command = "pwd"
     directory = "/tmp"
-    if osname == "posix":
+    if os.name == "posix":
         command = "pwd"
         directory = "/tmp"
-    elif osname == "nt":
+    elif os.name == "nt":
         command = "cd"
         directory = "C:\\Users"
     else:
-        print(f"Warning: os.name is unrecognized: {osname}; test may fail.")
+        print(f"Warning: os.name is unrecognized: {os.name}; test may fail.")
     result = logger.run(command, pwd=directory)
     assert result.stdout.strip() == directory
     assert result.pwd == directory
 
 def test_trace():
     logger = Logger(stack()[0][3], Path.cwd())
-    if uname().sysname == "Linux":
+    if os.uname().sysname == "Linux":
         result = logger.run("echo letter", trace="ltrace")
         assert 'getenv("POSIXLY_CORRECT")' in result.trace
         echoLocation = logger.run("which echo").stdout.strip()
         result = logger.run("echo hello", trace="strace")
         assert f'execve("{echoLocation}' in result.trace
     else:
-        print(f"Warning: uname is not 'Linux': {uname()}; strace/ltrace "
+        print(f"Warning: uname is not 'Linux': {os.uname()}; strace/ltrace "
                "not tested.")
 
 def test_traceExpression():
     logger = Logger(stack()[0][3], Path.cwd())
-    if uname().sysname == "Linux":
+    if os.uname().sysname == "Linux":
         result = logger.run("echo hello",
                          trace="ltrace",
                          expression='getenv')
         assert 'getenv("POSIXLY_CORRECT")' in result.trace
         assert result.trace.count('\n') == 2
     else:
-        print(f"Warning: uname is not 'Linux': {uname()}; ltrace "
+        print(f"Warning: uname is not 'Linux': {os.uname()}; ltrace "
                "expression not tested.")
 
 def test_traceSummary():
     logger = Logger(stack()[0][3], Path.cwd())
-    if uname().sysname == "Linux":
+    if os.uname().sysname == "Linux":
         result = logger.run("echo hello", trace="ltrace", summary=True)
         assert 'getenv("POSIXLY_CORRECT")' not in result.trace
         assert "getenv" in result.trace
@@ -365,12 +362,12 @@ def test_traceSummary():
         assert f'execve("{echoLocation}' not in result.trace
         assert "execve" in result.trace
     else:
-        print(f"Warning: uname is not 'Linux': {uname()}; strace/ltrace "
+        print(f"Warning: uname is not 'Linux': {os.uname()}; strace/ltrace "
                "summary not tested.")
 
 def test_traceExpressionAndSummary():
     logger = Logger(stack()[0][3], Path.cwd())
-    if uname().sysname == "Linux":
+    if os.uname().sysname == "Linux":
         echoLocation = logger.run("which echo").stdout.strip()
         result = logger.run("echo hello",
                          trace="strace",
@@ -387,7 +384,7 @@ def test_traceExpressionAndSummary():
         assert "getenv" in result.trace
         assert "strcmp" not in result.trace
     else:
-        print(f"Warning: uname is not 'Linux': {uname()}; strace/ltrace "
+        print(f"Warning: uname is not 'Linux': {os.uname()}; strace/ltrace "
                "expression+summary not tested.")
 
 def test_stats():
@@ -397,15 +394,15 @@ def test_stats():
     assert len(result.stats["memory"].data) < 30
     assert len(result.stats["cpu"].data) > 8
     assert len(result.stats["cpu"].data) < 30
-    if osname == "posix":
+    if os.name == "posix":
         assert len(result.stats["disk"]["/"].data) > 8
         assert len(result.stats["disk"]["/"].data) < 30
     else:
-        print(f"Warning: os.name is not 'posix': {osname}; disk usage not fully tested.")
+        print(f"Warning: os.name is not 'posix': {os.name}; disk usage not fully tested.")
 
 def test_traceAndStats():
     logger = Logger(stack()[0][3], Path.cwd())
-    if uname().sysname == "Linux":
+    if os.uname().sysname == "Linux":
         result = logger.run("sleep 1",
                          measure=["cpu", "memory", "disk"],
                          interval=0.1,
@@ -421,7 +418,7 @@ def test_traceAndStats():
         assert len(result.stats["disk"]["/"].data) > 8
         assert len(result.stats["disk"]["/"].data) < 30
     else:
-        print(f"Warning: uname is not 'Linux': {uname()}; ltrace not tested.")
+        print(f"Warning: uname is not 'Linux': {os.uname()}; ltrace not tested.")
 
 def test_svg():
     logger = Logger(stack()[0][3], Path.cwd())
@@ -430,7 +427,7 @@ def test_svg():
     assert "</svg>" in result.stats["cpu"].svg
 
 def test_log_book_traceAndStats():
-    if uname().sysname == "Linux":
+    if os.uname().sysname == "Linux":
         logger = Logger(stack()[0][3], Path.cwd())
         result = logger.log("Sleep",
                             "sleep 1",
@@ -448,7 +445,7 @@ def test_log_book_traceAndStats():
         assert len(logger.log_book[0]["stats"]["disk"]["/"]["data"]) > 8
         assert len(logger.log_book[0]["stats"]["disk"]["/"]["data"]) < 30
     else:
-        print(f"Warning: uname is not 'Linux': {uname()}; ltrace not tested.")
+        print(f"Warning: uname is not 'Linux': {os.uname()}; ltrace not tested.")
 
 def test_log_book_svg():
     logger = Logger(stack()[0][3], Path.cwd())

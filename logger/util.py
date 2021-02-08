@@ -1,31 +1,36 @@
 #!/usr/bin/env python3
 from collections.abc import Iterable, Mapping
-from io import StringIO, TextIOBase, BufferedIOBase, RawIOBase, IOBase
-from itertools import dropwhile
-from os import devnull, name as osname
+from io import StringIO
+import itertools
+import numpy as np
+import matplotlib.pyplot as pyplot
+import os
 from queue import Queue
-from subprocess import run, Popen, PIPE, DEVNULL
-from time import time
+import subprocess
+import sys
+import tempfile
+import time
 from threading import Thread
 from types import SimpleNamespace
-np = __import__('numpy', fromlist=["arrange"])
-pyplot = __import__('matplotlib.pyplot', fromlist=["figure", "plot", "close", "yticks"])
-sys = __import__('sys', fromlist=["stdout", "stderr"])
 
 def checkIfProgramExistsInPath(program):
-    if osname == "posix":
-        run(f"command -V {program}", shell=True, check=True)
-    elif osname == "nt":
-        run(f"where {program}", shell=True, check=True)
+    if os.name == "posix":
+        subprocess.run(f"command -V {program}", shell=True, check=True)
+    elif os.name == "nt":
+        subprocess.run(f"where {program}", shell=True, check=True)
 
 def runCommandWithConsole(command, **kwargs):
     with Console(**kwargs) as console:
-        start = round(time() * 1000)
-        stdin = None if not kwargs.get("devnull_stdin") else DEVNULL
-        popen = Popen(command, shell=True, stdin=stdin, stdout=PIPE, stderr=PIPE)
+        start = round(time.time() * 1000)
+        stdin = None if not kwargs.get("devnull_stdin") else subprocess.DEVNULL
+        popen = subprocess.Popen(command,
+                                 shell=True,
+                                 stdin=stdin,
+                                 stdout=subprocess.PIPE,
+                                 stderr=subprocess.PIPE)
         console.attach(popen.stdout, popen.stderr)
         popen.wait()
-        finish = round(time() * 1000)
+        finish = round(time.time() * 1000)
         return SimpleNamespace(
             returncode = popen.returncode,
             args = popen.args,
@@ -46,7 +51,7 @@ def makeSVGLineChart(data):
     pyplot.close(fig)
     stringIO.seek(0)
     lines = stringIO.readlines()
-    svg = "".join(dropwhile(lambda line: "<svg" not in line, lines))
+    svg = "".join(itertools.dropwhile(lambda line: "<svg" not in line, lines))
     return svg
 
 def nestedSimpleNamespaceToDict(object):
@@ -76,8 +81,8 @@ class Console():
             self.file.write(string)
             self.console.combined.put(string)
     def __init__(self, **kwargs):
-        stdoutFile = open(devnull, "w") if kwargs.get("quietStdout") else sys.stdout
-        stderrFile = open(devnull, "w") if kwargs.get("quietStderr") else sys.stderr
+        stdoutFile = open(os.devnull, "w") if kwargs.get("quietStdout") else sys.stdout
+        stderrFile = open(os.devnull, "w") if kwargs.get("quietStderr") else sys.stderr
         self.stdout = Console.Console(stdoutFile, self)
         self.stderr = Console.Console(stderrFile, self)
         self.combined = Queue()

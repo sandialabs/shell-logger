@@ -2,11 +2,10 @@
 from .util import runCommandWithConsole, checkIfProgramExistsInPath
 from abc import abstractmethod
 from collections import namedtuple
-from inspect import stack
+import inspect
 from multiprocessing import Process, Manager
 from pathlib import Path
-from subprocess import run
-from time import sleep
+import time
 
 def traceCollector(command, **kwargs):
     traceName = kwargs["trace"]
@@ -78,7 +77,7 @@ class StatsCollector:
     def loop(self):
         while True:
             self.collect()
-            sleep(self.interval)
+            time.sleep(self.interval)
     @abstractmethod
     def collect(self):
         raise AbstractMethod()
@@ -96,7 +95,7 @@ class FileAlreadyExists(RuntimeError):
 
 class AbstractMethod(NotImplementedError):
     def __init__(self):
-        className = stack()[1].frame.f_locals['self'].__class__.__name__
-        methodName = stack()[1].function
+        className = inspect.stack()[1].frame.f_locals['self'].__class__.__name__
+        methodName = inspect.stack()[1].function
         super().__init__(f"{className} must implement {methodName}()")
 

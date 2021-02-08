@@ -1,18 +1,24 @@
 #!/usr/bin/env python3
 
+from .classes import Trace, StatsCollector, Stat, traceCollector, statsCollectors
+from .util import makeSVGLineChart, runCommandWithConsole, nestedSimpleNamespaceToDict
 from collections.abc import Iterable, Mapping
 import datetime
-from distutils.dir_util import copy_tree
+import distutils.dir_util as dir_util
 import json
 import os
+from pathlib import Path
+import psutil
 import random
 import re
 import shutil
 import string
+import subprocess
 import sys
 import tempfile
 from textwrap import indent
-from pathlib import Path
+import time
+from types import SimpleNamespace
 
 
 class LoggerEncoder(json.JSONEncoder):
@@ -47,7 +53,7 @@ class LoggerEncoder(json.JSONEncoder):
             return tup
         elif isinstance(obj, Iterable):
             return [ self.default(x) for x in obj ]
-        elif isinstance(obj, datetime):
+        elif isinstance(obj, datetime.datetime):
             time = {
                 '__type__': 'datetime',
                 'value': obj.strftime('%Y-%m-%d_%H:%M:%S:%f'),
@@ -97,23 +103,12 @@ class LoggerDecoder(json.JSONDecoder):
                             obj['done_time'], obj['duration'])
             return logger
         elif obj['__type__'] == 'datetime':
-            return datetime.strptime(obj['value'], obj['format'])
+            return datetime.datetime.strptime(obj['value'], obj['format'])
         elif obj['__type__'] == 'Path':
             return Path(obj['value'])
         elif obj['__type__'] == 'tuple':
             return tuple(obj['items'])
 
-
-from .classes import Trace, StatsCollector, Stat, traceCollector, statsCollectors
-from .util import makeSVGLineChart, runCommandWithConsole, nestedSimpleNamespaceToDict
-from datetime import datetime
-from os import getcwd, chdir, name as osname
-from psutil import disk_partitions, disk_usage, cpu_percent, virtual_memory
-from random import choice
-from string import ascii_lowercase
-from subprocess import run
-from time import time
-from types import SimpleNamespace
 
 class Logger:
     """
@@ -201,8 +196,8 @@ class Logger:
         # ----
         self.name = name
         self.log_book = log if log is not None else []
-        self.init_time = datetime.now() if not init_time else init_time
-        self.done_time = datetime.now() if not done_time else done_time
+        self.init_time = datetime.datetime.now() if not init_time else init_time
+        self.done_time = datetime.datetime.now() if not done_time else done_time
         self.duration = duration
         self.indent = indent
         self.is_parent = True if self.indent == 0 else False
@@ -255,7 +250,7 @@ class Logger:
         :class:`Logger` objects who might finish their commands before the
         parent finalizes everything.
         """
-        self.done_time = datetime.now()
+        self.done_time = datetime.datetime.now()
 
     def __update_duration(self):
         """
@@ -274,7 +269,7 @@ class Logger:
         Returns:
             str:  Duration from this object's creation until now as a string.
         """
-        now = datetime.now()
+        now = datetime.datetime.now()
         dur = now - self.init_time
         return self.strfdelta(dur, "{hrs}h {min}m {sec}s")
 
@@ -294,7 +289,7 @@ class Logger:
 
         # This only gets executed once by the top-level parent Logger object.
         if self.log_dir.exists():
-            copy_tree(self.log_dir, new_log_dir)
+            dir_util.copy_tree(self.log_dir, new_log_dir)
             shutil.rmtree(self.log_dir)
 
         # Change the strm_dir, html_file, and log_dir for every child Logger
@@ -332,8 +327,9 @@ class Logger:
         Format a time delta object.
 
         Parameters:
-            tdelta (datetime.timedelta): Time delta object.
-            fmt (str): Delta format string. Use like :func:`datetime.strftime`.
+            tdelta (datetime.datetime.timedelta): Time delta object.
+            fmt (str): Delta format string. Use like
+                       :func:`datetime.datetime.strftime`.
 
         Returns:
             str: String with the formatted time delta.
@@ -363,7 +359,7 @@ class Logger:
         print(msg, end=end)
         log = {
             'msg': msg,
-            'timestamp': str(datetime.now()),
+            'timestamp': str(datetime.datetime.now()),
             'cmd': None
         }
         self.log_book.append(log)
@@ -602,7 +598,7 @@ class Logger:
             the `stdout` and `stderr` values will be ``None``.
         """
 
-        start_time = datetime.now()
+        start_time = datetime.datetime.now()
 
         if isinstance(cmd, list):
             cmd_str = ' '.join(str(x) for x in cmd)
@@ -645,15 +641,15 @@ class Logger:
                     'stderr': None}
 
     def run(self, command, **kwargs):
-        oldPWD = getcwd()
+        oldPWD = os.getcwd()
         if kwargs.get("pwd"):
-            chdir(kwargs.get("pwd"))
+            os.chdir(kwargs.get("pwd"))
         auxInfo = auxiliaryInformation()
         traceOutput, stats, completedProcess = runCommand(command, **kwargs)
         setattr(completedProcess, "trace", traceOutput)
         setattr(completedProcess, "stats", stats)
         if kwargs.get("pwd"):
-            chdir(oldPWD)
+            os.chdir(oldPWD)
         return SimpleNamespace(**completedProcess.__dict__, **auxInfo.__dict__)
 
 def auxiliaryInformation():
@@ -669,8 +665,8 @@ def auxiliaryInformation():
 
 def auxiliaryCommandOutput(**kwargs):
     stdout = None
-    if osname in kwargs:
-        c = run(kwargs[osname], capture_output=True, shell=True, check=True)
+    if os.name in kwargs:
+        c = subprocess.run(kwargs[os.name], capture_output=True, shell=True, check=True)
         stdout = c.stdout.decode()
     if stdout and kwargs.get("strip"):
         stdout = stdout.strip()
@@ -733,13 +729,13 @@ class DiskStatsCollector(StatsCollector):
     def __init__(self, interval, manager):
         super().__init__(interval, manager)
         self.stats = manager.dict()
-        self.mountpoints = [ p.mountpoint for p in disk_partitions() ]
+        self.mountpoints = [ p.mountpoint for p in psutil.disk_partitions() ]
         for m in self.mountpoints:
             self.stats[m] = manager.list()
     def collect(self):
-        timestamp = round(time() * 1000)
+        timestamp = round(time.time() * 1000)
         for m in self.mountpoints:
-            self.stats[m].append((timestamp, disk_usage(m).percent))
+            self.stats[m].append((timestamp, psutil.disk_usage(m).percent))
     def unproxiedStats(self):
         def makeStat(stat):
             data = list(stat)
@@ -754,8 +750,8 @@ class CPUStatsCollector(StatsCollector):
         super().__init__(interval, manager)
         self.stats = manager.list()
     def collect(self):
-        timestamp = round(time() * 1000)
-        self.stats.append((timestamp, cpu_percent(interval=None)))
+        timestamp = round(time.time() * 1000)
+        self.stats.append((timestamp, psutil.cpu_percent(interval=None)))
     def unproxiedStats(self):
         data = list(self.stats)
         svg = makeSVGLineChart(data)
@@ -768,8 +764,8 @@ class MemoryStatsCollector(StatsCollector):
         super().__init__(interval, manager)
         self.stats = manager.list()
     def collect(self):
-        timestamp = round(time() * 1000)
-        self.stats.append((timestamp, virtual_memory().percent))
+        timestamp = round(time.time() * 1000)
+        self.stats.append((timestamp, psutil.virtual_memory().percent))
     def unproxiedStats(self):
         data = list(self.stats)
         svg = makeSVGLineChart(data)
