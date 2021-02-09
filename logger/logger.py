@@ -432,8 +432,38 @@ class Logger:
                 ' '*i + f"    <li><b>Time:</b> {log['timestamp']}</li>\n" +
                 ' '*i + f"    <li><b>Command:</b> {log['cmd']}</li>\n" +
                 ' '*i + f"    <li><b>CWD:</b> {log['cwd']}</li>\n" +
+                ' '*i + f"    <li><b>User:</b> {log['user']}</li>\n" +
+                ' '*i + f"    <li><b>Group:</b> {log['group']}</li>\n" +
+                ' '*i + f"    <li><b>Shell:</b> {log['shell']}</li>\n" +
+                ' '*i + f"    <li><b>umask:</b> {log['umask']}</li>\n" +
                 ' '*i + "    <li><b>Return Code:</b> " +
-                f"{log['return_code']}</li>\n" +
+                f"{log['return_code']}</li>\n"
+            )
+            with open(self.html_file, 'a') as html:
+                html.write(html_str)
+
+            # Append HTML text between return code and beginning of environment.
+            env_lines = log["environment"].count('\n')
+            html_str = (
+                ' '*i + "    <li>\n" +
+                ' '*i + "      <b>Environment:</b><br>\n" +
+                ' '*i + "      <details>\n" +
+                ' '*i + f"        <summary>{env_lines} lines</summary>\n" +
+                ' '*i + "        <pre>\n"
+            )
+            with open(self.html_file, 'a') as html:
+                html.write(html_str)
+
+            with open(self.html_file, 'a') as html:
+                for line in log["environment"].split("\n"):
+                    html_line = ' '*i + "          " + line + "\n"
+                    html.write(html_line)
+            with open(self.html_file, 'a') as html:
+                html.write(' '*i + "        </pre>\n")
+                html.write(' '*i + "      </details>\n")
+
+            html_str = (
+                ' '*i + "    </li>\n" +
                 ' '*i + "    <li>\n" +
                 ' '*i + "      <b>stdout:</b>\n"
             )
@@ -466,7 +496,25 @@ class Logger:
                     for line in err:
                         html_line = ' '*i + "      <br>" + line
 
-            # Append HTML text between end of stderr and beginning of trace.
+            # Append HTML text between end of stderr and beginning of ulimit.
+            html_str = (
+                ' '*i + "    </li>\n" +
+                ' '*i + "    <li>\n" +
+                ' '*i + "      <b>ulimit:</b><br>\n" +
+                ' '*i + "      <pre>\n"
+            )
+            with open(self.html_file, 'a') as html:
+                html.write(html_str)
+
+            # Append the trace of this command to the HTML file
+            with open(self.html_file, 'a') as html:
+                for line in log["ulimit"].split("\n"):
+                    html_line = ' '*i + "        " + line + "\n"
+                    html.write(html_line)
+            with open(self.html_file, 'a') as html:
+                html.write(' '*i + "      </pre>\n")
+
+            # Append HTML text between end of ulimit and beginning of trace.
             if log["trace"]:
                 html_str = (
                     ' '*i + "    </li>\n" +

@@ -214,6 +214,13 @@ def test_finalize_creates_HTML_with_correct_information(logger):
     assert "<b>CPU Usage:</b>" in html_text
     assert "<b>Disk Usage:</b>" in html_text
     assert "<li>Volume /:" in html_text
+    assert "Environment:" in html_text
+    assert "PATH=" in html_text
+    assert "User:" in html_text
+    assert "Group:" in html_text
+    assert "Shell:" in html_text
+    assert "umask:" in html_text
+    assert "ulimit:" in html_text
 
     # Child Logger
     assert "Child</font></b>\n" in html_text
@@ -278,7 +285,7 @@ def test_logger_does_not_store_stdout_string_by_default():
 
     p = Process(target=logger.log, args=(msg, cmd))
     p.start()
-    time.sleep(0.5)
+    time.sleep(1)
     psutil_process = psutil.Process(p.pid)
     mem_usage = psutil_process.memory_info().rss
     p.join()
@@ -288,11 +295,12 @@ def test_logger_does_not_store_stdout_string_by_default():
 
     p = Process(target=logger.log, args=(msg, cmd, None, False, False, True))
     p.start()
-    time.sleep(0.5)
+    time.sleep(1)
     psutil_process = psutil.Process(p.pid)
     mem_usage = psutil_process.memory_info().rss
     p.join()
-    assert mem_usage > 67108864
+    # 134217728 bytes = 128 MB
+    assert mem_usage > 134217728
     print(mem_usage)
 
 def test_stdout():

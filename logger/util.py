@@ -4,6 +4,7 @@ from io import StringIO
 import itertools
 import numpy as np
 import matplotlib.pyplot as pyplot
+from matplotlib.ticker import MultipleLocator, FormatStrFormatter
 import os
 import subprocess
 import sys
@@ -40,9 +41,15 @@ def runCommandWithConsole(command, **kwargs):
     )
 
 def makeSVGLineChart(data):
-    fig = pyplot.figure()
+    fig, ax = pyplot.subplots(figsize=(6, 2), dpi=80)
     pyplot.plot(*zip(*data))
     pyplot.yticks(np.arange(0, 110, 10))
+    ax.xaxis.set_ticks([])
+    ax.yaxis.set_major_locator(MultipleLocator(20))
+    ax.yaxis.set_major_formatter(FormatStrFormatter('%d%%'))
+    ax.yaxis.set_minor_locator(MultipleLocator(10))
+    ax.spines['right'].set_visible(False)
+    ax.spines['top'].set_visible(False)
     stringIO = StringIO()
     fig.savefig(stringIO, format='svg')
     pyplot.close(fig)
