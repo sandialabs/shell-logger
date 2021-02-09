@@ -48,13 +48,13 @@ class Trace:
     @abstractmethod
     def traceArgs(self):
         raise AbstractMethod()
-    def __call__(self):
+    def __call__(self, **kwargs):
         traceOutput = None
         if self.outputPath.exists():
             raise FileAlreadyExists(self.outputPath)
         try:
             command = f"{self.traceArgs} -- {self.command}"
-            completedProcess = runCommandWithConsole(command)
+            completedProcess = runCommandWithConsole(command, **kwargs)
             with open(self.outputPath) as traceFile:
                 traceOutput = traceFile.read()
         finally:

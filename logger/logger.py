@@ -441,10 +441,13 @@ class Logger:
                 html.write(html_str)
 
             # Append the stdout of this command to the HTML file
-            with open(self.html_file, 'a') as html:
-                for line in log["stdout"].split("\n"):
-                    html_line = ' '*i + "      <br>" + line + "\n"
-                    html.write(html_line)
+            cmd_id = log['cmd_id']
+            stdout_path = self.strm_dir / f"{log['timestamp']}_{cmd_id}_stdout"
+            with open(stdout_path, 'r') as out:
+                with open(self.html_file, 'a') as html:
+                    for line in out:
+                        html_line = ' '*i + "      <br>" + line
+
 
             # Append HTML text between end of stdout and beginning of stderr.
             html_str = (
@@ -456,10 +459,12 @@ class Logger:
                 html.write(html_str)
 
             # Append the stderr of this command to the HTML file
-            with open(self.html_file, 'a') as html:
-                for line in log["stderr"].split("\n"):
-                    html_line = ' '*i + "      <br>" + line + "\n"
-                    html.write(html_line)
+            cmd_id = log['cmd_id']
+            stderr_path = self.strm_dir / f"{log['timestamp']}_{cmd_id}_stderr"
+            with open(stderr_path, 'r') as err:
+                with open(self.html_file, 'a') as html:
+                    for line in err:
+                        html_line = ' '*i + "      <br>" + line
 
             # Append HTML text between end of stderr and beginning of trace.
             if log["trace"]:
@@ -568,7 +573,8 @@ class Logger:
             live_stderr=False, return_info=False, verbose=False,
             stdin_redirect=True, **kwargs):
         """
-        Add something to the log. 
+        Add something to the log. To conserve memory, ``stdout`` and ``stderr``
+        will be written to the files as it is being generated.
 
         Parameters:
             msg (str):  Message to be recorded with the command. This could be
@@ -600,6 +606,12 @@ class Logger:
 
         start_time = datetime.datetime.now()
 
+        # Create a unique command ID that will be used to find the location
+        # of the stdout/stderr files in the temporary directory during
+        # finalization.
+        cmd_id = 'cmd_' + ''.join(random.choice(string.ascii_lowercase)
+                                  for i in range(9))
+
         if isinstance(cmd, list):
             cmd_str = ' '.join(str(x) for x in cmd)
         else:
@@ -610,16 +622,28 @@ class Logger:
             'duration': None,
             'timestamp': start_time.strftime("%Y-%m-%d_%H%M%S"),
             'cmd': cmd_str,
+            'cmd_id': cmd_id,
             'cwd': cwd,
             'return_code': 0,
         }
 
-        if verbose:
-            print(cmd_str)
+        # Create & open files for stdout and stderr
+        time_str = start_time.strftime("%Y-%m-%d_%H%M%S")
+        stdout_path = self.strm_dir / f"{time_str}_{cmd_id}_stdout"
+        stderr_path = self.strm_dir / f"{time_str}_{cmd_id}_stderr"
+
+        with open(stdout_path, 'a') as out, open(stderr_path, 'a') as err:
+            # Print the command to be executed.
+            if verbose:
+                print(cmd_str)
 
         result = self.run(cmd_str,
-                          quietStdout=not live_stdout,
-                          quietStderr=not live_stderr,
+                          quiet_stdout=not live_stdout,
+                          quiet_stderr=not live_stderr,
+                          stdout_str=return_info,
+                          stderr_str=return_info,
+                          stdout_file=stdout_path,
+                          stderr_file=stderr_path,
                           devnull_stdin=stdin_redirect,
                           pwd=cwd,
                           **kwargs)
@@ -633,17 +657,16 @@ class Logger:
 
         self.log_book.append(log)
 
-        if return_info:
-            return {'return_code': log['return_code'],
-                    'stdout': result.stdout, 'stderr': result.stderr}
-        else:
-            return {'return_code': log['return_code'], 'stdout': None,
-                    'stderr': None}
+        return {'return_code': log['return_code'],
+                'stdout': result.stdout, 'stderr': result.stderr}
 
     def run(self, command, **kwargs):
         oldPWD = os.getcwd()
         if kwargs.get("pwd"):
             os.chdir(kwargs.get("pwd"))
+        for key in ["stdout_str", "stderr_str"]:
+            if key not in kwargs:
+                kwargs[key] = True
         auxInfo = auxiliaryInformation()
         traceOutput, stats, completedProcess = runCommand(command, **kwargs)
         setattr(completedProcess, "trace", traceOutput)
@@ -688,7 +711,7 @@ def runCommand(command, **kwargs):
 
 def trace(command, **kwargs):
     trace = traceCollector(command, **kwargs)
-    traceResult = trace()
+    traceResult = trace(**kwargs)
     return traceResult.traceOutput, traceResult.completedProcess
 
 @Trace.subclass

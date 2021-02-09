@@ -5,10 +5,8 @@ import itertools
 import numpy as np
 import matplotlib.pyplot as pyplot
 import os
-from queue import Queue
 import subprocess
 import sys
-import tempfile
 import time
 from threading import Thread
 from types import SimpleNamespace
@@ -20,27 +18,25 @@ def checkIfProgramExistsInPath(program):
         subprocess.run(f"where {program}", shell=True, check=True)
 
 def runCommandWithConsole(command, **kwargs):
-    with Console(**kwargs) as console:
-        start = round(time.time() * 1000)
-        stdin = None if not kwargs.get("devnull_stdin") else subprocess.DEVNULL
-        popen = subprocess.Popen(command,
-                                 shell=True,
-                                 stdin=stdin,
-                                 stdout=subprocess.PIPE,
-                                 stderr=subprocess.PIPE)
-        console.attach(popen.stdout, popen.stderr)
-        popen.wait()
-        finish = round(time.time() * 1000)
-        return SimpleNamespace(
-            returncode = popen.returncode,
-            args = popen.args,
-            stdout = console.stdout.getvalue(),
-            stderr = console.stderr.getvalue(),
-            console = console.console.getvalue(),
-            start = start,
-            finish = finish,
-            wall = finish - start
-        )
+    start = round(time.time() * 1000)
+    stdin = None if not kwargs.get("devnull_stdin") else subprocess.DEVNULL
+    popen = subprocess.Popen(command,
+                             shell=True,
+                             stdin=stdin,
+                             stdout=subprocess.PIPE,
+                             stderr=subprocess.PIPE)
+    output = tee(popen.stdout, popen.stderr, **kwargs)
+    popen.wait()
+    finish = round(time.time() * 1000)
+    return SimpleNamespace(
+        returncode = popen.returncode,
+        args = popen.args,
+        stdout = output.stdout_str,
+        stderr = output.stderr_str,
+        start = start,
+        finish = finish,
+        wall = finish - start
+    )
 
 def makeSVGLineChart(data):
     fig = pyplot.figure()
@@ -68,48 +64,36 @@ def nestedSimpleNamespaceToDict(object):
     else:
         return object
 
-class Console():
-    class Console(StringIO):
-        def __init__(self, file, console):
-            super().__init__()
-            self.console = console
-            self.file = file
-        def write(self, string):
-            if type(string) == bytes:
-                string = string.decode()
-            super().write(string)
-            self.file.write(string)
-            self.console.combined.put(string)
-    def __init__(self, **kwargs):
-        stdoutFile = open(os.devnull, "w") if kwargs.get("quietStdout") else sys.stdout
-        stderrFile = open(os.devnull, "w") if kwargs.get("quietStderr") else sys.stderr
-        self.stdout = Console.Console(stdoutFile, self)
-        self.stderr = Console.Console(stderrFile, self)
-        self.combined = Queue()
-    def close(self):
-        if self.stdout.file != sys.stdout:
-            self.stdout.file.close()
-        if self.stderr.file != sys.stderr:
-            self.stderr.file.close()
-    def __enter__(self):
-        return self
-    def __exit__(self, type, value, traceback):
-        self.close()
-    @property
-    def console(self):
-        return StringIO("".join(self.combined.queue))
-    def attach(self, stdout, stderr):
-        def tee(file, output):
-            with file:
-                for line in iter(file.readline, b""):
-                    output.write(line)
-        threads = [
-            Thread(target=tee, args=(stdout, self.stdout)),
-            Thread(target=tee, args=(stderr, self.stderr)),
-        ]
-        for thread in threads:
-            thread.daemon = True
-            thread.start()
-        for thread in threads:
-            thread.join()
+def tee(stdout, stderr, **kwargs):
+    sys_stdout = open(os.devnull, "a") if kwargs.get("quiet_stdout") else sys.stdout
+    sys_stderr = open(os.devnull, "a") if kwargs.get("quiet_stderr") else sys.stderr
+    stdout_io = StringIO() if kwargs.get("stdout_str") else open(os.devnull, "a")
+    stderr_io = StringIO() if kwargs.get("stderr_str") else open(os.devnull, "a")
+    stdout_file = open(kwargs.get("stdout_file"), "a") if kwargs.get("stdout_file") else open(os.devnull, "a")
+    stderr_file = open(kwargs.get("stderr_file"), "a") if kwargs.get("stderr_file") else open(os.devnull, "a")
+    stdout_tee = [sys_stdout, stdout_io, stdout_file]
+    stderr_tee = [sys_stderr, stderr_io, stderr_file]
+    def write(input, outputs):
+        for line in iter(input.readline, b""):
+            line = line.decode()
+            for output in outputs:
+                output.write(line)
+    threads = [
+        Thread(target=write, args=(stdout, stdout_tee)),
+        Thread(target=write, args=(stderr, stderr_tee)),
+    ]
+    for thread in threads:
+        thread.daemon = True
+        thread.start()
+    for thread in threads:
+        thread.join()
+    stdout_str = stdout_io.getvalue() if type(stdout_io) is StringIO else None
+    stderr_str = stderr_io.getvalue() if type(stderr_io) is StringIO else None
+    for file in (stdout_tee + stderr_tee):
+        if file not in [None, sys.stdout, sys.stderr, sys.stdin]:
+            file.close()
+    return SimpleNamespace(
+        stdout_str = stdout_str,
+        stderr_str = stderr_str
+    )
 

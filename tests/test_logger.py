@@ -9,8 +9,6 @@ build_script_dir = Path(__file__).resolve().parent.parent
 sys.path.insert(0, build_script_dir / "logger")
 from logger import Logger, LoggerDecoder
 
-print(sys.path)
-
 
 def test_initialization_creates_strm_dir():
     """
@@ -34,6 +32,34 @@ def test_initialization_creates_html_file():
     timestamp = logger.init_time.strftime("%Y-%m-%d_%H.%M.%S.%f")
     strm_dir = next(Path.cwd().glob(f"{timestamp}_*"))
     assert (strm_dir / f'{stack()[0][3]}.html').exists()
+
+
+def test_log_method_creates_tmp_stdout_stderr_files(logger):
+    """
+    Verify that logging a command will create files in the :class:`Logger`
+    object's :attr:`strm_dir` corresponding to the ``stdout`` and ``stderr`` of
+    the command.
+    """
+
+    # Get the paths for the stdout/stderr files.
+    cmd_id = logger.log_book[0]['cmd_id']
+    cmd_ts = logger.log_book[0]['timestamp']
+    stdout_file = logger.strm_dir / f"{cmd_ts}_{cmd_id}_stdout"
+    stderr_file = logger.strm_dir / f"{cmd_ts}_{cmd_id}_stderr"
+
+    assert stdout_file.exists()
+    assert stderr_file.exists()
+
+    print(f"{stdout_file}")
+    print(f"{stderr_file}")
+
+    # Make sure the information written to these files is correct.
+    with open(stdout_file, 'r') as out, open(stderr_file, 'r') as err:
+        out_txt = out.readline()
+        err_txt = err.readline()
+
+        assert 'Hello world out' in out_txt
+        assert 'Hello world error' in err_txt
 
 
 @pytest.mark.parametrize('return_info', [True, False])
@@ -258,28 +284,6 @@ def test_stderr():
     command = "echo hello 1>&2"
     assert logger.run(command).stderr == "hello\n"
     assert logger.run(command).stdout == ""
-
-def test_console():
-    logger = Logger(stack()[0][3], Path.cwd())
-    command = "echo stdout ; echo stderr 1>&2"
-    if os.name == "posix":
-        command = "echo stdout ; echo stderr 1>&2"
-    elif os.name == "nt":
-        command = "echo stdout & echo stderr 1>&2"
-    else:
-        print(f"Warning: os.name is unrecognized: {os.name}; test may fail.")
-    assert logger.run(command).console == "stdout\nstderr\n"
-
-def test_consoleBackwards():
-    logger = Logger(stack()[0][3], Path.cwd())
-    command = "echo stderr 1>&2 ; echo stdout"
-    if os.name == "posix":
-        command = "echo stderr 1>&2 ; echo stdout"
-    elif os.name == "nt":
-        command = "echo stderr 1>&2 & echo stdout"
-    else:
-        print(f"Warning: os.name is unrecognized: {os.name}; test may fail.")
-    assert logger.run(command).console == "stderr\nstdout\n"
 
 def test_timing():
     logger = Logger(stack()[0][3], Path.cwd())
