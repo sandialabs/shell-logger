@@ -1,9 +1,12 @@
 from inspect import stack
 import json
 import os
+import psutil
 import pytest
 import re
 import sys
+import time
+from multiprocessing import Process
 from pathlib import Path
 build_script_dir = Path(__file__).resolve().parent.parent
 sys.path.insert(0, build_script_dir / "logger")
@@ -265,6 +268,32 @@ def test_JSON_file_can_reproduce_HTML_file(logger):
         new_html = hf.read()
 
     assert original_html == new_html
+
+
+def test_logger_does_not_store_stdout_string_by_default():
+    logger = Logger(stack()[0][3], Path.cwd())
+    cmd = ("dd if=/dev/urandom bs=1024 count=262144 | "
+           "LC_ALL=C tr -c '[:print:]' '*' ; sleep 1")
+    msg = "Get 256 MB of stdout from /dev/urandom"
+
+    p = Process(target=logger.log, args=(msg, cmd))
+    p.start()
+    time.sleep(0.5)
+    psutil_process = psutil.Process(p.pid)
+    mem_usage = psutil_process.memory_info().rss
+    p.join()
+    # 67108864 bytes = 64 MB
+    assert mem_usage < 67108864
+    print(mem_usage)
+
+    p = Process(target=logger.log, args=(msg, cmd, None, False, False, True))
+    p.start()
+    time.sleep(0.5)
+    psutil_process = psutil.Process(p.pid)
+    mem_usage = psutil_process.memory_info().rss
+    p.join()
+    assert mem_usage > 67108864
+    print(mem_usage)
 
 def test_stdout():
     logger = Logger(stack()[0][3], Path.cwd())

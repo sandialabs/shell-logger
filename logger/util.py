@@ -24,7 +24,8 @@ def runCommandWithConsole(command, **kwargs):
                              shell=True,
                              stdin=stdin,
                              stdout=subprocess.PIPE,
-                             stderr=subprocess.PIPE)
+                             stderr=subprocess.PIPE,
+                             bufsize=4096)
     output = tee(popen.stdout, popen.stderr, **kwargs)
     popen.wait()
     finish = round(time.time() * 1000)
@@ -74,10 +75,11 @@ def tee(stdout, stderr, **kwargs):
     stdout_tee = [sys_stdout, stdout_io, stdout_file]
     stderr_tee = [sys_stderr, stderr_io, stderr_file]
     def write(input, outputs):
-        for line in iter(input.readline, b""):
-            line = line.decode()
+        chunk = input.read(4096)
+        while chunk:
             for output in outputs:
-                output.write(line)
+                output.write(chunk.decode())
+            chunk = input.read(4096)
     threads = [
         Thread(target=write, args=(stdout, stdout_tee)),
         Thread(target=write, args=(stderr, stderr_tee)),
