@@ -458,7 +458,6 @@ class Logger:
                 for line in log["environment"].split("\n"):
                     html_line = ' '*i + "          " + line + "\n"
                     html.write(html_line)
-            with open(self.html_file, 'a') as html:
                 html.write(' '*i + "        </pre>\n")
                 html.write(' '*i + "      </details>\n")
 
@@ -477,6 +476,7 @@ class Logger:
                 with open(self.html_file, 'a') as html:
                     for line in out:
                         html_line = ' '*i + "      <br>" + line
+                        html.write(html_line)
 
 
             # Append HTML text between end of stdout and beginning of stderr.
@@ -495,6 +495,7 @@ class Logger:
                 with open(self.html_file, 'a') as html:
                     for line in err:
                         html_line = ' '*i + "      <br>" + line
+                        html.write(html_line)
 
             # Append HTML text between end of stderr and beginning of ulimit.
             html_str = (
@@ -511,11 +512,13 @@ class Logger:
                 for line in log["ulimit"].split("\n"):
                     html_line = ' '*i + "        " + line + "\n"
                     html.write(html_line)
-            with open(self.html_file, 'a') as html:
                 html.write(' '*i + "      </pre>\n")
 
             # Append HTML text between end of ulimit and beginning of trace.
-            if log["trace"]:
+            cmd_id = log['cmd_id']
+            trace_path = self.strm_dir / f"{log['timestamp']}_{cmd_id}_trace"
+            print(trace_path) #%#%#%#
+            if trace_path.exists():
                 html_str = (
                     ' '*i + "    </li>\n" +
                     ' '*i + "    <li>\n" +
@@ -527,10 +530,10 @@ class Logger:
 
                 # Append the trace of this command to the HTML file
                 with open(self.html_file, 'a') as html:
-                    for line in log["trace"].split("\n"):
-                        html_line = ' '*i + "        " + line + "\n"
-                        html.write(html_line)
-                with open(self.html_file, 'a') as html:
+                    with open(trace_path, 'r') as trace:
+                        for line in trace:
+                            html_line = ' '*i + "        " + line + "\n"
+                            html.write(html_line)
                     html.write(' '*i + "      </pre>\n")
 
             # Append HTML text between end of trace and beginning of
@@ -647,9 +650,12 @@ class Logger:
                 need the flexibility to revert back to standard behavior.
 
         Returns:
-            dict:  A dictionary containing `stdout`, `stderr`, and
+            dict:  A dictionary containing `stdout`, `stderr`, `trace`, and
             `return_code` keys.  If `return_info` is set to ``False``,
-            the `stdout` and `stderr` values will be ``None``.
+            the `stdout` and `stderr` values will be ``None``. If `return_info`
+            is set to ``True`` and `trace` is specified in kwargs, `trace` in
+            the dictionary will contain the output of the specified trace;
+            otherwise, it will be ``None``.
         """
 
         start_time = datetime.datetime.now()
@@ -679,6 +685,7 @@ class Logger:
         time_str = start_time.strftime("%Y-%m-%d_%H%M%S")
         stdout_path = self.strm_dir / f"{time_str}_{cmd_id}_stdout"
         stderr_path = self.strm_dir / f"{time_str}_{cmd_id}_stderr"
+        trace_path = self.strm_dir / f"{time_str}_{cmd_id}_trace" if kwargs.get("trace") else None
 
         with open(stdout_path, 'a') as out, open(stderr_path, 'a') as err:
             # Print the command to be executed.
@@ -690,8 +697,10 @@ class Logger:
                           quiet_stderr=not live_stderr,
                           stdout_str=return_info,
                           stderr_str=return_info,
+                          trace_str=return_info,
                           stdout_file=stdout_path,
                           stderr_file=stderr_path,
+                          trace_path=trace_path,
                           devnull_stdin=stdin_redirect,
                           pwd=cwd,
                           **kwargs)
@@ -712,13 +721,18 @@ class Logger:
         oldPWD = os.getcwd()
         if kwargs.get("pwd"):
             os.chdir(kwargs.get("pwd"))
-        for key in ["stdout_str", "stderr_str"]:
+        for key in ["stdout_str", "stderr_str", "trace_str"]:
             if key not in kwargs:
                 kwargs[key] = True
         auxInfo = auxiliaryInformation()
         traceOutput, stats, completedProcess = runCommand(command, **kwargs)
-        setattr(completedProcess, "trace", traceOutput)
+        setattr(completedProcess, "trace_path", traceOutput)
         setattr(completedProcess, "stats", stats)
+        if kwargs.get("trace_str") and traceOutput:
+            with open(traceOutput) as f:
+                setattr(completedProcess, "trace", f.read())
+        else:
+            setattr(completedProcess, "trace", None)
         if kwargs.get("pwd"):
             os.chdir(oldPWD)
         return SimpleNamespace(**completedProcess.__dict__, **auxInfo.__dict__)
@@ -759,14 +773,13 @@ def runCommand(command, **kwargs):
 
 def trace(command, **kwargs):
     trace = traceCollector(command, **kwargs)
-    traceResult = trace(**kwargs)
-    return traceResult.traceOutput, traceResult.completedProcess
+    return trace.outputPath, trace(**kwargs)
 
 @Trace.subclass
 class Strace(Trace):
     traceName = "strace"
     def __init__(self, command, **kwargs):
-        super().__init__(command)
+        super().__init__(command, **kwargs)
         self.summary = True if kwargs.get("summary") else False
         self.expression = kwargs.get("expression")
     @property
@@ -782,7 +795,7 @@ class Strace(Trace):
 class Ltrace(Trace):
     traceName = "ltrace"
     def __init__(self, command, **kwargs):
-        super().__init__(command)
+        super().__init__(command, **kwargs)
         self.summary = True if kwargs.get("summary") else False
         self.expression = kwargs.get("expression")
     @property

@@ -303,6 +303,22 @@ def test_logger_does_not_store_stdout_string_by_default():
     assert mem_usage > 134217728
     print(mem_usage)
 
+def test_logger_does_not_store_trace_string_by_default():
+    logger = Logger(stack()[0][3], Path.cwd())
+
+    logger.log("echo hello",
+               "echo hello",
+               Path.cwd(),
+               trace="ltrace")
+    assert logger.log_book[0]["trace"] is None
+
+    logger.log("echo hello",
+               "echo hello",
+               Path.cwd(),
+               return_info=True,
+               trace="ltrace")
+    assert logger.log_book[1]["trace"] is not None
+
 def test_stdout():
     logger = Logger(stack()[0][3], Path.cwd())
     assert logger.run(":").stdout == ""
@@ -445,11 +461,11 @@ def test_traceAndStats():
     logger = Logger(stack()[0][3], Path.cwd())
     if os.uname().sysname == "Linux":
         result = logger.run("sleep 1",
-                         measure=["cpu", "memory", "disk"],
-                         interval=0.1,
-                         trace="ltrace",
-                         expression="setlocale",
-                         summary=True)
+                            measure=["cpu", "memory", "disk"],
+                            interval=0.1,
+                            trace="ltrace",
+                            expression="setlocale",
+                            summary=True)
         assert "setlocale" in result.trace
         assert "sleep" not in result.trace
         assert len(result.stats["memory"].data) > 8
@@ -472,6 +488,7 @@ def test_log_book_traceAndStats():
         logger = Logger(stack()[0][3], Path.cwd())
         result = logger.log("Sleep",
                             "sleep 1",
+                            return_info=True,
                             measure=["cpu", "memory", "disk"],
                             interval=0.1,
                             trace="ltrace",

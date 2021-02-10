@@ -29,8 +29,6 @@ def statsCollectors(**kwargs):
                 collectors.append(Collector(interval, manager))
     return collectors
 
-TraceResult = namedtuple("TraceResult", ["traceOutput", "completedProcess"])
-
 Stat = namedtuple("Stat", ["data", "svg"])
 
 class Trace:
@@ -40,27 +38,21 @@ class Trace:
         if (issubclass(TraceSubclass, Trace)):
             Trace.subclasses.append(TraceSubclass)
         return TraceSubclass
-    def __init__(self, command):
+    def __init__(self, command, **kwargs):
         checkIfProgramExistsInPath(self.traceName)
-        self.outputPath = Path(f"{self.traceName}.log")
+        if kwargs.get("trace_path"):
+            self.outputPath = Path(kwargs["trace_path"])
+        else:
+            self.outputPath = Path(f"{self.traceName}.log")
         self.command = command
     @property
     @abstractmethod
     def traceArgs(self):
         raise AbstractMethod()
     def __call__(self, **kwargs):
-        traceOutput = None
-        if self.outputPath.exists():
-            raise FileAlreadyExists(self.outputPath)
-        try:
-            command = f"{self.traceArgs} -- {self.command}"
-            completedProcess = runCommandWithConsole(command, **kwargs)
-            with open(self.outputPath) as traceFile:
-                traceOutput = traceFile.read()
-        finally:
-            if self.outputPath.exists():
-                self.outputPath.unlink()
-        return TraceResult(traceOutput, completedProcess)
+        command = f"{self.traceArgs} -- {self.command}"
+        completedProcess = runCommandWithConsole(command, **kwargs)
+        return completedProcess
 
 class StatsCollector:
     statName = "undefined"
