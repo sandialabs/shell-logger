@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
-from .classes import Trace, StatsCollector, Stat, traceCollector, statsCollectors
-from .util import makeSVGLineChart, runCommandWithConsole, nestedSimpleNamespaceToDict
+from .classes import Trace, StatsCollector, Stat, trace_collector, stats_collectors
+from .util import make_svg_line_chart, run_teed_command, nested_SimpleNamespace_to_dict
 from collections.abc import Iterable, Mapping
 import datetime
 import distutils.dir_util as dir_util
@@ -44,7 +44,7 @@ class LoggerEncoder(json.JSONEncoder):
         elif isinstance(obj, (int, float, str, bytes)):
             return obj
         elif isinstance(obj, Mapping):
-            return { k:self.default(v) for k, v in obj.items() }
+            return {k:self.default(v) for k,v in obj.items()}
         elif isinstance(obj, tuple):
             tup = {
                 '__type__': 'tuple',
@@ -698,8 +698,8 @@ class Logger:
                           stdout_str=return_info,
                           stderr_str=return_info,
                           trace_str=return_info,
-                          stdout_file=stdout_path,
-                          stderr_file=stderr_path,
+                          stdout_path=stdout_path,
+                          stderr_path=stderr_path,
                           trace_path=trace_path,
                           devnull_stdin=stdin_redirect,
                           pwd=cwd,
@@ -710,7 +710,7 @@ class Logger:
         sec = int(result.wall / 1000) % 60
         log["duration"] = f"{hrs}h {min}m {sec}s"
         log["return_code"] = result.returncode
-        log = {**log, **nestedSimpleNamespaceToDict(result)}
+        log = {**log, **nested_SimpleNamespace_to_dict(result)}
 
         self.log_book.append(log)
 
@@ -718,37 +718,49 @@ class Logger:
                 'stdout': result.stdout, 'stderr': result.stderr}
 
     def run(self, command, **kwargs):
-        oldPWD = os.getcwd()
-        if kwargs.get("pwd"):
-            os.chdir(kwargs.get("pwd"))
+        completed_process, trace_output = None, None
+        collectors = stats_collectors(**kwargs)
+        stats = {} if len(collectors) > 0 else None
         for key in ["stdout_str", "stderr_str", "trace_str"]:
             if key not in kwargs:
                 kwargs[key] = True
-        auxInfo = auxiliaryInformation()
-        traceOutput, stats, completedProcess = runCommand(command, **kwargs)
-        setattr(completedProcess, "trace_path", traceOutput)
-        setattr(completedProcess, "stats", stats)
-        if kwargs.get("trace_str") and traceOutput:
-            with open(traceOutput) as f:
-                setattr(completedProcess, "trace", f.read())
-        else:
-            setattr(completedProcess, "trace", None)
+        old_pwd = os.getcwd()
         if kwargs.get("pwd"):
-            os.chdir(oldPWD)
-        return SimpleNamespace(**completedProcess.__dict__, **auxInfo.__dict__)
+            os.chdir(kwargs.get("pwd"))
+        aux_info = auxiliary_information()
+        for collector in collectors:
+            collector.start()
+        if "trace" in kwargs:
+            trace = trace_collector(command, **kwargs)
+            completed_process = trace(**kwargs)
+            trace_output = trace.output_path
+        else:
+            completed_process = run_teed_command(command, **kwargs)
+        for collector in collectors:
+            stats[collector.stat_name] = collector.finish()
+        setattr(completed_process, "trace_path", trace_output)
+        setattr(completed_process, "stats", stats)
+        if kwargs.get("trace_str") and trace_output:
+            with open(trace_output) as f:
+                setattr(completed_process, "trace", f.read())
+        else:
+            setattr(completed_process, "trace", None)
+        if kwargs.get("pwd"):
+            os.chdir(old_pwd)
+        return SimpleNamespace(**completed_process.__dict__, **aux_info.__dict__)
 
-def auxiliaryInformation():
+def auxiliary_information():
     return SimpleNamespace(
-        pwd = auxiliaryCommandOutput(posix="pwd", nt="cd", strip=True),
-        environment = auxiliaryCommandOutput(posix="env", nt="set"),
-        umask = auxiliaryCommandOutput(posix="umask", strip=True),
-        user = auxiliaryCommandOutput(posix="whoami", nt="whoami", strip=True),
-        group = auxiliaryCommandOutput(posix="id -gn", strip=True),
-        shell = auxiliaryCommandOutput(posix="printenv SHELL", strip=True),
-        ulimit = auxiliaryCommandOutput(posix="ulimit -a")
+        pwd = auxiliary_command_output(posix="pwd", nt="cd", strip=True),
+        environment = auxiliary_command_output(posix="env", nt="set"),
+        umask = auxiliary_command_output(posix="umask", strip=True),
+        user = auxiliary_command_output(posix="whoami", nt="whoami", strip=True),
+        group = auxiliary_command_output(posix="id -gn", strip=True),
+        shell = auxiliary_command_output(posix="printenv SHELL", strip=True),
+        ulimit = auxiliary_command_output(posix="ulimit -a")
     )
 
-def auxiliaryCommandOutput(**kwargs):
+def auxiliary_command_output(**kwargs):
     stdout = None
     if os.name in kwargs:
         c = subprocess.run(kwargs[os.name], capture_output=True, shell=True, check=True)
@@ -757,34 +769,16 @@ def auxiliaryCommandOutput(**kwargs):
         stdout = stdout.strip()
     return stdout
 
-def runCommand(command, **kwargs):
-    completedProcess, traceOutput = None, None
-    collectors = statsCollectors(**kwargs)
-    stats = {} if len(collectors) > 0 else None
-    for collector in collectors:
-        collector.start()
-    if "trace" in kwargs:
-        traceOutput, completedProcess = trace(command, **kwargs)
-    else:
-        completedProcess = runCommandWithConsole(command, **kwargs)
-    for collector in collectors:
-        stats[collector.statName] = collector.finish()
-    return traceOutput, stats, completedProcess
-
-def trace(command, **kwargs):
-    trace = traceCollector(command, **kwargs)
-    return trace.outputPath, trace(**kwargs)
-
 @Trace.subclass
 class Strace(Trace):
-    traceName = "strace"
+    trace_name = "strace"
     def __init__(self, command, **kwargs):
         super().__init__(command, **kwargs)
         self.summary = True if kwargs.get("summary") else False
         self.expression = kwargs.get("expression")
     @property
-    def traceArgs(self):
-        args = f"strace -f -o {self.outputPath}"
+    def trace_args(self):
+        args = f"strace -f -o {self.output_path}"
         if self.summary:
             args += " -c"
         if self.expression:
@@ -793,14 +787,14 @@ class Strace(Trace):
 
 @Trace.subclass
 class Ltrace(Trace):
-    traceName = "ltrace"
+    trace_name = "ltrace"
     def __init__(self, command, **kwargs):
         super().__init__(command, **kwargs)
         self.summary = True if kwargs.get("summary") else False
         self.expression = kwargs.get("expression")
     @property
-    def traceArgs(self):
-        args = f"ltrace -C -f -o {self.outputPath}"
+    def trace_args(self):
+        args = f"ltrace -C -f -o {self.output_path}"
         if self.summary:
             args += " -c"
         if self.expression:
@@ -809,7 +803,7 @@ class Ltrace(Trace):
 
 @StatsCollector.subclass
 class DiskStatsCollector(StatsCollector):
-    statName = "disk"
+    stat_name = "disk"
     def __init__(self, interval, manager):
         super().__init__(interval, manager)
         self.stats = manager.dict()
@@ -820,38 +814,38 @@ class DiskStatsCollector(StatsCollector):
         timestamp = round(time.time() * 1000)
         for m in self.mountpoints:
             self.stats[m].append((timestamp, psutil.disk_usage(m).percent))
-    def unproxiedStats(self):
-        def makeStat(stat):
+    def unproxied_stats(self):
+        def make_stat(stat):
             data = list(stat)
-            svg = makeSVGLineChart(data)
+            svg = make_svg_line_chart(data)
             return Stat(data, svg)
-        return { k:makeStat(v) for k, v in self.stats.items() }
+        return {k:make_stat(v) for k,v in self.stats.items()}
 
 @StatsCollector.subclass
 class CPUStatsCollector(StatsCollector):
-    statName = "cpu"
+    stat_name = "cpu"
     def __init__(self, interval, manager):
         super().__init__(interval, manager)
         self.stats = manager.list()
     def collect(self):
         timestamp = round(time.time() * 1000)
         self.stats.append((timestamp, psutil.cpu_percent(interval=None)))
-    def unproxiedStats(self):
+    def unproxied_stats(self):
         data = list(self.stats)
-        svg = makeSVGLineChart(data)
+        svg = make_svg_line_chart(data)
         return Stat(data, svg)
 
 @StatsCollector.subclass
 class MemoryStatsCollector(StatsCollector):
-    statName = "memory"
+    stat_name = "memory"
     def __init__(self, interval, manager):
         super().__init__(interval, manager)
         self.stats = manager.list()
     def collect(self):
         timestamp = round(time.time() * 1000)
         self.stats.append((timestamp, psutil.virtual_memory().percent))
-    def unproxiedStats(self):
+    def unproxied_stats(self):
         data = list(self.stats)
-        svg = makeSVGLineChart(data)
+        svg = make_svg_line_chart(data)
         return Stat(data, svg)
 

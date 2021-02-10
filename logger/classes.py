@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-from .util import runCommandWithConsole, checkIfProgramExistsInPath
+from .util import run_teed_command, program_exists_in_path
 from abc import abstractmethod
 from collections import namedtuple
 import inspect
@@ -7,55 +7,55 @@ from multiprocessing import Process, Manager
 from pathlib import Path
 import time
 
-def traceCollector(command, **kwargs):
-    traceName = kwargs["trace"]
-    Collectors = [c for c in Trace.subclasses if c.traceName == traceName]
+def trace_collector(command, **kwargs):
+    trace_name = kwargs["trace"]
+    Collectors = [c for c in Trace.subclasses if c.trace_name == trace_name]
     if len(Collectors) == 1:
         Collector = Collectors[0]
         return Collector(command, **kwargs)
     elif len(Collectors) == 0:
-        raise RuntimeError(f"Unsupported trace type: {traceName}")
+        raise RuntimeError(f"Unsupported trace type: {trace_name}")
     else:
-        raise RuntimeError(f"Multiple trace types match {traceName}")
+        raise RuntimeError(f"Multiple trace types match {trace_name}")
 
-def statsCollectors(**kwargs):
+def stats_collectors(**kwargs):
     collectors = []
     if "measure" in kwargs:
         interval = kwargs["interval"] if "interval" in kwargs else 1.0
         stats = {}
         manager = Manager()
         for Collector in StatsCollector.subclasses:
-            if Collector.statName in kwargs["measure"]:
+            if Collector.stat_name in kwargs["measure"]:
                 collectors.append(Collector(interval, manager))
     return collectors
 
 Stat = namedtuple("Stat", ["data", "svg"])
 
 class Trace:
-    traceName = "undefined"
+    trace_name = "undefined"
     subclasses = []
     def subclass(TraceSubclass):
         if (issubclass(TraceSubclass, Trace)):
             Trace.subclasses.append(TraceSubclass)
         return TraceSubclass
     def __init__(self, command, **kwargs):
-        checkIfProgramExistsInPath(self.traceName)
+        program_exists_in_path(self.trace_name)
         if kwargs.get("trace_path"):
-            self.outputPath = Path(kwargs["trace_path"])
+            self.output_path = Path(kwargs["trace_path"])
         else:
-            self.outputPath = Path(f"{self.traceName}.log")
+            self.output_path = Path(f"{self.trace_name}.log")
         self.command = command
     @property
     @abstractmethod
-    def traceArgs(self):
+    def trace_args(self):
         raise AbstractMethod()
     def __call__(self, **kwargs):
-        command = f"{self.traceArgs} -- {self.command}"
-        completedProcess = runCommandWithConsole(command, **kwargs)
-        return completedProcess
+        command = f"{self.trace_args} -- {self.command}"
+        completed_process = run_teed_command(command, **kwargs)
+        return completed_process
 
 class StatsCollector:
-    statName = "undefined"
+    stat_name = "undefined"
     subclasses = []
     def subclass(StatsCollectorSubclass):
         if (issubclass(StatsCollectorSubclass, StatsCollector)):
@@ -74,11 +74,11 @@ class StatsCollector:
     def collect(self):
         raise AbstractMethod()
     @abstractmethod
-    def unproxiedStats(self):
+    def unproxied_stats(self):
         raise AbstractMethod()
     def finish(self):
         self.process.terminate()
-        return self.unproxiedStats()
+        return self.unproxied_stats()
 
 class FileAlreadyExists(RuntimeError):
     def __init__(self, file):
@@ -87,7 +87,7 @@ class FileAlreadyExists(RuntimeError):
 
 class AbstractMethod(NotImplementedError):
     def __init__(self):
-        className = inspect.stack()[1].frame.f_locals['self'].__class__.__name__
-        methodName = inspect.stack()[1].function
-        super().__init__(f"{className} must implement {methodName}()")
+        class_name = inspect.stack()[1].frame.f_locals['self'].__class__.__name__
+        method_name = inspect.stack()[1].function
+        super().__init__(f"{class_name} must implement {method_name}()")
 

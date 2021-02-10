@@ -12,13 +12,13 @@ import time
 from threading import Thread
 from types import SimpleNamespace
 
-def checkIfProgramExistsInPath(program):
+def program_exists_in_path(program):
     if os.name == "posix":
         subprocess.run(f"command -V {program}", shell=True, check=True)
     elif os.name == "nt":
         subprocess.run(f"where {program}", shell=True, check=True)
 
-def runCommandWithConsole(command, **kwargs):
+def run_teed_command(command, **kwargs):
     start = round(time.time() * 1000)
     stdin = None if not kwargs.get("devnull_stdin") else subprocess.DEVNULL
     popen = subprocess.Popen(command,
@@ -40,7 +40,7 @@ def runCommandWithConsole(command, **kwargs):
         wall = finish - start
     )
 
-def makeSVGLineChart(data):
+def make_svg_line_chart(data):
     fig, ax = pyplot.subplots(figsize=(6, 2), dpi=80)
     pyplot.plot(*zip(*data))
     pyplot.yticks(np.arange(0, 110, 10))
@@ -50,42 +50,43 @@ def makeSVGLineChart(data):
     ax.yaxis.set_minor_locator(MultipleLocator(10))
     ax.spines['right'].set_visible(False)
     ax.spines['top'].set_visible(False)
-    stringIO = StringIO()
-    fig.savefig(stringIO, format='svg')
+    string_io = StringIO()
+    fig.savefig(string_io, format='svg')
     pyplot.close(fig)
-    stringIO.seek(0)
-    lines = stringIO.readlines()
+    string_io.seek(0)
+    lines = string_io.readlines()
     svg = "".join(itertools.dropwhile(lambda line: "<svg" not in line, lines))
     return svg
 
-def nestedSimpleNamespaceToDict(object):
+def nested_SimpleNamespace_to_dict(object):
     if "_asdict" in dir(object):
-        return nestedSimpleNamespaceToDict(object._asdict())
+        return nested_SimpleNamespace_to_dict(object._asdict())
     elif isinstance(object, (str, bytes, tuple)):
         return object
     elif isinstance(object, Mapping):
-        return { k:nestedSimpleNamespaceToDict(v) for k, v in object.items() }
+        return {k:nested_SimpleNamespace_to_dict(v) for k,v in object.items()}
     elif isinstance(object, Iterable):
-        return [ nestedSimpleNamespaceToDict(x) for x in object ]
+        return [nested_SimpleNamespace_to_dict(x) for x in object]
     elif isinstance(object, SimpleNamespace):
-        return nestedSimpleNamespaceToDict(object.__dict__)
+        return nested_SimpleNamespace_to_dict(object.__dict__)
     else:
         return object
 
 def tee(stdout, stderr, **kwargs):
-    sys_stdout = open(os.devnull, "a") if kwargs.get("quiet_stdout") else sys.stdout
-    sys_stderr = open(os.devnull, "a") if kwargs.get("quiet_stderr") else sys.stderr
-    stdout_io = StringIO() if kwargs.get("stdout_str") else open(os.devnull, "a")
-    stderr_io = StringIO() if kwargs.get("stderr_str") else open(os.devnull, "a")
-    stdout_file = open(kwargs.get("stdout_file"), "a") if kwargs.get("stdout_file") else open(os.devnull, "a")
-    stderr_file = open(kwargs.get("stderr_file"), "a") if kwargs.get("stderr_file") else open(os.devnull, "a")
-    stdout_tee = [sys_stdout, stdout_io, stdout_file]
-    stderr_tee = [sys_stderr, stderr_io, stderr_file]
+    sys_stdout = None if kwargs.get("quiet_stdout") else sys.stdout
+    sys_stderr = None if kwargs.get("quiet_stderr") else sys.stderr
+    stdout_io = StringIO() if kwargs.get("stdout_str") else None
+    stderr_io = StringIO() if kwargs.get("stderr_str") else None
+    stdout_path = open(kwargs.get("stdout_path", os.devnull), "a")
+    stderr_path = open(kwargs.get("stderr_path", os.devnull), "a")
+    stdout_tee = [sys_stdout, stdout_io, stdout_path]
+    stderr_tee = [sys_stderr, stderr_io, stderr_path]
     def write(input, outputs):
         chunk = input.read(4096)
         while chunk:
             for output in outputs:
-                output.write(chunk.decode())
+                if output is not None:
+                    output.write(chunk.decode())
             chunk = input.read(4096)
     threads = [
         Thread(target=write, args=(stdout, stdout_tee)),
@@ -96,11 +97,12 @@ def tee(stdout, stderr, **kwargs):
         thread.start()
     for thread in threads:
         thread.join()
-    stdout_str = stdout_io.getvalue() if type(stdout_io) is StringIO else None
-    stderr_str = stderr_io.getvalue() if type(stderr_io) is StringIO else None
+    stdout_str = stdout_io.getvalue() if stdout_io is not None else None
+    stderr_str = stderr_io.getvalue() if stderr_io is not None else None
     for file in (stdout_tee + stderr_tee):
         if file not in [None, sys.stdout, sys.stderr, sys.stdin]:
-            file.close()
+            if not file.closed:
+                file.close()
     return SimpleNamespace(
         stdout_str = stdout_str,
         stderr_str = stderr_str
