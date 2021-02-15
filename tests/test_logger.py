@@ -289,8 +289,8 @@ def test_logger_does_not_store_stdout_string_by_default():
     psutil_process = psutil.Process(p.pid)
     mem_usage = psutil_process.memory_info().rss
     p.join()
-    # 67108864 bytes = 64 MB
-    assert mem_usage < 67108864
+    # 134217728 bytes = 128 MB
+    assert mem_usage < 134217728
     print(mem_usage)
 
     p = Process(target=logger.log, args=(msg, cmd, None, False, False, True))

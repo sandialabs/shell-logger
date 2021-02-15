@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
-from .classes import Trace, StatsCollector, Stat, trace_collector, stats_collectors
-from .util import make_svg_line_chart, run_teed_command, nested_SimpleNamespace_to_dict
+from .classes import Shell, Trace, StatsCollector, Stat, trace_collector, stats_collectors
+from .util import make_svg_line_chart, nested_SimpleNamespace_to_dict
 from collections.abc import Iterable, Mapping
 import datetime
 import distutils.dir_util as dir_util
@@ -11,10 +11,9 @@ from pathlib import Path
 import psutil
 import random
 import re
+import select
 import shutil
 import string
-import subprocess
-import sys
 import tempfile
 from textwrap import indent
 import time
@@ -68,6 +67,12 @@ class LoggerEncoder(json.JSONEncoder):
             return path
         elif obj is None:
             return None
+        elif isinstance(obj, Shell):
+            shell = {
+                '__type__': 'Shell',
+                'pwd': obj.pwd()
+            }
+            return shell
         else:
             # Call JSONEncoder's implementation
             return json.JSONEncoder.default(self, obj)
@@ -108,6 +113,8 @@ class LoggerDecoder(json.JSONDecoder):
             return Path(obj['value'])
         elif obj['__type__'] == 'tuple':
             return tuple(obj['items'])
+        elif obj['__type__'] == 'Shell':
+            return Shell(Path(obj['pwd']))
 
 
 class Logger:
@@ -201,6 +208,7 @@ class Logger:
         self.duration = duration
         self.indent = indent
         self.is_parent = True if self.indent == 0 else False
+        self.shell = Shell(Path.cwd())
 
         # log_dir
         # -------
@@ -726,16 +734,15 @@ class Logger:
                 kwargs[key] = True
         old_pwd = os.getcwd()
         if kwargs.get("pwd"):
-            os.chdir(kwargs.get("pwd"))
-        aux_info = auxiliary_information()
+            self.shell.cd(kwargs.get("pwd"))
+        aux_info = self.auxiliary_information()
         for collector in collectors:
             collector.start()
         if "trace" in kwargs:
-            trace = trace_collector(command, **kwargs)
-            completed_process = trace(**kwargs)
+            trace = trace_collector(**kwargs)
+            command = trace.command(command, **kwargs)
             trace_output = trace.output_path
-        else:
-            completed_process = run_teed_command(command, **kwargs)
+        completed_process = self.shell.run(command, **kwargs)
         for collector in collectors:
             stats[collector.stat_name] = collector.finish()
         setattr(completed_process, "trace_path", trace_output)
@@ -746,34 +753,33 @@ class Logger:
         else:
             setattr(completed_process, "trace", None)
         if kwargs.get("pwd"):
-            os.chdir(old_pwd)
+            self.shell.cd(old_pwd)
         return SimpleNamespace(**completed_process.__dict__, **aux_info.__dict__)
 
-def auxiliary_information():
-    return SimpleNamespace(
-        pwd = auxiliary_command_output(posix="pwd", nt="cd", strip=True),
-        environment = auxiliary_command_output(posix="env", nt="set"),
-        umask = auxiliary_command_output(posix="umask", strip=True),
-        user = auxiliary_command_output(posix="whoami", nt="whoami", strip=True),
-        group = auxiliary_command_output(posix="id -gn", strip=True),
-        shell = auxiliary_command_output(posix="printenv SHELL", strip=True),
-        ulimit = auxiliary_command_output(posix="ulimit -a")
-    )
-
-def auxiliary_command_output(**kwargs):
-    stdout = None
-    if os.name in kwargs:
-        c = subprocess.run(kwargs[os.name], capture_output=True, shell=True, check=True)
-        stdout = c.stdout.decode()
-    if stdout and kwargs.get("strip"):
-        stdout = stdout.strip()
-    return stdout
+    def auxiliary_information(self):
+        pwd, _ = self.shell.auxiliary_command(posix="pwd", nt="cd", strip=True)
+        environment, _ = self.shell.auxiliary_command(posix="env", nt="set")
+        umask, _ = self.shell.auxiliary_command(posix="umask", strip=True)
+        user, _ = self.shell.auxiliary_command(posix="whoami", nt="whoami", strip=True)
+        group, _ = self.shell.auxiliary_command(posix="id -gn", strip=True)
+        shell, _ = self.shell.auxiliary_command(posix="printenv SHELL", strip=True)
+        ulimit, _ = self.shell.auxiliary_command(posix="ulimit -a")
+        x = SimpleNamespace(
+            pwd=pwd,
+            environment=environment,
+            umask=umask,
+            user=user,
+            group=group,
+            shell=shell,
+            ulimit=ulimit
+        )
+        return x
 
 @Trace.subclass
 class Strace(Trace):
     trace_name = "strace"
-    def __init__(self, command, **kwargs):
-        super().__init__(command, **kwargs)
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
         self.summary = True if kwargs.get("summary") else False
         self.expression = kwargs.get("expression")
     @property
@@ -788,8 +794,8 @@ class Strace(Trace):
 @Trace.subclass
 class Ltrace(Trace):
     trace_name = "ltrace"
-    def __init__(self, command, **kwargs):
-        super().__init__(command, **kwargs)
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
         self.summary = True if kwargs.get("summary") else False
         self.expression = kwargs.get("expression")
     @property
