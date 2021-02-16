@@ -525,7 +525,6 @@ class Logger:
             # Append HTML text between end of ulimit and beginning of trace.
             cmd_id = log['cmd_id']
             trace_path = self.strm_dir / f"{log['timestamp']}_{cmd_id}_trace"
-            print(trace_path) #%#%#%#
             if trace_path.exists():
                 html_str = (
                     ' '*i + "    </li>\n" +
