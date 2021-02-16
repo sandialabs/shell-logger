@@ -286,6 +286,17 @@ def test_under_stress():
     assert logger.log_book[0]["returncode"] == 0
 
 
+def test_heredoc():
+    logger = Logger(stack()[0][3], Path.cwd())
+    cmd = ("bash << EOF\necho hello\nEOF")
+    msg = "Test out a heredoc"
+
+    p = Process(target=logger.log, args=(msg, cmd))
+    p.start()
+    p.join(1)
+    assert not p.is_alive()
+
+
 def test_logger_does_not_store_stdout_string_by_default():
     logger = Logger(stack()[0][3], Path.cwd())
     cmd = ("dd if=/dev/urandom bs=1024 count=262144 | "

@@ -82,7 +82,7 @@ class Shell:
 
     def run(self, command, **kwargs):
         start = round(time.time() * 1000)
-        os.write(self.aux_stdin_wfd, f"{command} ; RET_CODE=$?\n".encode())
+        os.write(self.aux_stdin_wfd, f"{command}\nRET_CODE=$?\n".encode())
         os.write(self.aux_stdin_wfd, f"printf '\\4'\n".encode())
         os.write(self.aux_stdin_wfd, f"printf '\\4' 1>&2\n".encode())
         output = self.tee(self.shell.stdout, self.shell.stderr, **kwargs)
