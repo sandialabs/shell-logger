@@ -61,7 +61,7 @@ class Shell:
         os.set_inheritable(self.aux_stderr_wfd, False)
         self.cd(pwd)
 
-    def __def__(self):
+    def __del__(self):
         os.close(self.aux_stdin_rfd)
         os.close(self.aux_stdin_wfd)
         os.close(self.aux_stdout_rfd)
@@ -82,13 +82,16 @@ class Shell:
 
     def run(self, command, **kwargs):
         start = round(time.time() * 1000)
-        os.write(self.aux_stdin_wfd, f"{command}\n".encode())
+        os.write(self.aux_stdin_wfd, f"{command} ; RET_CODE=$?\n".encode())
         os.write(self.aux_stdin_wfd, f"printf '\\4'\n".encode())
         os.write(self.aux_stdin_wfd, f"printf '\\4' 1>&2\n".encode())
         output = self.tee(self.shell.stdout, self.shell.stderr, **kwargs)
-        aux_out, _ = self.auxiliary_command(posix="echo $?", nt="echo %ERRORLEVEL%")
-        returncode = int(aux_out)
         finish = round(time.time() * 1000)
+        aux_out, _ = self.auxiliary_command(posix="echo $RET_CODE")
+        try:
+            returncode = int(aux_out)
+        except ValueError:
+            returncode = "N/A"
         return SimpleNamespace(
             returncode = returncode,
             args = command,

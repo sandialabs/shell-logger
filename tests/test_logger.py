@@ -277,6 +277,15 @@ def test_JSON_file_can_reproduce_HTML_file(logger):
     assert original_html == new_html
 
 
+def test_under_stress():
+    logger = Logger(stack()[0][3], Path.cwd())
+    cmd = ("dd if=/dev/urandom bs=1024 count=262144 | "
+           "LC_ALL=C tr -c '[:print:]' '*' ; sleep 1")
+    msg = "Get 256 MB of stdout from /dev/urandom"
+    logger.log(msg, cmd)
+    assert logger.log_book[0]["returncode"] == 0
+
+
 def test_logger_does_not_store_stdout_string_by_default():
     logger = Logger(stack()[0][3], Path.cwd())
     cmd = ("dd if=/dev/urandom bs=1024 count=262144 | "
@@ -291,7 +300,6 @@ def test_logger_does_not_store_stdout_string_by_default():
     p.join()
     # 134217728 bytes = 128 MB
     assert mem_usage < 134217728
-    print(mem_usage)
 
     p = Process(target=logger.log, args=(msg, cmd, None, False, False, True))
     p.start()
@@ -301,7 +309,6 @@ def test_logger_does_not_store_stdout_string_by_default():
     p.join()
     # 134217728 bytes = 128 MB
     assert mem_usage > 134217728
-    print(mem_usage)
 
 def test_logger_does_not_store_trace_string_by_default():
     logger = Logger(stack()[0][3], Path.cwd())
@@ -511,3 +518,42 @@ def test_log_book_svg():
     assert "<svg " in logger.log_book[0]["stats"]["cpu"]["svg"]
     assert "</svg>" in logger.log_book[0]["stats"]["cpu"]["svg"]
 
+def test_change_pwd():
+    logger = Logger(stack()[0][3], Path.cwd())
+    pwd_command = "pwd"
+    directory1 = "/"
+    directory2 = "/tmp"
+    if os.name == "posix":
+        pwd_command = "pwd"
+        directory1 = "/"
+        directory2 = "/tmp"
+    elif os.name == "nt":
+        pwd_command = "cd"
+        directory1 = "C:\\"
+        directory2 = "C:\\Users"
+    else:
+        print(f"Warning: os.name is unrecognized: {os.name}; test may fail.")
+    result = logger.run(f"cd {directory1}")
+    result = logger.run(pwd_command)
+    assert result.stdout.strip() == directory1
+    assert result.pwd == directory1
+    result = logger.run(f"cd {directory2}")
+    result = logger.run(pwd_command)
+    assert result.stdout.strip() == directory2
+    assert result.pwd == directory2
+
+def test_returncode():
+    logger = Logger(stack()[0][3], Path.cwd())
+    command = "false"
+    expected_returncode = 1
+    if os.name == "posix":
+        command = "false"
+        expected_returncode = 1
+    elif os.name == "nt":
+        command = "type nul | findstr NOPE"
+        expected_returncode = 1
+    else:
+        print(f"Warning: os.name is unrecognized: {os.name}; test may fail.")
+    result = logger.run(command)
+    assert result.returncode == expected_returncode
+    

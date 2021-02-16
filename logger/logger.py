@@ -439,7 +439,7 @@ class Logger:
                 ' '*i + "  <ul>\n" +
                 ' '*i + f"    <li><b>Time:</b> {log['timestamp']}</li>\n" +
                 ' '*i + f"    <li><b>Command:</b> {log['cmd']}</li>\n" +
-                ' '*i + f"    <li><b>CWD:</b> {log['cwd']}</li>\n" +
+                ' '*i + f"    <li><b>CWD:</b> {log['pwd']}</li>\n" +
                 ' '*i + f"    <li><b>User:</b> {log['user']}</li>\n" +
                 ' '*i + f"    <li><b>Group:</b> {log['group']}</li>\n" +
                 ' '*i + f"    <li><b>Shell:</b> {log['shell']}</li>\n" +
@@ -610,6 +610,7 @@ class Logger:
             )
             with open(self.html_file, 'a') as html:
                 html.write(html_str)
+                html.write('\n')
 
         # Final steps (Only for the parent)
         # ---------------------------------
