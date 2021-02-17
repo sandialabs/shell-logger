@@ -472,7 +472,8 @@ class Logger:
             html_str = (
                 ' '*i + "    </li>\n" +
                 ' '*i + "    <li>\n" +
-                ' '*i + "      <b>stdout:</b>\n"
+                ' '*i + "      <b>stdout:</b><br>\n" +
+                ' '*i + "      <pre>\n"
             )
             with open(self.html_file, 'a') as html:
                 html.write(html_str)
@@ -480,18 +481,20 @@ class Logger:
             # Append the stdout of this command to the HTML file
             cmd_id = log['cmd_id']
             stdout_path = self.strm_dir / f"{log['timestamp']}_{cmd_id}_stdout"
-            with open(stdout_path, 'r') as out:
-                with open(self.html_file, 'a') as html:
+            with open(self.html_file, 'a') as html:
+                with open(stdout_path, 'r') as out:
                     for line in out:
-                        html_line = ' '*i + "      <br>" + line
+                        html_line = ' '*i + "        " + line + "\n"
                         html.write(html_line)
+                html.write(' '*i + "      </pre>\n")
 
 
             # Append HTML text between end of stdout and beginning of stderr.
             html_str = (
                 ' '*i + "    </li>\n" +
                 ' '*i + "    <li>\n" +
-                ' '*i + "      <b>stderr:</b>\n"
+                ' '*i + "      <b>stderr:</b><br>\n" +
+                ' '*i + "      <pre>\n"
             )
             with open(self.html_file, 'a') as html:
                 html.write(html_str)
@@ -499,11 +502,12 @@ class Logger:
             # Append the stderr of this command to the HTML file
             cmd_id = log['cmd_id']
             stderr_path = self.strm_dir / f"{log['timestamp']}_{cmd_id}_stderr"
-            with open(stderr_path, 'r') as err:
-                with open(self.html_file, 'a') as html:
+            with open(self.html_file, 'a') as html:
+                with open(stderr_path, 'r') as err:
                     for line in err:
-                        html_line = ' '*i + "      <br>" + line
+                        html_line = ' '*i + "        " + line + "\n"
                         html.write(html_line)
+                html.write(' '*i + "      </pre>\n")
 
             # Append HTML text between end of stderr and beginning of ulimit.
             html_str = (
