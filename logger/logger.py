@@ -484,7 +484,7 @@ class Logger:
             with open(self.html_file, 'a') as html:
                 with open(stdout_path, 'r') as out:
                     for line in out:
-                        html_line = ' '*i + "        " + line + "\n"
+                        html_line = ' '*i + "        " + line
                         html.write(html_line)
                 html.write(' '*i + "      </pre>\n")
 
@@ -505,7 +505,7 @@ class Logger:
             with open(self.html_file, 'a') as html:
                 with open(stderr_path, 'r') as err:
                     for line in err:
-                        html_line = ' '*i + "        " + line + "\n"
+                        html_line = ' '*i + "        " + line
                         html.write(html_line)
                 html.write(' '*i + "      </pre>\n")
 
