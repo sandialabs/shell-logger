@@ -11,7 +11,7 @@ import os
 import subprocess
 import sys
 import time
-from types import SimpleNamespace
+from types import SimpleNamespace, GeneratorType
 
 def make_svg_line_chart(data):
     fig, ax = pyplot.subplots(figsize=(6, 2), dpi=80)
@@ -54,6 +54,62 @@ def opening_html_text():
 
 def closing_html_text():
     return "</html>"
+
+def append_html(input, output):
+    with open(output, "a") as file:
+        if isinstance(input, GeneratorType):
+            for text in input:
+                file.write(text)
+        if isinstance(input, str):
+            file.write(input)
+        if isinstance(input, bytes):
+            file.write(input.decode())
+
+def html_details(*args, summary=None, indent=0):
+    yield ' '*indent + "<details>\n"
+    if summary is not None:
+        yield ' '*(indent+2) + f"<summary>{summary}</summary>\n"
+    for arg in args:
+        if isinstance(arg, GeneratorType):
+            for element in arg:
+                yield element
+        if isinstance(arg, str):
+            yield arg
+        if isinstance(arg, bytes):
+            yield arg.decode()
+    yield ' '*indent + "</details>\n"
+
+def html_list_item(*args, indent=0):
+    yield ' '*indent + "<li>\n"
+    for arg in args:
+        if isinstance(arg, GeneratorType):
+            for element in arg:
+                yield element
+        if isinstance(arg, str):
+            yield arg
+        if isinstance(arg, bytes):
+            yield arg.decode()
+    yield ' '*indent + "</li>\n"
+
+def html_bold(text, indent=0):
+    return ' '*indent + f"<b>{text}</b><br>\n"
+
+def html_fixed_width_from_file(input_file, indent=0):
+    yield "<pre>\n"
+
+    with open(input_file, 'r') as out:
+        for line in out.readlines():
+            yield line
+
+    yield "</pre>\n"
+
+def html_fixed_width_from_str(input_str, indent=0):
+    yield "<pre>\n"
+
+    for line in input_str.split("\n"):
+        yield line + "\n"
+
+    yield "</pre>\n"
 
 def html_header():
     return (

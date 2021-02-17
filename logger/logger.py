@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 from .classes import Shell, Trace, StatsCollector, Stat, trace_collector, stats_collectors
-from .util import make_svg_line_chart, nested_SimpleNamespace_to_dict, opening_html_text, closing_html_text
+from .util import make_svg_line_chart, nested_SimpleNamespace_to_dict, opening_html_text, closing_html_text, append_html, html_fixed_width_from_file, html_fixed_width_from_str, html_bold, html_list_item, html_details
 from collections.abc import Iterable, Mapping
 import datetime
 import distutils.dir_util as dir_util
@@ -442,102 +442,63 @@ class Logger:
             with open(self.html_file, 'a') as html:
                 html.write(html_str)
 
-            # Append HTML text between return code and beginning of environment.
-            env_lines = log["environment"].count('\n')
-            html_str = (
-                ' '*i + "    <li>\n" +
-                ' '*i + "      <b>Environment:</b><br>\n" +
-                ' '*i + "      <details>\n" +
-                ' '*i + f"        <summary>{env_lines} lines</summary>\n" +
-                ' '*i + "        <pre>\n"
-            )
-            with open(self.html_file, 'a') as html:
-                html.write(html_str)
-
-            with open(self.html_file, 'a') as html:
-                for line in log["environment"].split("\n"):
-                    html_line = ' '*i + "          " + line + "\n"
-                    html.write(html_line)
-                html.write(' '*i + "        </pre>\n")
-                html.write(' '*i + "      </details>\n")
-
-            html_str = (
-                ' '*i + "    </li>\n" +
-                ' '*i + "    <li>\n" +
-                ' '*i + "      <b>stdout:</b><br>\n" +
-                ' '*i + "      <pre>\n"
-            )
-            with open(self.html_file, 'a') as html:
-                html.write(html_str)
-
-            # Append the stdout of this command to the HTML file
+            env = log["environment"]
+            env_lines = env.count('\n')
             cmd_id = log['cmd_id']
             stdout_path = self.strm_dir / f"{log['timestamp']}_{cmd_id}_stdout"
-            with open(self.html_file, 'a') as html:
-                with open(stdout_path, 'r') as out:
-                    for line in out:
-                        html_line = ' '*i + "        " + line
-                        html.write(html_line)
-                html.write(' '*i + "      </pre>\n")
-
-
-            # Append HTML text between end of stdout and beginning of stderr.
-            html_str = (
-                ' '*i + "    </li>\n" +
-                ' '*i + "    <li>\n" +
-                ' '*i + "      <b>stderr:</b><br>\n" +
-                ' '*i + "      <pre>\n"
-            )
-            with open(self.html_file, 'a') as html:
-                html.write(html_str)
-
-            # Append the stderr of this command to the HTML file
-            cmd_id = log['cmd_id']
             stderr_path = self.strm_dir / f"{log['timestamp']}_{cmd_id}_stderr"
-            with open(self.html_file, 'a') as html:
-                with open(stderr_path, 'r') as err:
-                    for line in err:
-                        html_line = ' '*i + "        " + line
-                        html.write(html_line)
-                html.write(' '*i + "      </pre>\n")
+            trace_path = self.strm_dir / f"{log['timestamp']}_{cmd_id}_trace"
+            ulimit = log["ulimit"]
 
-            # Append HTML text between end of stderr and beginning of ulimit.
-            html_str = (
-                ' '*i + "    </li>\n" +
-                ' '*i + "    <li>\n" +
-                ' '*i + "      <b>ulimit:</b><br>\n" +
-                ' '*i + "      <pre>\n"
+            append_html(
+                html_list_item(
+                    html_bold("Environment:", indent=i+4),
+                    html_details(
+                        html_fixed_width_from_str(env),
+                        summary=f"{env_lines} lines",
+                        indent=i+6
+                    ),
+                ),
+                self.html_file
             )
-            with open(self.html_file, 'a') as html:
-                html.write(html_str)
 
-            # Append the trace of this command to the HTML file
-            with open(self.html_file, 'a') as html:
-                for line in log["ulimit"].split("\n"):
-                    html_line = ' '*i + "        " + line + "\n"
-                    html.write(html_line)
-                html.write(' '*i + "      </pre>\n")
+            append_html(
+                html_list_item(
+                    html_bold("stdout:", indent=i+4),
+                    html_fixed_width_from_file(stdout_path),
+                    indent=i+4
+                ),
+                self.html_file
+            )
+
+            append_html(
+                html_list_item(
+                    html_bold("stderr:", indent=i+4),
+                    html_fixed_width_from_file(stderr_path),
+                    indent=i+4
+                ),
+                self.html_file
+            )
+
+            append_html(
+                html_list_item(
+                    html_bold("ulimit:", indent=i+4),
+                    html_fixed_width_from_str(ulimit),
+                    indent=i+4
+                ),
+                self.html_file
+            )
 
             # Append HTML text between end of ulimit and beginning of trace.
-            cmd_id = log['cmd_id']
-            trace_path = self.strm_dir / f"{log['timestamp']}_{cmd_id}_trace"
             if trace_path.exists():
-                html_str = (
-                    ' '*i + "    </li>\n" +
-                    ' '*i + "    <li>\n" +
-                    ' '*i + "      <b>trace:</b><br>\n" +
-                    ' '*i + "      <pre>\n"
+                append_html(
+                    html_list_item(
+                        html_bold("trace:", indent=i+4),
+                        html_fixed_width_from_file(trace_path),
+                        indent=i+4
+                    ),
+                    self.html_file
                 )
-                with open(self.html_file, 'a') as html:
-                    html.write(html_str)
-
-                # Append the trace of this command to the HTML file
-                with open(self.html_file, 'a') as html:
-                    with open(trace_path, 'r') as trace:
-                        for line in trace:
-                            html_line = ' '*i + "        " + line + "\n"
-                            html.write(html_line)
-                    html.write(' '*i + "      </pre>\n")
 
             # Append HTML text between end of trace and beginning of
             # Memory Usage.
