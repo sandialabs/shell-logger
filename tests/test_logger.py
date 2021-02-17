@@ -273,6 +273,7 @@ def test_JSON_file_can_reproduce_HTML_file(logger):
     assert html_file.exists()
     with open(html_file, 'r') as hf:
         new_html = hf.read()
+    print(f"New Read: {html_file.resolve()}") #^#^#^#^#
 
     assert original_html == new_html
 

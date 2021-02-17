@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
+from . import resources
 from collections.abc import Iterable, Mapping
+import importlib.resources
 from io import StringIO
 import itertools
 import numpy as np
@@ -42,4 +44,32 @@ def nested_SimpleNamespace_to_dict(object):
         return nested_SimpleNamespace_to_dict(object.__dict__)
     else:
         return object
+
+def opening_html_text():
+    return (
+        "<!DOCTYPE html>" +
+        "<html>" +
+        html_header()
+    )
+
+def closing_html_text():
+    return "</html>"
+
+def html_header():
+    return (
+        "<head>" +
+        "<script>\n" +
+        importlib.resources.read_text(resources, "bootstrap.min.js") +
+        "\n</script>\n" +
+        "<script>\n" +
+        importlib.resources.read_text(resources, "Chart.bundle.min.js") +
+        "\n</script>\n" +
+        "<style>\n" +
+        importlib.resources.read_text(resources, "bootstrap.min.css") +
+        "\n</style>\n" +
+        "<style>\n" +
+        importlib.resources.read_text(resources, "Chart.min.css") +
+        "\n</style>\n" +
+        "</head>"
+    )
 

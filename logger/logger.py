@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 from .classes import Shell, Trace, StatsCollector, Stat, trace_collector, stats_collectors
-from .util import make_svg_line_chart, nested_SimpleNamespace_to_dict
+from .util import make_svg_line_chart, nested_SimpleNamespace_to_dict, opening_html_text, closing_html_text
 from collections.abc import Iterable, Mapping
 import datetime
 import distutils.dir_util as dir_util
@@ -229,26 +229,15 @@ class Logger:
 
         # html_file
         # ---------
-        html_text = "<h1>"
         if html_file is not None:
             self.html_file = html_file.resolve()
-
-            # Usually, this is only the case if loading from a JSON file when
-            # the HTML file has been removed.
-            if not self.html_file.exists():
-                logger_name = self.html_file.name
-                logger_name = re.match("(.*).html$", logger_name).group(1)
-                html_text += logger_name
         else:
-            # If there isn't an HTML file, this is that parent Logger object,
-            # and it needs to create the main HTML file.
             self.html_file = self.strm_dir / (name.replace(' ', '_') + '.html')
-            html_text += self.name
-        html_text += " Log</h1>"
 
-        # Write the file.
-        with open(self.html_file, 'w') as f:
-            f.write(html_text)
+        if self.is_parent:
+            html_text = opening_html_text() + "\n"
+            with open(self.html_file, 'w') as f:
+                f.write(html_text)
 
 
     def update_done_time(self):
@@ -380,9 +369,12 @@ class Logger:
         respective files in the ``strm_dir``.
         """
 
-        for log in self.log_book:
-            i = self.indent * 2  # Each indent is 2 spaces
+        i = self.indent * 2  # Each indent is 2 spaces
+        html_str = ' '*i + f"\n<h1>{self.name} Log</h1>\n"
+        with open(self.html_file, 'a') as html:
+            html.write(html_str)
 
+        for log in self.log_book:
             # Child Logger
             # ------------
             if isinstance(log, Logger):
@@ -618,6 +610,9 @@ class Logger:
         # Final steps (Only for the parent)
         # ---------------------------------
         if self.is_parent:
+            with open(self.html_file, 'a') as html:
+                html.write(closing_html_text())
+                html.write('\n')
             # Create a symlink in log_dir to the HTML file in strm_dir.
             curr_html_file = self.html_file.name
             new_location = self.log_dir / curr_html_file
