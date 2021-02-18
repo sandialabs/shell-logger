@@ -168,8 +168,8 @@ def test_finalize_creates_JSON_with_correct_information(logger):
     assert logger.log_book[0] == loaded_logger.log_book[0]
 
     # Child Logger
-    child = logger.log_book[1]
-    loaded_child = loaded_logger.log_book[1]
+    child = logger.log_book[2]
+    loaded_child = loaded_logger.log_book[2]
     assert child.log_dir == loaded_child.log_dir
     assert child.strm_dir == loaded_child.strm_dir
     assert child.html_file == loaded_child.html_file
@@ -195,17 +195,17 @@ def test_finalize_creates_HTML_with_correct_information(logger):
         html_text = hf.read()
 
     # Command info.
-    assert "<b>test cmd</b>" in html_text
+    assert ">test cmd</" in html_text
     assert f"Duration: {logger.log_book[0]['duration']}" in html_text
     assert f"Time:</b> {logger.log_book[0]['timestamp']}" in html_text
-    assert "Command:</b> echo 'Hello world out'; "\
-        "echo 'Hello world error' 1>&2" in html_text
+    assert "Command:</b> <code>echo 'Hello world out'; "\
+        "echo 'Hello world error' 1&gt;&amp;2" in html_text
     assert f"CWD:</b> {Path.cwd()}" in html_text
     assert "Return Code:</b> 0" in html_text
 
     # Print statement.
-    assert "\n  <br>Hello world child" in html_text
-    assert "<b>trace:</b>" in html_text
+    assert "Hello world child" in html_text
+    assert "trace</" in html_text
     assert "setlocale" in html_text
     assert "getenv" not in html_text
     assert "<b>Memory Usage:</b>" in html_text
@@ -214,16 +214,16 @@ def test_finalize_creates_HTML_with_correct_information(logger):
     assert "<b>CPU Usage:</b>" in html_text
     assert "<b>Disk Usage:</b>" in html_text
     assert "<b>Volume /:</b>" in html_text
-    assert "Environment:" in html_text
+    assert "Environment</" in html_text
     assert "PATH=" in html_text
     assert "User:" in html_text
     assert "Group:" in html_text
     assert "Shell:" in html_text
     assert "umask:" in html_text
-    assert "ulimit:" in html_text
+    assert "ulimit</" in html_text
 
     # Child Logger
-    assert "Child</font></b>\n" in html_text
+    assert "Child</" in html_text
 
 
 def test_log_dir_HTML_symlinks_to_strm_dir_HTML(logger):

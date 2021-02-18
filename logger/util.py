@@ -68,20 +68,48 @@ def append_html(*args, output=Path(os.devnull)):
             if isinstance(arg, bytes):
                 file.write(arg.decode())
 
+def inline_fixed_width(text):
+    return f"<code>{html_encode(text)}</code>"
+
+def simple_details_list(*args, title="Details", indent=0):
+    yield (
+        ' '*indent + 
+        '<div class="card" style="display: inline-block">' +
+        '<div class="card-body">' +
+        '<ul class="list-group">\n'
+    )
+    yield f'<h5 class="card-title">{title}</h5>'
+    for arg in args:
+        if isinstance(arg, GeneratorType):
+            for element in arg:
+                yield element
+        if isinstance(arg, str):
+            yield arg
+        if isinstance(arg, bytes):
+            yield arg.decode()
+    yield ' '*indent + f"</ul></div></div>\n"
+
+
 def simple_detail_list_item(name, value, indent=0):
     return html_list_item(
         html_bold(f"{name}:", add_br=False),
         str(value),
         indent=indent,
-        add_br=False
+        add_br=False,
+        element_class="list-group-item"
     )
 
-def output_block_from_file(name, file, indent=0):
-    return html_list_item(
-        html_bold(f"{name}:", indent=indent),
-        html_fixed_width_from_file(file),
-        indent=indent
+def output_block_from_file(title, file, indent=0):
+    yield (
+        ' '*indent + 
+        '<div class="card">' +
+        '<div class="card-body">' +
+        '<ul class="list-group">\n'
     )
+    yield f'<h5 class="card-title">{title}</h5>'
+    for element in html_fixed_width_from_file(file):
+        yield element
+    yield ' '*indent + f"</ul></div></div>\n"
 
 def stat_chart(name, chart, indent=0):
     return html_list_item(
@@ -90,12 +118,17 @@ def stat_chart(name, chart, indent=0):
         indent=indent
     )
 
-def output_block_from_str(name, value, indent=0):
-    return html_list_item(
-        html_bold(f"{name}:", indent=indent),
-        html_fixed_width_from_str(value),
-        indent=indent
+def output_block_from_str(title, value, indent=0):
+    yield (
+        ' '*indent + 
+        '<div class="card">' +
+        '<div class="card-body">' +
+        '<ul class="list-group">\n'
     )
+    yield f'<h5 class="card-title">{title}</h5>'
+    for element in html_fixed_width_from_str(value):
+        yield element
+    yield ' '*indent + f"</ul></div></div>\n"
 
 def html_details(*args, summary=None, indent=0):
     yield ' '*indent + "<details>\n"
@@ -111,11 +144,12 @@ def html_details(*args, summary=None, indent=0):
             yield arg.decode()
     yield ' '*indent + "</details>\n"
 
-def html_list_item(*args, indent=0, add_br=True):
+def html_list_item(*args, indent=0, add_br=True, element_class=None):
+    li = "<li>" if element_class is None else f'<li class="{element_class}">'
     if add_br:
-        yield ' '*indent + "<li>\n"
+        yield ' '*indent + f"{li}\n"
     else:
-        yield ' '*indent + "<li>"
+        yield ' '*indent + f"{li}"
     for arg in args:
         if isinstance(arg, GeneratorType):
             for element in arg:
@@ -136,21 +170,28 @@ def html_bold(text, indent=0, add_br=True):
         return ' '*indent + f"<b>{text}</b> "
 
 def html_fixed_width_from_file(input_file, indent=0):
-    yield "<pre>\n"
+    yield "<pre><code>\n"
 
     with open(input_file, 'r') as out:
         for line in out.readlines():
-            yield line
+            yield html_encode(line)
 
-    yield "</pre>\n"
+    yield "</code></pre>\n"
 
 def html_fixed_width_from_str(input_str, indent=0):
-    yield "<pre>\n"
+    yield "<pre><code>\n"
 
     for line in input_str.split("\n"):
-        yield line + "\n"
+        yield html_encode(line) + '\n'
 
-    yield "</pre>\n"
+    yield "</code></pre>\n"
+
+def html_encode(text):
+    text = text.replace('&', "&amp;")
+    text = text.replace('<', "&lt;")
+    text = text.replace('>', "&gt;")
+    text = text.replace('-', "-&#8288;") # non breaking dashes
+    return text
 
 def html_header():
     return (
@@ -166,6 +207,10 @@ def html_header():
         "\n</style>\n" +
         "<style>\n" +
         importlib.resources.read_text(resources, "Chart.min.css") +
+        "\n</style>\n" +
+        "<style>\n" +
+        "code { color: inherit; }\n" +
+        "pre { white-space: pre-wrap; }\n" +
         "\n</style>\n" +
         "</head>"
     )

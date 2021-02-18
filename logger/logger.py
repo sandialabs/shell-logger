@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 from .classes import Shell, Trace, StatsCollector, Stat, trace_collector, stats_collectors
-from .util import make_svg_line_chart, nested_SimpleNamespace_to_dict, opening_html_text, closing_html_text, append_html, html_fixed_width_from_file, html_fixed_width_from_str, html_bold, html_list_item, html_details, simple_detail_list_item, output_block_from_file, output_block_from_str, stat_chart
+from .util import make_svg_line_chart, nested_SimpleNamespace_to_dict, opening_html_text, closing_html_text, append_html, html_fixed_width_from_file, html_fixed_width_from_str, html_bold, html_list_item, html_details, simple_detail_list_item, output_block_from_file, output_block_from_str, stat_chart, simple_details_list, inline_fixed_width
 from collections.abc import Iterable, Mapping
 import datetime
 import distutils.dir_util as dir_util
@@ -369,9 +369,14 @@ class Logger:
         """
 
         i = self.indent * 2  # Each indent is 2 spaces
-        html_str = ' '*i + f"\n<h1>{self.name} Log</h1>\n"
+        heading = f"h{min(self.indent + 1, 5)}"
+        html_str = ' '*i + f"\n<{heading}>{self.name} Log</{heading}>\n"
         with open(self.html_file, 'a') as html:
             html.write(html_str)
+
+        if self.is_parent:
+            with open(self.html_file, 'a') as html:
+                html.write('<div style="padding: 0 1% 1cm;">')
 
         for log in self.log_book:
             # Child Logger
@@ -381,15 +386,17 @@ class Logger:
                 if log.duration is None:
                     log.__update_duration()
 
+                heading = f"h{min(log.indent + 1, 5)}"
                 # First print the header text.
                 html_str = (
-                    ' '*i + "\n<br>\n" +
                     ' '*i + "<details>\n" +
                     ' '*i + "  <summary>\n" +
-                    ' '*i + "    <b><font " +
-                    f"size='6'>{log.name}</font></b>\n" +
+                    ' '*i + f"    <{heading} " +
+                            'style="line-height: 1.5; display: inline;"' +
+                            f">{log.name}</{heading}>\n" +
                     ' '*i + f"    <br>Duration: {log.duration}\n" +
-                    ' '*i + "  </summary>"
+                    ' '*i + "  </summary>" +
+                    ' '*i + '  <div style="padding: 0 2.5%;">'
                 )
                 with open(self.html_file, 'a') as html:
                     html.write(html_str)
@@ -398,7 +405,7 @@ class Logger:
                 log.finalize()
 
                 # Save the ending HTML
-                html_str = ' '*i + "</details>"
+                html_str = ' '*i + "</div></details>"
                 with open(self.html_file, 'a') as html:
                     html.write(html_str)
 
@@ -408,8 +415,13 @@ class Logger:
             # Message Log Entry
             # -----------------
             if log['cmd'] is None:
-                html_str = log['msg'].replace('\n', '\n' + ' '*i + '<br>')
-                html_str = '\n' + ' '*i + '<br>' + html_str
+                html_str = (
+                    ' '*i + '<div class="card">\n' +
+                    ' '*(i+2) + '<div class="card-body">\n' +
+                    ' '*(i+4) + log['msg'].replace('\n', "<br>") + '\n' +
+                    ' '*(i+2) + '</div>\n' +
+                    ' '*i + '</div>\n'
+                )
                 with open(self.html_file, 'a') as html:
                     html.write(html_str)
 
@@ -421,13 +433,14 @@ class Logger:
             # Write the top part of the HTML entry
             html_str = (
                 '\n' +
-                ' '*i + "<br>\n" +
                 ' '*i + "<details>\n" +
                 ' '*i + "  <summary>\n" +
-                ' '*i + f"    <b>{log['msg']}</b>\n" +
+                ' '*i + "    <h6 " +
+                        'style="line-height: 1.5; display: inline;"' +
+                        f">{log['msg']}</h6>\n" +
                 ' '*i + f"    <br>Duration: {log['duration']}\n" +
                 ' '*i + "  </summary>\n" +
-                ' '*i + "  <ul>\n"
+                ' '*i + '  <div style="padding: 0 2.5%;">'
             )
             with open(self.html_file, 'a') as html:
                 html.write(html_str)
@@ -438,16 +451,20 @@ class Logger:
             trace_path = self.strm_dir / f"{log['timestamp']}_{cmd_id}_trace"
 
             append_html(
-                simple_detail_list_item("Time", log["timestamp"], indent=4),
-                simple_detail_list_item("Command", log["cmd"], indent=4),
-                simple_detail_list_item("CWD", log["pwd"], indent=4),
-                simple_detail_list_item("User", log["user"], indent=4),
-                simple_detail_list_item("Group", log["group"], indent=4),
-                simple_detail_list_item("Shell", log["shell"], indent=4),
-                simple_detail_list_item("umask", log["umask"], indent=4),
-                simple_detail_list_item("Return Code",
-                                        log["return_code"],
-                                        indent=4),
+                simple_details_list(
+                    simple_detail_list_item("Time", log["timestamp"], indent=4),
+                    simple_detail_list_item("Command",
+                                            inline_fixed_width(log["cmd"]),
+                                            indent=4),
+                    simple_detail_list_item("CWD", log["pwd"], indent=4),
+                    simple_detail_list_item("User", log["user"], indent=4),
+                    simple_detail_list_item("Group", log["group"], indent=4),
+                    simple_detail_list_item("Shell", log["shell"], indent=4),
+                    simple_detail_list_item("umask", log["umask"], indent=4),
+                    simple_detail_list_item("Return Code",
+                                            log["return_code"],
+                                            indent=4),
+                ),
                 output_block_from_file("stdout", stdout_path),
                 output_block_from_file("stderr", stderr_path),
                 output_block_from_str("Environment", log["environment"]),
@@ -463,6 +480,10 @@ class Logger:
             # Append HTML text between end of trace and beginning of
             # Memory Usage.
             if log["stats"]:
+                append_html(
+                    ' '*i + "  <ul>\n",
+                    output=self.html_file
+                )
                 if log["stats"]["memory"]:
                     memory_usage_graph = log["stats"]["memory"]["svg"]
                     append_html(
@@ -507,7 +528,7 @@ class Logger:
             html_str = (
                 ' '*i + "    </li>\n" +
                 ' '*i + "  </ul>\n" +
-                ' '*i + "</details>"
+                ' '*i + "</div></details>"
             )
             with open(self.html_file, 'a') as html:
                 html.write('\n')
@@ -518,6 +539,7 @@ class Logger:
         # ---------------------------------
         if self.is_parent:
             with open(self.html_file, 'a') as html:
+                html.write("</div>")
                 html.write(closing_html_text())
                 html.write('\n')
             # Create a symlink in log_dir to the HTML file in strm_dir.
