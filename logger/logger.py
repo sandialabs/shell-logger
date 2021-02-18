@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 from .classes import Shell, Trace, StatsCollector, Stat, trace_collector, stats_collectors
-from .util import make_svg_line_chart, nested_SimpleNamespace_to_dict, opening_html_text, closing_html_text, append_html, html_fixed_width_from_file, html_fixed_width_from_str, html_bold, html_list_item, html_details
+from .util import make_svg_line_chart, nested_SimpleNamespace_to_dict, opening_html_text, closing_html_text, append_html, html_fixed_width_from_file, html_fixed_width_from_str, html_bold, html_list_item, html_details, simple_detail_list_item, output_block_from_file, output_block_from_str, stat_chart
 from collections.abc import Iterable, Mapping
 import datetime
 import distutils.dir_util as dir_util
@@ -15,7 +15,6 @@ import select
 import shutil
 import string
 import tempfile
-import textwrap
 import time
 from types import SimpleNamespace
 
@@ -433,113 +432,31 @@ class Logger:
             with open(self.html_file, 'a') as html:
                 html.write(html_str)
 
-            append_html(
-                html_list_item(
-                    html_bold("Time:", add_br=False),
-                    log["timestamp"],
-                    indent=i+4,
-                    add_br=False
-                ),
-                html_list_item(
-                    html_bold("Command:", add_br=False),
-                    log["cmd"],
-                    indent=i+4,
-                    add_br=False
-                ),
-                html_list_item(
-                    html_bold("CWD:", add_br=False),
-                    log["pwd"],
-                    indent=i+4,
-                    add_br=False
-                ),
-                html_list_item(
-                    html_bold("User:", add_br=False),
-                    log["user"],
-                    indent=i+4,
-                    add_br=False
-                ),
-                html_list_item(
-                    html_bold("Group:", add_br=False),
-                    log["group"],
-                    indent=i+4,
-                    add_br=False
-                ),
-                html_list_item(
-                    html_bold("Shell:", add_br=False),
-                    log["shell"],
-                    indent=i+4,
-                    add_br=False
-                ),
-                html_list_item(
-                    html_bold("umask:", add_br=False),
-                    log["umask"],
-                    indent=i+4,
-                    add_br=False
-                ),
-                html_list_item(
-                    html_bold("Return Code:", add_br=False),
-                    str(log["return_code"]),
-                    indent=i+4,
-                    add_br=False
-                ),
-                output=self.html_file
-            )
-
-            env = log["environment"]
-            env_lines = env.count('\n')
             cmd_id = log['cmd_id']
             stdout_path = self.strm_dir / f"{log['timestamp']}_{cmd_id}_stdout"
             stderr_path = self.strm_dir / f"{log['timestamp']}_{cmd_id}_stderr"
             trace_path = self.strm_dir / f"{log['timestamp']}_{cmd_id}_trace"
-            ulimit = log["ulimit"]
 
             append_html(
-                html_list_item(
-                    html_bold("Environment:", indent=i+4),
-                    html_details(
-                        html_fixed_width_from_str(env),
-                        summary=f"{env_lines} lines",
-                        indent=i+6
-                    ),
-                ),
+                simple_detail_list_item("Time", log["timestamp"], indent=4),
+                simple_detail_list_item("Command", log["cmd"], indent=4),
+                simple_detail_list_item("CWD", log["pwd"], indent=4),
+                simple_detail_list_item("User", log["user"], indent=4),
+                simple_detail_list_item("Group", log["group"], indent=4),
+                simple_detail_list_item("Shell", log["shell"], indent=4),
+                simple_detail_list_item("umask", log["umask"], indent=4),
+                simple_detail_list_item("Return Code",
+                                        log["return_code"],
+                                        indent=4),
+                output_block_from_file("stdout", stdout_path),
+                output_block_from_file("stderr", stdout_path),
+                output_block_from_str("Environment", log["environment"]),
+                output_block_from_str("ulimit", log["ulimit"]),
                 output=self.html_file
             )
-
-            append_html(
-                html_list_item(
-                    html_bold("stdout:", indent=i+4),
-                    html_fixed_width_from_file(stdout_path),
-                    indent=i+4
-                ),
-                output=self.html_file
-            )
-
-            append_html(
-                html_list_item(
-                    html_bold("stderr:", indent=i+4),
-                    html_fixed_width_from_file(stderr_path),
-                    indent=i+4
-                ),
-                output=self.html_file
-            )
-
-            append_html(
-                html_list_item(
-                    html_bold("ulimit:", indent=i+4),
-                    html_fixed_width_from_str(ulimit),
-                    indent=i+4
-                ),
-                output=self.html_file
-            )
-
-            # Append HTML text between end of ulimit and beginning of trace.
             if trace_path.exists():
                 append_html(
-                    html_list_item(
-                        html_bold("trace:", indent=i+4),
-                        html_fixed_width_from_file(trace_path),
-                        indent=i+4
-                    ),
+                    output_block_from_file("trace", trace_path),
                     output=self.html_file
                 )
 
@@ -549,21 +466,17 @@ class Logger:
                 if log["stats"]["memory"]:
                     memory_usage_graph = log["stats"]["memory"]["svg"]
                     append_html(
-                        html_list_item(
-                            html_bold("Memory Usage:", indent=i+4),
-                            textwrap.indent(memory_usage_graph, ' '*(i+6)),
-                            indent=i+4
-                        ),
+                        stat_chart("Memory Usage",
+                                   memory_usage_graph,
+                                   indent=4),
                         output=self.html_file
                     )
                 if log["stats"]["cpu"]:
                     cpu_usage_graph = log["stats"]["cpu"]["svg"]
                     append_html(
-                        html_list_item(
-                            html_bold("CPU Usage:", indent=i+4),
-                            textwrap.indent(cpu_usage_graph, ' '*(i+6)),
-                            indent=i+4
-                        ),
+                        stat_chart("CPU Usage",
+                                   cpu_usage_graph,
+                                   indent=4),
                         output=self.html_file
                     )
                 if log["stats"]["disk"]:
@@ -582,13 +495,9 @@ class Logger:
                     for disk, stats in sorted(log["stats"]["disk"].items()):
                         disk_usage_graph = stats["svg"]
                         append_html(
-                            html_list_item(
-                                f"Volume {disk}:<br>\n",
-                                textwrap.indent(disk_usage_graph, ' '*(i+8)),
-                                ' '*6,
-                                indent=i+6,
-                                add_br=False
-                            ),
+                            stat_chart(f"Volume {disk}",
+                                       disk_usage_graph,
+                                       indent=8),
                             output=self.html_file
                         )
                     with open(self.html_file, 'a') as html:

@@ -213,7 +213,7 @@ def test_finalize_creates_HTML_with_correct_information(logger):
     assert "</svg>" in html_text
     assert "<b>CPU Usage:</b>" in html_text
     assert "<b>Disk Usage:</b>" in html_text
-    assert "<li>Volume /:" in html_text
+    assert "<b>Volume /:</b>" in html_text
     assert "Environment:" in html_text
     assert "PATH=" in html_text
     assert "User:" in html_text

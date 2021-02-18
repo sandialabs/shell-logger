@@ -11,6 +11,7 @@ import os
 from pathlib import Path
 import subprocess
 import sys
+import textwrap
 import time
 from types import SimpleNamespace, GeneratorType
 
@@ -66,6 +67,35 @@ def append_html(*args, output=Path(os.devnull)):
                 file.write(arg)
             if isinstance(arg, bytes):
                 file.write(arg.decode())
+
+def simple_detail_list_item(name, value, indent=0):
+    return html_list_item(
+        html_bold(f"{name}:", add_br=False),
+        str(value),
+        indent=indent,
+        add_br=False
+    )
+
+def output_block_from_file(name, file, indent=0):
+    return html_list_item(
+        html_bold(f"{name}:", indent=indent),
+        html_fixed_width_from_file(file),
+        indent=indent
+    )
+
+def stat_chart(name, chart, indent=0):
+    return html_list_item(
+        html_bold(f"{name}:", indent=indent),
+        textwrap.indent(chart, ' '*(indent+2)),
+        indent=indent
+    )
+
+def output_block_from_str(name, value, indent=0):
+    return html_list_item(
+        html_bold(f"{name}:", indent=indent),
+        html_fixed_width_from_str(value),
+        indent=indent
+    )
 
 def html_details(*args, summary=None, indent=0):
     yield ' '*indent + "<details>\n"
