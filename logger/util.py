@@ -8,6 +8,7 @@ import numpy as np
 import matplotlib.pyplot as pyplot
 from matplotlib.ticker import MultipleLocator, FormatStrFormatter
 import os
+from pathlib import Path
 import subprocess
 import sys
 import time
@@ -55,15 +56,16 @@ def opening_html_text():
 def closing_html_text():
     return "</html>"
 
-def append_html(input, output):
+def append_html(*args, output=Path(os.devnull)):
     with open(output, "a") as file:
-        if isinstance(input, GeneratorType):
-            for text in input:
-                file.write(text)
-        if isinstance(input, str):
-            file.write(input)
-        if isinstance(input, bytes):
-            file.write(input.decode())
+        for arg in args:
+            if isinstance(arg, GeneratorType):
+                for element in arg:
+                    file.write(element)
+            if isinstance(arg, str):
+                file.write(arg)
+            if isinstance(arg, bytes):
+                file.write(arg.decode())
 
 def html_details(*args, summary=None, indent=0):
     yield ' '*indent + "<details>\n"
@@ -79,8 +81,11 @@ def html_details(*args, summary=None, indent=0):
             yield arg.decode()
     yield ' '*indent + "</details>\n"
 
-def html_list_item(*args, indent=0):
-    yield ' '*indent + "<li>\n"
+def html_list_item(*args, indent=0, add_br=True):
+    if add_br:
+        yield ' '*indent + "<li>\n"
+    else:
+        yield ' '*indent + "<li>"
     for arg in args:
         if isinstance(arg, GeneratorType):
             for element in arg:
@@ -89,10 +94,16 @@ def html_list_item(*args, indent=0):
             yield arg
         if isinstance(arg, bytes):
             yield arg.decode()
-    yield ' '*indent + "</li>\n"
+    if add_br:
+        yield ' '*indent + "</li>\n"
+    else:
+        yield "</li>\n"
 
-def html_bold(text, indent=0):
-    return ' '*indent + f"<b>{text}</b><br>\n"
+def html_bold(text, indent=0, add_br=True):
+    if add_br:
+        return ' '*indent + f"<b>{text}</b><br>\n"
+    else:
+        return ' '*indent + f"<b>{text}</b> "
 
 def html_fixed_width_from_file(input_file, indent=0):
     yield "<pre>\n"

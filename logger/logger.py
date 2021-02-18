@@ -15,7 +15,7 @@ import select
 import shutil
 import string
 import tempfile
-from textwrap import indent
+import textwrap
 import time
 from types import SimpleNamespace
 
@@ -428,19 +428,62 @@ class Logger:
                 ' '*i + f"    <b>{log['msg']}</b>\n" +
                 ' '*i + f"    <br>Duration: {log['duration']}\n" +
                 ' '*i + "  </summary>\n" +
-                ' '*i + "  <ul>\n" +
-                ' '*i + f"    <li><b>Time:</b> {log['timestamp']}</li>\n" +
-                ' '*i + f"    <li><b>Command:</b> {log['cmd']}</li>\n" +
-                ' '*i + f"    <li><b>CWD:</b> {log['pwd']}</li>\n" +
-                ' '*i + f"    <li><b>User:</b> {log['user']}</li>\n" +
-                ' '*i + f"    <li><b>Group:</b> {log['group']}</li>\n" +
-                ' '*i + f"    <li><b>Shell:</b> {log['shell']}</li>\n" +
-                ' '*i + f"    <li><b>umask:</b> {log['umask']}</li>\n" +
-                ' '*i + "    <li><b>Return Code:</b> " +
-                f"{log['return_code']}</li>\n"
+                ' '*i + "  <ul>\n"
             )
             with open(self.html_file, 'a') as html:
                 html.write(html_str)
+
+            append_html(
+                html_list_item(
+                    html_bold("Time:", add_br=False),
+                    log["timestamp"],
+                    indent=i+4,
+                    add_br=False
+                ),
+                html_list_item(
+                    html_bold("Command:", add_br=False),
+                    log["cmd"],
+                    indent=i+4,
+                    add_br=False
+                ),
+                html_list_item(
+                    html_bold("CWD:", add_br=False),
+                    log["pwd"],
+                    indent=i+4,
+                    add_br=False
+                ),
+                html_list_item(
+                    html_bold("User:", add_br=False),
+                    log["user"],
+                    indent=i+4,
+                    add_br=False
+                ),
+                html_list_item(
+                    html_bold("Group:", add_br=False),
+                    log["group"],
+                    indent=i+4,
+                    add_br=False
+                ),
+                html_list_item(
+                    html_bold("Shell:", add_br=False),
+                    log["shell"],
+                    indent=i+4,
+                    add_br=False
+                ),
+                html_list_item(
+                    html_bold("umask:", add_br=False),
+                    log["umask"],
+                    indent=i+4,
+                    add_br=False
+                ),
+                html_list_item(
+                    html_bold("Return Code:", add_br=False),
+                    str(log["return_code"]),
+                    indent=i+4,
+                    add_br=False
+                ),
+                output=self.html_file
+            )
 
             env = log["environment"]
             env_lines = env.count('\n')
@@ -459,7 +502,7 @@ class Logger:
                         indent=i+6
                     ),
                 ),
-                self.html_file
+                output=self.html_file
             )
 
             append_html(
@@ -468,7 +511,7 @@ class Logger:
                     html_fixed_width_from_file(stdout_path),
                     indent=i+4
                 ),
-                self.html_file
+                output=self.html_file
             )
 
             append_html(
@@ -477,7 +520,7 @@ class Logger:
                     html_fixed_width_from_file(stderr_path),
                     indent=i+4
                 ),
-                self.html_file
+                output=self.html_file
             )
 
             append_html(
@@ -486,7 +529,7 @@ class Logger:
                     html_fixed_width_from_str(ulimit),
                     indent=i+4
                 ),
-                self.html_file
+                output=self.html_file
             )
 
             # Append HTML text between end of ulimit and beginning of trace.
@@ -497,43 +540,34 @@ class Logger:
                         html_fixed_width_from_file(trace_path),
                         indent=i+4
                     ),
-                    self.html_file
+                    output=self.html_file
                 )
 
             # Append HTML text between end of trace and beginning of
             # Memory Usage.
             if log["stats"]:
                 if log["stats"]["memory"]:
-                    html_str = (
-                        ' '*i + "    </li>\n" +
-                        ' '*i + "    <li>\n" +
-                        ' '*i + "      <b>Memory Usage:</b><br>\n"
+                    memory_usage_graph = log["stats"]["memory"]["svg"]
+                    append_html(
+                        html_list_item(
+                            html_bold("Memory Usage:", indent=i+4),
+                            textwrap.indent(memory_usage_graph, ' '*(i+6)),
+                            indent=i+4
+                        ),
+                        output=self.html_file
                     )
-                    with open(self.html_file, 'a') as html:
-                        html.write(html_str)
-
-                    # Append the memory usage of this command to
-                    # the HTML file
-                    with open(self.html_file, 'a') as html:
-                        svg = log["stats"]["memory"]["svg"]
-                        html.write(indent(svg, ' '*(i+8)))
                 if log["stats"]["cpu"]:
-                    html_str = (
-                        ' '*i + "    </li>\n" +
-                        ' '*i + "    <li>\n" +
-                        ' '*i + "      <b>CPU Usage:</b><br>\n"
+                    cpu_usage_graph = log["stats"]["cpu"]["svg"]
+                    append_html(
+                        html_list_item(
+                            html_bold("CPU Usage:", indent=i+4),
+                            textwrap.indent(cpu_usage_graph, ' '*(i+6)),
+                            indent=i+4
+                        ),
+                        output=self.html_file
                     )
-                    with open(self.html_file, 'a') as html:
-                        html.write(html_str)
-
-                    # Append the CPU usage of this command to
-                    # the HTML file
-                    with open(self.html_file, 'a') as html:
-                        svg = log["stats"]["cpu"]["svg"]
-                        html.write(indent(svg, ' '*(i+8)))
                 if log["stats"]["disk"]:
                     html_str = (
-                        ' '*i + "    </li>\n" +
                         ' '*i + "    <li>\n" +
                         ' '*i + "      <b>Disk Usage:</b><br>\n" +
                         ' '*i + '      <ul style="list-style-type:none;">\n'
@@ -546,17 +580,19 @@ class Logger:
                     # Note: we sort because JSON deserialization may change
                     # the ordering of the map.
                     for disk, stats in sorted(log["stats"]["disk"].items()):
-                        with open(self.html_file, 'a') as html:
-                            svg = stats["svg"]
-                            html_str = (
-                                ' '*i + "        <li>" +
-                                f"Volume {disk}:<br>\n" +
-                                indent(svg, ' '*(i+10)) +
-                                ' '*i + "        </li>\n"
-                            )
-                            html.write(html_str)
+                        disk_usage_graph = stats["svg"]
+                        append_html(
+                            html_list_item(
+                                f"Volume {disk}:<br>\n",
+                                textwrap.indent(disk_usage_graph, ' '*(i+8)),
+                                ' '*6,
+                                indent=i+6,
+                                add_br=False
+                            ),
+                            output=self.html_file
+                        )
                     with open(self.html_file, 'a') as html:
-                        html.write(' '*i + "      </ul>\n")
+                        html.write(' '*i + "      </li></ul>\n")
 
             # Append concluding HTML for this command to the HTML file.
             html_str = (
@@ -565,6 +601,7 @@ class Logger:
                 ' '*i + "</details>"
             )
             with open(self.html_file, 'a') as html:
+                html.write('\n')
                 html.write(html_str)
                 html.write('\n')
 
