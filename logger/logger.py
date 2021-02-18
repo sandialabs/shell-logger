@@ -449,7 +449,7 @@ class Logger:
                                         log["return_code"],
                                         indent=4),
                 output_block_from_file("stdout", stdout_path),
-                output_block_from_file("stderr", stdout_path),
+                output_block_from_file("stderr", stderr_path),
                 output_block_from_str("Environment", log["environment"]),
                 output_block_from_str("ulimit", log["ulimit"]),
                 output=self.html_file
