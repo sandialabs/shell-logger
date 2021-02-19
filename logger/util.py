@@ -79,14 +79,25 @@ def append_html(*args, output=None):
 def inline_fixed_width(text):
     return f"<code>{html_encode(text)}</code>"
 
-def simple_details_list(*args, title="Details", indent=0):
+def simple_details_list(*args, title="Details", indent=0, cmd_id=None):
     yield (
         ' '*indent + 
         '<div class="card" style="display: inline-block; margin-top: 6pt;">' +
         '<div class="card-body">' +
         '<ul class="list-group">\n'
     )
-    yield f'<h5 class="card-title">{title}</h5>'
+    if cmd_id:
+        yield (
+            '<h5 class="card-title" ' +
+            'role="button" ' +
+            f'data-target=".{cmd_id}-collapsible" ' +
+            'data-toggle="collapse"' +
+            '>' +
+            f'{title}' +
+            '</h5>'
+        )
+    else:
+        yield f'<h5 class="card-title">{title}</h5>'
     for arg in args:
         if isinstance(arg, GeneratorType):
             for element in arg:
@@ -97,6 +108,14 @@ def simple_details_list(*args, title="Details", indent=0):
             yield arg.decode()
     yield ' '*indent + f"</ul></div></div>\n"
 
+def simple_detail_collapsed_list_item(name, value, cmd_id, indent=0):
+    return html_list_item(
+        html_bold(f"{name}:", add_br=False),
+        str(value),
+        indent=indent,
+        add_br=False,
+        element_class=f"list-group-item collapse {cmd_id}-collapsible"
+    )
 
 def simple_detail_list_item(name, value, indent=0):
     return html_list_item(
@@ -107,16 +126,30 @@ def simple_detail_list_item(name, value, indent=0):
         element_class="list-group-item"
     )
 
-def output_block_from_file(title, file, indent=0):
+def output_block_from_file(title, file, cmd_id, indent=0, expanded=False):
     yield (
         ' '*indent + 
         '<div class="card" style="margin-top: 6pt;">' +
         '<div class="card-body">' +
         '<ul class="list-group">\n'
     )
-    yield f'<h5 class="card-title">{title}</h5>'
+    element_id = cmd_id + '-' + title.replace(' ', '_')
+    yield (
+        '<h5 class="card-title" ' +
+        'role="button" ' +
+        f'data-target="#{element_id}" ' +
+        'data-toggle="collapse"' +
+        '>' +
+        f'{title}' +
+        '</h5>'
+    )
+    if expanded:
+        yield f'<div class="collapse show" id={element_id}>'
+    else:
+        yield f'<div class="collapse" id={element_id}>'
     for element in html_fixed_width_from_file(file):
         yield element
+    yield f'</div>'
     yield ' '*indent + f"</ul></div></div>\n"
 
 def stat_chart(name, chart, indent=0):
@@ -126,16 +159,30 @@ def stat_chart(name, chart, indent=0):
         indent=indent
     )
 
-def output_block_from_str(title, value, indent=0):
+def output_block_from_str(title, string, cmd_id, indent=0, expanded=False):
     yield (
         ' '*indent + 
         '<div class="card" style="margin-top: 6pt;">' +
         '<div class="card-body">' +
         '<ul class="list-group">\n'
     )
-    yield f'<h5 class="card-title">{title}</h5>'
-    for element in html_fixed_width_from_str(value):
+    element_id = cmd_id + '-' + title.replace(' ', '_')
+    yield (
+        '<h5 class="card-title" ' +
+        'role="button" ' +
+        f'data-target="#{element_id}" ' +
+        'data-toggle="collapse"' +
+        '>' +
+        f'{title}' +
+        '</h5>'
+    )
+    if expanded:
+        yield f'<div class="collapse show" id={element_id}>'
+    else:
+        yield f'<div class="collapse" id={element_id}>'
+    for element in html_fixed_width_from_str(string):
         yield element
+    yield f'</div>'
     yield ' '*indent + f"</ul></div></div>\n"
 
 def html_details(*args, summary=None, indent=0):

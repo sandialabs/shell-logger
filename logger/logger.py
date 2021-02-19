@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 from .classes import Shell, Trace, StatsCollector, Stat, trace_collector, stats_collectors
-from .util import make_svg_line_chart, nested_SimpleNamespace_to_dict, filter_junk_from_env, opening_html_text, closing_html_text, append_html, html_fixed_width_from_file, html_fixed_width_from_str, html_bold, html_list_item, html_details, simple_detail_list_item, output_block_from_file, output_block_from_str, stat_chart, simple_details_list, inline_fixed_width
+from .util import make_svg_line_chart, nested_SimpleNamespace_to_dict, filter_junk_from_env, opening_html_text, closing_html_text, append_html, html_fixed_width_from_file, html_fixed_width_from_str, html_bold, html_list_item, html_details, simple_detail_list_item, simple_detail_collapsed_list_item, output_block_from_file, output_block_from_str, stat_chart, simple_details_list, inline_fixed_width
 from collections.abc import Iterable, Mapping
 import datetime
 import distutils.dir_util as dir_util
@@ -466,25 +466,69 @@ class Logger:
                     simple_detail_list_item("Command",
                                             inline_fixed_width(log["cmd"]),
                                             indent=4),
-                    simple_detail_list_item("CWD", log["pwd"], indent=4),
-                    simple_detail_list_item("Hostname", log["hostname"], indent=4),
-                    simple_detail_list_item("User", log["user"], indent=4),
-                    simple_detail_list_item("Group", log["group"], indent=4),
-                    simple_detail_list_item("Shell", log["shell"], indent=4),
-                    simple_detail_list_item("umask", log["umask"], indent=4),
+                    simple_detail_collapsed_list_item("CWD",
+                                                      log["pwd"],
+                                                      indent=4,
+                                                      cmd_id=cmd_id),
+                    simple_detail_collapsed_list_item("Hostname",
+                                                      log["hostname"],
+                                                      indent=4,
+                                                      cmd_id=cmd_id),
+                    simple_detail_collapsed_list_item("User",
+                                                      log["user"],
+                                                      indent=4,
+                                                      cmd_id=cmd_id),
+                    simple_detail_collapsed_list_item("Group",
+                                                      log["group"],
+                                                      indent=4,
+                                                      cmd_id=cmd_id),
+                    simple_detail_collapsed_list_item("Shell",
+                                                      log["shell"],
+                                                      indent=4,
+                                                      cmd_id=cmd_id),
+                    simple_detail_collapsed_list_item("umask",
+                                                      log["umask"],
+                                                      indent=4,
+                                                      cmd_id=cmd_id),
                     simple_detail_list_item("Return Code",
                                             log["return_code"],
                                             indent=4),
+                    cmd_id=cmd_id
                 ),
-                output_block_from_file("stdout", stdout_path),
-                output_block_from_file("stderr", stderr_path),
-                output_block_from_str("Environment", filtered_env),
-                output_block_from_str("ulimit", log["ulimit"]),
+                output_block_from_file("stdout",
+                                       stdout_path,
+                                       log["cmd_id"],
+                                       expanded=True),
+                output_block_from_file("stderr",
+                                       stderr_path,
+                                       log["cmd_id"],
+                                       expanded=True),
+                output=self.html_file
+            )
+
+            html_str = (
+                '<div class="card" style="margin: 6pt 0 6pt">' +
+                '<div class="card-body">' +
+                '<h5 class="card-title" ' +
+                'role="button" ' +
+                f'data-target="#{cmd_id}-diagnostics" ' +
+                'data-toggle="collapse"' +
+                '>' +
+                'Diagnostics' +
+                '</h5>' +
+                f'<div class="collapse" id="{cmd_id}-diagnostics">'
+            )
+            append_html(html_str, output=self.html_file)
+            append_html(
+                output_block_from_str("Environment",
+                                      filtered_env,
+                                      log["cmd_id"]),
+                output_block_from_str("ulimit", log["ulimit"], log["cmd_id"]),
                 output=self.html_file
             )
             if trace_path.exists():
                 append_html(
-                    output_block_from_file("trace", trace_path),
+                    output_block_from_file("trace", trace_path, log["cmd_id"]),
                     output=self.html_file
                 )
 
@@ -600,7 +644,7 @@ class Logger:
                 append_html('<div style="clear: left; margin-bottom: 6pt" />',
                             output=self.html_file)
 
-            html_str = ' '*i + "</div></details>"
+            html_str = ' '*i + "</div></div></div></div></details>"
             with open(self.html_file, 'a') as html:
                 html.write('\n')
                 html.write(html_str)
