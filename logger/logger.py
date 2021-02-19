@@ -541,12 +541,12 @@ class Logger:
                         '<div class="card" style="width: 47.5%; margin: 6pt 1.25% 0; float: left;">'
                         '<h5 class="card-title">Memory Usage</h5>'
                         '<div class="wrapper">',
-                        '<canvas id="mem-usage-chart">',
+                        f'<canvas id="{cmd_id}-mem-usage-chart">',
                         '</canvas>',
                         '</div>',
                         '</div>',
                         '<script>\n',
-                        'var chart = new Chart("mem-usage-chart", {' + '\n',
+                        f'var chart = new Chart("{cmd_id}-mem-usage-chart", {{' + '\n',
                         '    type: "line",' + '\n',
                         '    data: {' + '\n',
                         '        labels: ',
@@ -574,12 +574,12 @@ class Logger:
                         '<div class="card" style="width: 47.5%; margin: 6pt 1.25% 0; float: left;">'
                         '<h5 class="card-title">CPU Usage</h5>'
                         '<div class="wrapper">',
-                        '<canvas id="cpu-usage-chart">',
+                        f'<canvas id="{cmd_id}-cpu-usage-chart">',
                         '</canvas>',
                         '</div>',
                         '</div>',
                         '<script>\n',
-                        'var chart = new Chart("cpu-usage-chart", {' + '\n',
+                        f'var chart = new Chart("{cmd_id}-cpu-usage-chart", {{' + '\n',
                         '    type: "line",' + '\n',
                         '    data: {' + '\n',
                         '        labels: ',
@@ -609,7 +609,7 @@ class Logger:
                     for disk, stats in sorted(log["stats"]["disk"].items()):
                         if disk[:4] != "/var" and disk[:5] != "/boot":
                             x_offset = min([x for x, _ in stats["data"]] + [0])
-                            html_id = "volume" + disk.replace("/", "_") + "-usage"
+                            html_id = cmd_id + '-' + "volume" + disk.replace("/", "_") + "-usage"
                             append_html(
                                 '<div class="card" style="width: 47.5%; margin: 6pt 1.25% 0; float: left;">'
                                 f'<h5 class="card-title">Used Space on {disk}</h5>'
