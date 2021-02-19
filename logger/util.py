@@ -47,6 +47,14 @@ def nested_SimpleNamespace_to_dict(object):
     else:
         return object
 
+def filter_junk_from_env(env, junk_list):
+    filtered_env = ""
+    for line in env.split('\n'):
+        is_junk = any([line[:len(junk)+1] == f"{junk}=" for junk in junk_list])
+        if not is_junk:
+            filtered_env += line + '\n'
+    return filtered_env
+
 def opening_html_text():
     return (
         "<!DOCTYPE html>" +
@@ -57,7 +65,7 @@ def opening_html_text():
 def closing_html_text():
     return "</html>"
 
-def append_html(*args, output=Path(os.devnull)):
+def append_html(*args, output=None):
     with open(output, "a") as file:
         for arg in args:
             if isinstance(arg, GeneratorType):
@@ -74,7 +82,7 @@ def inline_fixed_width(text):
 def simple_details_list(*args, title="Details", indent=0):
     yield (
         ' '*indent + 
-        '<div class="card" style="display: inline-block">' +
+        '<div class="card" style="display: inline-block; margin-top: 6pt;">' +
         '<div class="card-body">' +
         '<ul class="list-group">\n'
     )
@@ -102,7 +110,7 @@ def simple_detail_list_item(name, value, indent=0):
 def output_block_from_file(title, file, indent=0):
     yield (
         ' '*indent + 
-        '<div class="card">' +
+        '<div class="card" style="margin-top: 6pt;">' +
         '<div class="card-body">' +
         '<ul class="list-group">\n'
     )
@@ -121,7 +129,7 @@ def stat_chart(name, chart, indent=0):
 def output_block_from_str(title, value, indent=0):
     yield (
         ' '*indent + 
-        '<div class="card">' +
+        '<div class="card" style="margin-top: 6pt;">' +
         '<div class="card-body">' +
         '<ul class="list-group">\n'
     )
@@ -196,12 +204,6 @@ def html_encode(text):
 def html_header():
     return (
         "<head>" +
-        "<script>\n" +
-        importlib.resources.read_text(resources, "bootstrap.min.js") +
-        "\n</script>\n" +
-        "<script>\n" +
-        importlib.resources.read_text(resources, "Chart.bundle.min.js") +
-        "\n</script>\n" +
         "<style>\n" +
         importlib.resources.read_text(resources, "bootstrap.min.css") +
         "\n</style>\n" +
@@ -212,6 +214,15 @@ def html_header():
         "code { color: inherit; }\n" +
         "pre { white-space: pre-wrap; }\n" +
         "\n</style>\n" +
+        "<script>\n" +
+        importlib.resources.read_text(resources, "jquery.slim.min.js") +
+        "\n</script>\n" +
+        "<script>\n" +
+        importlib.resources.read_text(resources, "bootstrap.bundle.min.js") +
+        "\n</script>\n" +
+        "<script>\n" +
+        importlib.resources.read_text(resources, "Chart.bundle.min.js") +
+        "\n</script>\n" +
         "</head>"
     )
 

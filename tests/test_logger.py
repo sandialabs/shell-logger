@@ -215,6 +215,7 @@ def test_finalize_creates_HTML_with_correct_information(logger):
     assert 'class="card-title">Used Space on /' in html_text
     assert "Environment</" in html_text
     assert "PATH=" in html_text
+    assert "Hostname:" in html_text
     assert "User:" in html_text
     assert "Group:" in html_text
     assert "Shell:" in html_text
@@ -376,6 +377,7 @@ def test_auxiliaryData():
     assert result.pwd == result.stdout.strip()
     result = logger.run(":")
     assert "PATH=" in result.environment
+    assert logger.run("hostname").stdout.strip() == result.hostname
     assert logger.run("whoami").stdout.strip() == result.user
     if os.name == "posix":
         assert len(result.umask) == 3 or len(result.umask) == 4

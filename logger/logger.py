@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 from .classes import Shell, Trace, StatsCollector, Stat, trace_collector, stats_collectors
-from .util import make_svg_line_chart, nested_SimpleNamespace_to_dict, opening_html_text, closing_html_text, append_html, html_fixed_width_from_file, html_fixed_width_from_str, html_bold, html_list_item, html_details, simple_detail_list_item, output_block_from_file, output_block_from_str, stat_chart, simple_details_list, inline_fixed_width
+from .util import make_svg_line_chart, nested_SimpleNamespace_to_dict, filter_junk_from_env, opening_html_text, closing_html_text, append_html, html_fixed_width_from_file, html_fixed_width_from_str, html_bold, html_list_item, html_details, simple_detail_list_item, output_block_from_file, output_block_from_str, stat_chart, simple_details_list, inline_fixed_width
 from collections.abc import Iterable, Mapping
 import datetime
 import distutils.dir_util as dir_util
@@ -396,7 +396,7 @@ class Logger:
                             f">{log.name}</{heading}>\n" +
                     ' '*i + f"    <br>Duration: {log.duration}\n" +
                     ' '*i + "  </summary>" +
-                    ' '*i + '  <div style="padding: 0 2.5%;">'
+                    ' '*i + '  <div style="padding: 0 1.25%;">'
                 )
                 with open(self.html_file, 'a') as html:
                     html.write(html_str)
@@ -449,6 +449,16 @@ class Logger:
             stdout_path = self.strm_dir / f"{log['timestamp']}_{cmd_id}_stdout"
             stderr_path = self.strm_dir / f"{log['timestamp']}_{cmd_id}_stderr"
             trace_path = self.strm_dir / f"{log['timestamp']}_{cmd_id}_trace"
+            filtered_env = filter_junk_from_env(log["environment"],
+                                                [
+                                                    "LS_COLORS",
+                                                    "MANPATH",
+                                                    "XDG_SESSION_ID",
+                                                    "XDG_DATA_DIRS",
+                                                    "HISTSIZE",
+                                                    "KDEDIRS",
+                                                    "LESSOPEN",
+                                                ])
 
             append_html(
                 simple_details_list(
@@ -457,6 +467,7 @@ class Logger:
                                             inline_fixed_width(log["cmd"]),
                                             indent=4),
                     simple_detail_list_item("CWD", log["pwd"], indent=4),
+                    simple_detail_list_item("Hostname", log["hostname"], indent=4),
                     simple_detail_list_item("User", log["user"], indent=4),
                     simple_detail_list_item("Group", log["group"], indent=4),
                     simple_detail_list_item("Shell", log["shell"], indent=4),
@@ -467,7 +478,7 @@ class Logger:
                 ),
                 output_block_from_file("stdout", stdout_path),
                 output_block_from_file("stderr", stderr_path),
-                output_block_from_str("Environment", log["environment"]),
+                output_block_from_str("Environment", filtered_env),
                 output_block_from_str("ulimit", log["ulimit"]),
                 output=self.html_file
             )
@@ -483,7 +494,7 @@ class Logger:
                 if log["stats"]["memory"]:
                     x_offset = min([x for x, _ in log["stats"]["memory"]["data"]] + [0])
                     append_html(
-                        '<div class="card" style="width: 50%">'
+                        '<div class="card" style="width: 47.5%; margin: 6pt 1.25% 0; float: left;">'
                         '<h5 class="card-title">Memory Usage</h5>'
                         '<div class="wrapper">',
                         '<canvas id="mem-usage-chart">',
@@ -516,7 +527,7 @@ class Logger:
                 if log["stats"]["cpu"]:
                     x_offset = min([x for x, _ in log["stats"]["cpu"]["data"]] + [0])
                     append_html(
-                        '<div class="card" style="width: 50%">'
+                        '<div class="card" style="width: 47.5%; margin: 6pt 1.25% 0; float: left;">'
                         '<h5 class="card-title">CPU Usage</h5>'
                         '<div class="wrapper">',
                         '<canvas id="cpu-usage-chart">',
@@ -556,7 +567,7 @@ class Logger:
                             x_offset = min([x for x, _ in stats["data"]] + [0])
                             html_id = "volume" + disk.replace("/", "_") + "-usage"
                             append_html(
-                                '<div class="card" style="width: 50%">'
+                                '<div class="card" style="width: 47.5%; margin: 6pt 1.25% 0; float: left;">'
                                 f'<h5 class="card-title">Used Space on {disk}</h5>'
                                 '<div class="wrapper">',
                                 f'<canvas id="{html_id}">',
@@ -586,6 +597,8 @@ class Logger:
                                 '</script>' + '\n',
                                 output=self.html_file
                             )
+                append_html('<div style="clear: left; margin-bottom: 6pt" />',
+                            output=self.html_file)
 
             html_str = ' '*i + "</div></details>"
             with open(self.html_file, 'a') as html:
@@ -746,6 +759,7 @@ class Logger:
         pwd, _ = self.shell.auxiliary_command(posix="pwd", nt="cd", strip=True)
         environment, _ = self.shell.auxiliary_command(posix="env", nt="set")
         umask, _ = self.shell.auxiliary_command(posix="umask", strip=True)
+        hostname, _ = self.shell.auxiliary_command(posix="hostname", nt="hostname", strip=True)
         user, _ = self.shell.auxiliary_command(posix="whoami", nt="whoami", strip=True)
         group, _ = self.shell.auxiliary_command(posix="id -gn", strip=True)
         shell, _ = self.shell.auxiliary_command(posix="printenv SHELL", strip=True)
@@ -754,6 +768,7 @@ class Logger:
             pwd=pwd,
             environment=environment,
             umask=umask,
+            hostname=hostname,
             user=user,
             group=group,
             shell=shell,
