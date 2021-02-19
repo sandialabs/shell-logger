@@ -208,12 +208,11 @@ def test_finalize_creates_HTML_with_correct_information(logger):
     assert "trace</" in html_text
     assert "setlocale" in html_text
     assert "getenv" not in html_text
-    assert "<b>Memory Usage:</b>" in html_text
-    assert "<svg" in html_text
-    assert "</svg>" in html_text
-    assert "<b>CPU Usage:</b>" in html_text
-    assert "<b>Disk Usage:</b>" in html_text
-    assert "<b>Volume /:</b>" in html_text
+    assert 'class="card-title">Memory Usage' in html_text
+    assert "<canvas" in html_text
+    assert "</canvas>" in html_text
+    assert 'class="card-title">CPU Usage' in html_text
+    assert 'class="card-title">Used Space on /' in html_text
     assert "Environment</" in html_text
     assert "PATH=" in html_text
     assert "User:" in html_text

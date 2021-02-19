@@ -480,56 +480,114 @@ class Logger:
             # Append HTML text between end of trace and beginning of
             # Memory Usage.
             if log["stats"]:
-                append_html(
-                    ' '*i + "  <ul>\n",
-                    output=self.html_file
-                )
                 if log["stats"]["memory"]:
-                    memory_usage_graph = log["stats"]["memory"]["svg"]
+                    x_offset = min([x for x, _ in log["stats"]["memory"]["data"]] + [0])
                     append_html(
-                        stat_chart("Memory Usage",
-                                   memory_usage_graph,
-                                   indent=4),
+                        '<div class="card" style="width: 50%">'
+                        '<h5 class="card-title">Memory Usage</h5>'
+                        '<div class="wrapper">',
+                        '<canvas id="mem-usage-chart">',
+                        '</canvas>',
+                        '</div>',
+                        '</div>',
+                        '<script>\n',
+                        'var chart = new Chart("mem-usage-chart", {' + '\n',
+                        '    type: "line",' + '\n',
+                        '    data: {' + '\n',
+                        '        labels: ',
+                        str([datetime.datetime.fromtimestamp(x / 1000.0).strftime('%Y-%m-%d %H:%M:%S.%f') for x, _ in log["stats"]["memory"]["data"]]) + ",\n",
+                        '        datasets: [{' + '\n',
+                        '            label: "Memory Usage",' + '\n',
+                        '            showLine: true,' + '\n',
+                        '            lineTension: 0,' + '\n',
+                        '            data: ',
+                        str([y for _, y in log["stats"]["memory"]["data"]]) + '\n',
+                        '        }]' + '\n',
+                        '    },' + '\n',
+                        '    options: {' + '\n',
+                        '        legend: false,' + '\n',
+                        '        scales: ',
+                        '{yAxes:[{ticks:{beginAtZero:true,max:100,stepSize:100}}],xAxes:[{display:false}]}' + '\n',
+                        '    }' + '\n',
+                        '});' + '\n',
+                        '</script>' + '\n',
                         output=self.html_file
                     )
                 if log["stats"]["cpu"]:
-                    cpu_usage_graph = log["stats"]["cpu"]["svg"]
+                    x_offset = min([x for x, _ in log["stats"]["cpu"]["data"]] + [0])
                     append_html(
-                        stat_chart("CPU Usage",
-                                   cpu_usage_graph,
-                                   indent=4),
+                        '<div class="card" style="width: 50%">'
+                        '<h5 class="card-title">CPU Usage</h5>'
+                        '<div class="wrapper">',
+                        '<canvas id="cpu-usage-chart">',
+                        '</canvas>',
+                        '</div>',
+                        '</div>',
+                        '<script>\n',
+                        'var chart = new Chart("cpu-usage-chart", {' + '\n',
+                        '    type: "line",' + '\n',
+                        '    data: {' + '\n',
+                        '        labels: ',
+                        str([datetime.datetime.fromtimestamp(x / 1000.0).strftime('%Y-%m-%d %H:%M:%S.%f') for x, _ in log["stats"]["cpu"]["data"]]) + ",\n",
+                        '        datasets: [{' + '\n',
+                        '            label: "CPU Usage",' + '\n',
+                        '            showLine: true,' + '\n',
+                        '            lineTension: 0,' + '\n',
+                        '            data: ',
+                        str([y for _, y in log["stats"]["cpu"]["data"]]) + '\n',
+                        '        }]' + '\n',
+                        '    },' + '\n',
+                        '    options: {' + '\n',
+                        '        legend: false,' + '\n',
+                        '        scales: ',
+                        '{yAxes:[{ticks:{beginAtZero:true,max:100,stepSize:100}}],xAxes:[{display:false}]}' + '\n',
+                        '    }' + '\n',
+                        '});' + '\n',
+                        '</script>' + '\n',
                         output=self.html_file
                     )
                 if log["stats"]["disk"]:
-                    html_str = (
-                        ' '*i + "    <li>\n" +
-                        ' '*i + "      <b>Disk Usage:</b><br>\n" +
-                        ' '*i + '      <ul style="list-style-type:none;">\n'
-                    )
-                    with open(self.html_file, 'a') as html:
-                        html.write(html_str)
-
                     # Append the disk usage of this command to
                     # the HTML file
                     # Note: we sort because JSON deserialization may change
                     # the ordering of the map.
                     for disk, stats in sorted(log["stats"]["disk"].items()):
-                        disk_usage_graph = stats["svg"]
-                        append_html(
-                            stat_chart(f"Volume {disk}",
-                                       disk_usage_graph,
-                                       indent=8),
-                            output=self.html_file
-                        )
-                    with open(self.html_file, 'a') as html:
-                        html.write(' '*i + "      </li></ul>\n")
+                        if disk[:4] != "/var" and disk[:5] != "/boot":
+                            x_offset = min([x for x, _ in stats["data"]] + [0])
+                            html_id = "volume" + disk.replace("/", "_") + "-usage"
+                            append_html(
+                                '<div class="card" style="width: 50%">'
+                                f'<h5 class="card-title">Used Space on {disk}</h5>'
+                                '<div class="wrapper">',
+                                f'<canvas id="{html_id}">',
+                                '</canvas>',
+                                '</div>',
+                                '</div>',
+                                '<script>\n',
+                                f'var chart = new Chart("{html_id}", {{' + '\n',
+                                '    type: "line",' + '\n',
+                                '    data: {' + '\n',
+                                '        labels: ',
+                                str([datetime.datetime.fromtimestamp(x / 1000.0).strftime('%Y-%m-%d %H:%M:%S.%f') for x, _ in stats["data"]]) + ",\n",
+                                '        datasets: [{' + '\n',
+                                f'            label: "{disk} Usage",' + '\n',
+                                '            showLine: true,' + '\n',
+                                '            lineTension: 0,' + '\n',
+                                '            data: ',
+                                str([y for _, y in stats["data"]]) + '\n',
+                                '        }]' + '\n',
+                                '    },' + '\n',
+                                '    options: {' + '\n',
+                                '        legend: false,' + '\n',
+                                '        scales: ',
+                                '{yAxes:[{ticks:{beginAtZero:true,max:100,stepSize:100}}],xAxes:[{display:false}]}' + '\n',
+                                '    }' + '\n',
+                                '});' + '\n',
+                                '</script>' + '\n',
+                                output=self.html_file
+                            )
 
-            # Append concluding HTML for this command to the HTML file.
-            html_str = (
-                ' '*i + "    </li>\n" +
-                ' '*i + "  </ul>\n" +
-                ' '*i + "</div></details>"
-            )
+            html_str = ' '*i + "</div></details>"
             with open(self.html_file, 'a') as html:
                 html.write('\n')
                 html.write(html_str)
