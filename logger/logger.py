@@ -865,6 +865,8 @@ class DiskStatsCollector(StatsCollector):
         super().__init__(interval, manager)
         self.stats = manager.dict()
         self.mountpoints = [ p.mountpoint for p in psutil.disk_partitions() ]
+        if not '/tmp' in self.mountpoints:
+            self.mountpoints += ['/tmp']
         for m in self.mountpoints:
             self.stats[m] = manager.list()
     def collect(self):
