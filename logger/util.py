@@ -336,6 +336,9 @@ def html_header():
         "table.output code {\n" +
         "    vertical-align: top;\n" +
         "}\n" +
+        "table.output td {\n" +
+        "    width: 100%;\n" +
+        "}\n" +
         "table.output tr[line-number]::before {\n" +
         "    font-family: SFMono-Regular,Menlo,Monaco,Consolas," +
             '"Liberation Mono","Courier New",monospace;\n' +
