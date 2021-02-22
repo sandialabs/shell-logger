@@ -239,22 +239,24 @@ def html_fixed_width_from_file(input_file, title, cmd_id, indent=0):
         '<label ' +
             f'for="{cmd_id}-{title}-show-duplicates"> ' +
         'Show duplicates</label><br>\n' +
-        '<table class="display table" ' +
+        '<table class="output display table" ' +
             f'id="{cmd_id}-{title}-table" ' +
             'style="width: 100%;">\n' +
         '<tbody>\n'
     )
 
+    lineno = 0
     with open(input_file, 'r') as out:
         for line in out.readlines():
+            lineno += 1
             yield (
-                "<tr>" +
+                f'<tr line-number="{lineno}">' +
                 '<td style="padding: 0; border: 0;">' +
                 '<code style="white-space: pre;">' +
                 html_encode(line).rstrip() +
                 "</code>" +
                 "</td>" +
-                "</tr>"
+                "</tr>\n"
             )
 
     yield (
@@ -278,21 +280,23 @@ def html_fixed_width_from_str(input_str, title, cmd_id, indent=0):
         '<label ' +
             f'for="{cmd_id}-{title}-show-duplicates"> ' +
         'Show duplicates</label><br>\n' +
-        '<table class="display table" ' +
+        '<table class="output display table" ' +
             f'id="{cmd_id}-{title}-table" ' +
             'style="width: 100%;">\n' +
         '<tbody>\n'
     )
 
+    lineno = 0
     for line in input_str.split("\n"):
+        lineno += 1
         yield (
-            "<tr>" +
+            f'<tr line-number="{lineno}">' +
             '<td style="padding: 0; border: 0;">' +
             '<code style="white-space: pre;">' +
             html_encode(line).rstrip() +
             "</code>" +
             "</td>" +
-            "</tr>"
+            "</tr>\n"
         )
 
     yield (
@@ -320,6 +324,31 @@ def html_header():
         "<style>\n" +
         "code { color: inherit; }\n" +
         "pre { white-space: pre-wrap; }\n" +
+        "\n</style>\n" +
+        "<style>\n" +
+        "table.output tr {\n" +
+        "    line-height: 1;\n" +
+        "}\n" +
+        "table.output tr[line-number] {\n" +
+        "    text-align: left;\n" +
+        "    clear: left;\n" +
+        "}\n" +
+        "table.output code {\n" +
+        "    vertical-align: top;\n" +
+        "}\n" +
+        "table.output tr[line-number]::before {\n" +
+        "    font-family: SFMono-Regular,Menlo,Monaco,Consolas," +
+            '"Liberation Mono","Courier New",monospace;\n' +
+        "    font-size: 87.5%;\n"
+        "    opacity: 0.5;\n"
+        "    padding-bottom: 2px;\n"
+        "    white-space: pre;\n" +
+        '    content: attr(line-number) ". ";\n' +
+        "    display: inline-block;\n" +
+        "    float: right;\n" +
+        "    margin-left: auto;\n" +
+        "    text-align: right;\n" +
+        "}\n" +
         "\n</style>\n" +
         "<script>\n" +
         importlib.resources.read_text(resources, "jquery.slim.min.js") +
