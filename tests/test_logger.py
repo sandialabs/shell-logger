@@ -497,6 +497,14 @@ def test_traceAndStats():
     else:
         print(f"Warning: uname is not 'Linux': {os.uname()}; ltrace not tested.")
 
+@pytest.mark.skip(reason="Not sure it's worth it to fix this or not")
+def test_set_env_trace():
+    logger = Logger(stack()[0][3], Path.cwd())
+    result = logger.run("TEST_ENV=abdc env | grep TEST_ENV", trace="ltrace")
+    assert "TEST_ENV=abdc" in result.stdout
+    result = logger.run("TEST_ENV=abdc env | grep TEST_ENV", trace="strace")
+    assert "TEST_ENV=abdc" in result.stdout
+
 def test_svg():
     logger = Logger(stack()[0][3], Path.cwd())
     result = logger.run("sleep 1", measure=["cpu"], interval=0.1)

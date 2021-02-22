@@ -147,7 +147,7 @@ def output_block_from_file(title, file, cmd_id, indent=0, expanded=False):
         yield f'<div class="collapse show" id={element_id}>'
     else:
         yield f'<div class="collapse" id={element_id}>'
-    for element in html_fixed_width_from_file(file):
+    for element in html_fixed_width_from_file(file, title, cmd_id):
         yield element
     yield f'</div>'
     yield ' '*indent + f"</ul></div></div>\n"
@@ -180,7 +180,7 @@ def output_block_from_str(title, string, cmd_id, indent=0, expanded=False):
         yield f'<div class="collapse show" id={element_id}>'
     else:
         yield f'<div class="collapse" id={element_id}>'
-    for element in html_fixed_width_from_str(string):
+    for element in html_fixed_width_from_str(string, title, cmd_id):
         yield element
     yield f'</div>'
     yield ' '*indent + f"</ul></div></div>\n"
@@ -224,22 +224,82 @@ def html_bold(text, indent=0, add_br=True):
     else:
         return ' '*indent + f"<b>{text}</b> "
 
-def html_fixed_width_from_file(input_file, indent=0):
-    yield "<pre><code>\n"
+def html_fixed_width_from_file(input_file, title, cmd_id, indent=0):
+    yield (
+        "<div>\n" +
+        '<input type="text" ' +
+            f'id="{cmd_id}-{title}-search" ' +
+            'onkeyup="outputSearch(this)" ' +
+            f'target="{cmd_id}-{title}-table" ' +
+            'placeholder="Regex Search...">\n' +
+        '<input type="checkbox" ' +
+            f'id="{cmd_id}-{title}-checkbox" ' +
+            'onclick="outputSearch(this)" ' +
+            f'name="{cmd_id}-{title}-show-duplicates">\n' +
+        '<label ' +
+            f'for="{cmd_id}-{title}-show-duplicates"> ' +
+        'Show duplicates</label><br>\n' +
+        '<table class="display table" ' +
+            f'id="{cmd_id}-{title}-table" ' +
+            'style="width: 100%;">\n' +
+        '<tbody>\n'
+    )
 
     with open(input_file, 'r') as out:
         for line in out.readlines():
-            yield html_encode(line)
+            yield (
+                "<tr>" +
+                '<td style="padding: 0; border: 0;">' +
+                '<code style="white-space: pre;">' +
+                html_encode(line).rstrip() +
+                "</code>" +
+                "</td>" +
+                "</tr>"
+            )
 
-    yield "</code></pre>\n"
+    yield (
+        "</tbody>\n" +
+        "</table>\n" +
+        "</div>\n"
+    )
 
-def html_fixed_width_from_str(input_str, indent=0):
-    yield "<pre><code>\n"
+def html_fixed_width_from_str(input_str, title, cmd_id, indent=0):
+    yield (
+        "<div>\n" +
+        '<input type="text" ' +
+            f'id="{cmd_id}-{title}-search" ' +
+            'onkeyup="outputSearch(this)" ' +
+            f'target="{cmd_id}-{title}-table" ' +
+            'placeholder="Regex Search...">\n' +
+        '<input type="checkbox" ' +
+            f'id="{cmd_id}-{title}-checkbox" ' +
+            'onclick="outputSearch(this)" ' +
+            f'name="{cmd_id}-{title}-show-duplicates">\n' +
+        '<label ' +
+            f'for="{cmd_id}-{title}-show-duplicates"> ' +
+        'Show duplicates</label><br>\n' +
+        '<table class="display table" ' +
+            f'id="{cmd_id}-{title}-table" ' +
+            'style="width: 100%;">\n' +
+        '<tbody>\n'
+    )
 
     for line in input_str.split("\n"):
-        yield html_encode(line) + '\n'
+        yield (
+            "<tr>" +
+            '<td style="padding: 0; border: 0;">' +
+            '<code style="white-space: pre;">' +
+            html_encode(line).rstrip() +
+            "</code>" +
+            "</td>" +
+            "</tr>"
+        )
 
-    yield "</code></pre>\n"
+    yield (
+        "</tbody>\n" +
+        "</table>\n" +
+        "</div>\n"
+    )
 
 def html_encode(text):
     text = text.replace('&', "&amp;")
@@ -269,6 +329,9 @@ def html_header():
         "\n</script>\n" +
         "<script>\n" +
         importlib.resources.read_text(resources, "Chart.bundle.min.js") +
+        "\n</script>\n" +
+        "<script>\n" +
+        importlib.resources.read_text(resources, "search_output.js") +
         "\n</script>\n" +
         "</head>"
     )
