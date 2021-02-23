@@ -28,6 +28,7 @@ function outputSearch(caller)
         if (td)
         {
             txtValue = td.textContent || td.innerText;
+            txtValue = txtValue.replaceAll("\u2060", "")
             if (!filter ||
                 (txtValue.match(filter) && (!(txtValue === lastTxtValue) ||
                                             showDuplicates)))

@@ -328,6 +328,8 @@ def html_header():
         "<style>\n" +
         "table.output tr {\n" +
         "    line-height: 1;\n" +
+        "    table-layout: fixed;\n" +
+        "    width: auto;\n" +
         "}\n" +
         "table.output tr[line-number] {\n" +
         "    text-align: left;\n" +
