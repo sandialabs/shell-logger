@@ -14,7 +14,7 @@ function outputSearch(caller)
             input = caller.parentNode.childNodes[i];
         }
     }
-    filter = input.value;
+    filter = input.value.toUpperCase();
     table = document.getElementById(input.getAttribute("target"));
     tr = table.getElementsByTagName("tr");
     showDuplicates = checkbox.checked;
@@ -28,7 +28,7 @@ function outputSearch(caller)
         if (td)
         {
             txtValue = td.textContent || td.innerText;
-            txtValue = txtValue.replaceAll("\u2060", "")
+            txtValue = txtValue.replaceAll("\u2060", "").toUpperCase();
             if (!filter ||
                 (txtValue.match(filter) && (!(txtValue === lastTxtValue) ||
                                             showDuplicates)))
