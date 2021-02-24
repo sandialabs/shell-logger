@@ -534,8 +534,8 @@ class Logger:
 
             # Append HTML text between end of trace and beginning of
             # Memory Usage.
-            if log["stats"]:
-                if log["stats"]["memory"]:
+            if log.get("stats"):
+                if log["stats"].get("memory"):
                     x_offset = min([x for x, _ in log["stats"]["memory"]["data"]] + [0])
                     append_html(
                         '<div class="card" style="width: 47.5%; margin: 6pt 1.25% 0; float: left;">'
@@ -570,7 +570,7 @@ class Logger:
                         '</script>' + '\n',
                         output=self.html_file
                     )
-                if log["stats"]["cpu"]:
+                if log["stats"].get("cpu"):
                     x_offset = min([x for x, _ in log["stats"]["cpu"]["data"]] + [0])
                     append_html(
                         '<div class="card" style="width: 47.5%; margin: 6pt 1.25% 0; float: left;">'
@@ -605,7 +605,7 @@ class Logger:
                         '</script>' + '\n',
                         output=self.html_file
                     )
-                if log["stats"]["disk"]:
+                if log["stats"].get("disk"):
                     # Append the disk usage of this command to
                     # the HTML file
                     # Note: we sort because JSON deserialization may change
