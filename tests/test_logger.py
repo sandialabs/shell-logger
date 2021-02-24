@@ -497,6 +497,23 @@ def test_traceAndStats():
     else:
         print(f"Warning: uname is not 'Linux': {os.uname()}; ltrace not tested.")
 
+def test_traceAndStat():
+    logger = Logger(stack()[0][3], Path.cwd())
+    if os.uname().sysname == "Linux":
+        result = logger.run("sleep 1",
+                            measure=["cpu"],
+                            interval=0.1,
+                            trace="ltrace",
+                            expression="setlocale",
+                            summary=True)
+        assert "setlocale" in result.trace
+        assert "sleep" not in result.trace
+        assert result.stats.get("memory") is None
+        assert result.stats.get("disk") is None
+        assert result.stats.get("cpu") is not None
+    else:
+        print(f"Warning: uname is not 'Linux': {os.uname()}; ltrace not tested.")
+
 @pytest.mark.skip(reason="Not sure it's worth it to fix this or not")
 def test_set_env_trace():
     logger = Logger(stack()[0][3], Path.cwd())
