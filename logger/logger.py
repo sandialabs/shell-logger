@@ -776,8 +776,6 @@ class Logger:
 
     def run(self, command, **kwargs):
         completed_process, trace_output = None, None
-        collectors = stats_collectors(**kwargs)
-        stats = {} if len(collectors) > 0 else None
         for key in ["stdout_str", "stderr_str", "trace_str"]:
             if key not in kwargs:
                 kwargs[key] = True
@@ -785,8 +783,24 @@ class Logger:
         if kwargs.get("pwd"):
             self.shell.cd(kwargs.get("pwd"))
         aux_info = self.auxiliary_information()
+        # Stats collectors use a multiprocessing manager which creates
+        # unix domain sockets with names determined by tempfile.mktemp
+        # which looks at TMPDIR. If TMPDIR is too long, it may result
+        # in the multiprocessing manager trying to use a too long for
+        # UNIX domain sockets, resulting in OSError: AF_UNIX path too
+        # long. The typical maximum path length on Linux is 108. See:
+        # grep '#define UNIX_PATH_MAX' /usr/include/linux/un.h
+        old_tmpdir = os.environ.get("TMPDIR")
+        os.environ["TMPDIR"] = "/tmp"
+        collectors = stats_collectors(**kwargs)
+        stats = {} if len(collectors) > 0 else None
         for collector in collectors:
             collector.start()
+        if old_tmpdir is not None:
+            os.environ["TMPDIR"] = old_tmpdir
+        else:
+            os.unsetenv("TMPDIR")
+            del os.environ["TMPDIR"]
         if "trace" in kwargs:
             trace = trace_collector(**kwargs)
             command = trace.command(command, **kwargs)
