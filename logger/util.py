@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 from . import resources
 from collections.abc import Iterable, Mapping
-import importlib.resources
+import pkgutil
 from io import StringIO
 import itertools
 import numpy as np
@@ -316,10 +316,10 @@ def html_header():
     return (
         "<head>" +
         "<style>\n" +
-        importlib.resources.read_text(resources, "bootstrap.min.css") +
+        pkgutil.get_data(__name__, "resources/bootstrap.min.css").decode() +
         "\n</style>\n" +
         "<style>\n" +
-        importlib.resources.read_text(resources, "Chart.min.css") +
+        pkgutil.get_data(__name__, "resources/Chart.min.css").decode() +
         "\n</style>\n" +
         "<style>\n" +
         "code { color: inherit; }\n" +
@@ -356,16 +356,17 @@ def html_header():
         "}\n" +
         "\n</style>\n" +
         "<script>\n" +
-        importlib.resources.read_text(resources, "jquery.slim.min.js") +
+        pkgutil.get_data(__name__, "resources/jquery.slim.min.js").decode() +
         "\n</script>\n" +
         "<script>\n" +
-        importlib.resources.read_text(resources, "bootstrap.bundle.min.js") +
+        pkgutil.get_data(__name__,
+                         "resources/bootstrap.bundle.min.js").decode() +
         "\n</script>\n" +
         "<script>\n" +
-        importlib.resources.read_text(resources, "Chart.bundle.min.js") +
+        pkgutil.get_data(__name__, "resources/Chart.bundle.min.js").decode() +
         "\n</script>\n" +
         "<script>\n" +
-        importlib.resources.read_text(resources, "search_output.js") +
+        pkgutil.get_data(__name__, "resources/search_output.js").decode() +
         "\n</script>\n" +
         "</head>"
     )
