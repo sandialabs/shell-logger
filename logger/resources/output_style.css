@@ -1,3 +1,6 @@
+table.output {
+    width: 100%;
+}
 table.output tr {
     line-height: 1;
     table-layout: fixed;
@@ -6,6 +9,13 @@ table.output tr {
 table.output tr[line-number] {
     text-align: left;
     clear: left;
+}
+table.output tr[line-number] td {
+    padding: 0;
+    border: 0;
+}
+table.output tr[line-number] td code {
+    white-space: pre;
 }
 table.output code {
     vertical-align: top;

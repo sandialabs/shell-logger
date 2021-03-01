@@ -225,85 +225,39 @@ def html_bold(text, indent=0, add_br=True):
         return ' '*indent + f"<b>{text}</b> "
 
 def html_fixed_width_from_file(input_file, title, cmd_id, indent=0):
-    yield (
-        "<div>\n" +
-        '<input type="text" ' +
-            f'id="{cmd_id}-{title}-search" ' +
-            'onkeyup="outputSearch(this)" ' +
-            f'target="{cmd_id}-{title}-table" ' +
-            'placeholder="Regex Search...">\n' +
-        '<input type="checkbox" ' +
-            f'id="{cmd_id}-{title}-checkbox" ' +
-            'onclick="outputSearch(this)" ' +
-            f'name="{cmd_id}-{title}-show-duplicates">\n' +
-        '<label ' +
-            f'for="{cmd_id}-{title}-show-duplicates"> ' +
-        'Show duplicates</label><br>\n' +
-        '<table class="output display table" ' +
-            f'id="{cmd_id}-{title}-table" ' +
-            'style="width: 100%;">\n' +
-        '<tbody>\n'
-    )
-
-    lineno = 0
-    with open(input_file, 'r') as out:
-        for line in out.readlines():
-            lineno += 1
-            yield (
-                f'<tr line-number="{lineno}">' +
-                '<td style="padding: 0; border: 0;">' +
-                '<code style="white-space: pre;">' +
-                html_encode(line).rstrip() +
-                "</code>" +
-                "</td>" +
-                "</tr>\n"
-            )
-
-    yield (
-        "</tbody>\n" +
-        "</table>\n" +
-        "</div>\n"
-    )
+    with open(input_file) as f:
+        for string in output_block_html(f, title, cmd_id):
+            yield string
 
 def html_fixed_width_from_str(input_str, title, cmd_id, indent=0):
-    yield (
-        "<div>\n" +
-        '<input type="text" ' +
-            f'id="{cmd_id}-{title}-search" ' +
-            'onkeyup="outputSearch(this)" ' +
-            f'target="{cmd_id}-{title}-table" ' +
-            'placeholder="Regex Search...">\n' +
-        '<input type="checkbox" ' +
-            f'id="{cmd_id}-{title}-checkbox" ' +
-            'onclick="outputSearch(this)" ' +
-            f'name="{cmd_id}-{title}-show-duplicates">\n' +
-        '<label ' +
-            f'for="{cmd_id}-{title}-show-duplicates"> ' +
-        'Show duplicates</label><br>\n' +
-        '<table class="output display table" ' +
-            f'id="{cmd_id}-{title}-table" ' +
-            'style="width: 100%;">\n' +
-        '<tbody>\n'
-    )
+    for string in output_block_html(input_str, title, cmd_id):
+        yield string
 
+output_block_template_file = "resources/templates/output_block.html"
+output_block_template = pkgutil.get_data(__name__,
+                                         output_block_template_file).decode()
+def output_block_html(lines, title, cmd_id):
+    split_marker = bytes([4]).decode()
+    indent = ' '*12
+    if isinstance(lines, str):
+        lines = lines.split('\n')
+    placeholder = output_block_template.format(title=title,
+                                               cmd_id=cmd_id,
+                                               table_contents=split_marker)
+    header, footer = placeholder.split(split_marker + '\n')
+    yield header
     lineno = 0
-    for line in input_str.split("\n"):
+    for line in lines:
         lineno += 1
-        yield (
-            f'<tr line-number="{lineno}">' +
-            '<td style="padding: 0; border: 0;">' +
-            '<code style="white-space: pre;">' +
-            html_encode(line).rstrip() +
-            "</code>" +
-            "</td>" +
-            "</tr>\n"
-        )
+        yield textwrap.indent(output_line_html(line, lineno), indent)
+    yield footer
 
-    yield (
-        "</tbody>\n" +
-        "</table>\n" +
-        "</div>\n"
-    )
+output_line_template_file = "resources/templates/output_line.html"
+output_line_template = pkgutil.get_data(__name__,
+                                        output_line_template_file).decode()
+def output_line_html(line, lineno):
+    encoded_line = html_encode(line).rstrip()
+    return output_line_template.format(line=encoded_line, lineno=lineno)
 
 def html_encode(text):
     text = text.replace('&', "&amp;")
