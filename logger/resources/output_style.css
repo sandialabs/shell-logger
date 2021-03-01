@@ -1,0 +1,28 @@
+table.output tr {
+    line-height: 1;
+    table-layout: fixed;
+    width: auto;
+}
+table.output tr[line-number] {
+    text-align: left;
+    clear: left;
+}
+table.output code {
+    vertical-align: top;
+}
+table.output td {
+    width: 100%;
+}
+table.output tr[line-number]::before {
+    font-family: SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace;
+    font-size: 87.5%;
+    opacity: 0.5;
+    padding-bottom: 2px;
+    white-space: pre;
+    content: attr(line-number) ". ";
+    display: inline-block;
+    float: right;
+    margin-left: auto;
+    text-align: right;
+}
+

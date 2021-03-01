@@ -322,38 +322,10 @@ def html_header():
         pkgutil.get_data(__name__, "resources/Chart.min.css").decode() +
         "\n</style>\n" +
         "<style>\n" +
-        "code { color: inherit; }\n" +
-        "pre { white-space: pre-wrap; }\n" +
+        pkgutil.get_data(__name__, "resources/code_block_style.css").decode() +
         "\n</style>\n" +
         "<style>\n" +
-        "table.output tr {\n" +
-        "    line-height: 1;\n" +
-        "    table-layout: fixed;\n" +
-        "    width: auto;\n" +
-        "}\n" +
-        "table.output tr[line-number] {\n" +
-        "    text-align: left;\n" +
-        "    clear: left;\n" +
-        "}\n" +
-        "table.output code {\n" +
-        "    vertical-align: top;\n" +
-        "}\n" +
-        "table.output td {\n" +
-        "    width: 100%;\n" +
-        "}\n" +
-        "table.output tr[line-number]::before {\n" +
-        "    font-family: SFMono-Regular,Menlo,Monaco,Consolas," +
-            '"Liberation Mono","Courier New",monospace;\n' +
-        "    font-size: 87.5%;\n"
-        "    opacity: 0.5;\n"
-        "    padding-bottom: 2px;\n"
-        "    white-space: pre;\n" +
-        '    content: attr(line-number) ". ";\n' +
-        "    display: inline-block;\n" +
-        "    float: right;\n" +
-        "    margin-left: auto;\n" +
-        "    text-align: right;\n" +
-        "}\n" +
+        pkgutil.get_data(__name__, "resources/output_style.css").decode() +
         "\n</style>\n" +
         "<script>\n" +
         pkgutil.get_data(__name__, "resources/jquery.slim.min.js").decode() +
