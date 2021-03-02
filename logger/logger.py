@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 from .classes import Shell, Trace, StatsCollector, Stat, trace_collector, stats_collectors
-from .util import make_svg_line_chart, nested_SimpleNamespace_to_dict, filter_junk_from_env, opening_html_text, closing_html_text, append_html, html_fixed_width_from_file, html_fixed_width_from_str, html_bold, html_list_item, html_details, simple_detail_list_item, simple_detail_collapsed_list_item, output_block_from_file, output_block_from_str, stat_chart, simple_details_list, inline_fixed_width
+from .util import make_svg_line_chart, nested_SimpleNamespace_to_dict, filter_junk_from_env, miliseconds_to_human_time, opening_html_text, closing_html_text, append_html, html_fixed_width_from_file, html_fixed_width_from_str, html_bold, html_list_item, html_details, simple_detail_list_item, simple_detail_collapsed_list_item, output_block_from_file, output_block_from_str, stat_chart_html, simple_details_list, inline_fixed_width
 from collections.abc import Iterable, Mapping
 import datetime
 import distutils.dir_util as dir_util
@@ -536,73 +536,23 @@ class Logger:
             # Memory Usage.
             if log.get("stats"):
                 if log["stats"].get("memory"):
-                    x_offset = min([x for x, _ in log["stats"]["memory"]["data"]] + [0])
+                    data = log["stats"]["memory"]["data"]
+                    labels = [miliseconds_to_human_time(x) for x, _ in data]
+                    values = [y for _, y in data]
+                    id = f"{cmd_id}-mem-usage-chart"
+                    title = "Memory Usage"
                     append_html(
-                        '<div class="card" style="width: 47.5%; margin: 6pt 1.25% 0; float: left;">'
-                        '<h5 class="card-title">Memory Usage</h5>'
-                        '<div class="wrapper">',
-                        f'<canvas id="{cmd_id}-mem-usage-chart">',
-                        '</canvas>',
-                        '</div>',
-                        '</div>',
-                        '<script>\n',
-                        f'var chart = new Chart("{cmd_id}-mem-usage-chart", {{' + '\n',
-                        '    type: "line",' + '\n',
-                        '    data: {' + '\n',
-                        '        labels: ',
-                        str([datetime.datetime.fromtimestamp(x / 1000.0).strftime('%Y-%m-%d %H:%M:%S.%f') for x, _ in log["stats"]["memory"]["data"]]) + ",\n",
-                        '        datasets: [{' + '\n',
-                        '            label: "Memory Usage",' + '\n',
-                        '            showLine: true,' + '\n',
-                        '            lineTension: 0,' + '\n',
-                        '            pointRadius: 0,' + '\n',
-                        '            data: ',
-                        str([y for _, y in log["stats"]["memory"]["data"]]) + '\n',
-                        '        }]' + '\n',
-                        '    },' + '\n',
-                        '    options: {' + '\n',
-                        '        legend: false,' + '\n',
-                        '        tooltips: { enabled: false },' + '\n',
-                        '        scales: ',
-                        '{yAxes:[{ticks:{beginAtZero:true,max:100,stepSize:100}}],xAxes:[{display:false}]}' + '\n',
-                        '    }' + '\n',
-                        '});' + '\n',
-                        '</script>' + '\n',
+                        stat_chart_html(labels, values, title, id),
                         output=self.html_file
                     )
                 if log["stats"].get("cpu"):
-                    x_offset = min([x for x, _ in log["stats"]["cpu"]["data"]] + [0])
+                    data = log["stats"]["cpu"]["data"]
+                    labels = [miliseconds_to_human_time(x) for x, _ in data]
+                    values = [y for _, y in data]
+                    id = f"{cmd_id}-cpu-usage-chart"
+                    title = "CPU Usage"
                     append_html(
-                        '<div class="card" style="width: 47.5%; margin: 6pt 1.25% 0; float: left;">'
-                        '<h5 class="card-title">CPU Usage</h5>'
-                        '<div class="wrapper">',
-                        f'<canvas id="{cmd_id}-cpu-usage-chart">',
-                        '</canvas>',
-                        '</div>',
-                        '</div>',
-                        '<script>\n',
-                        f'var chart = new Chart("{cmd_id}-cpu-usage-chart", {{' + '\n',
-                        '    type: "line",' + '\n',
-                        '    data: {' + '\n',
-                        '        labels: ',
-                        str([datetime.datetime.fromtimestamp(x / 1000.0).strftime('%Y-%m-%d %H:%M:%S.%f') for x, _ in log["stats"]["cpu"]["data"]]) + ",\n",
-                        '        datasets: [{' + '\n',
-                        '            label: "CPU Usage",' + '\n',
-                        '            showLine: true,' + '\n',
-                        '            lineTension: 0,' + '\n',
-                        '            pointRadius: 0,' + '\n',
-                        '            data: ',
-                        str([y for _, y in log["stats"]["cpu"]["data"]]) + '\n',
-                        '        }]' + '\n',
-                        '    },' + '\n',
-                        '    options: {' + '\n',
-                        '        legend: false,' + '\n',
-                        '        tooltips: { enabled: false },' + '\n',
-                        '        scales: ',
-                        '{yAxes:[{ticks:{beginAtZero:true,max:100,stepSize:100}}],xAxes:[{display:false}]}' + '\n',
-                        '    }' + '\n',
-                        '});' + '\n',
-                        '</script>' + '\n',
+                        stat_chart_html(labels, values, title, id),
                         output=self.html_file
                     )
                 if log["stats"].get("disk"):
@@ -612,39 +562,20 @@ class Logger:
                     # the ordering of the map.
                     for disk, stats in sorted(log["stats"]["disk"].items()):
                         if disk[:4] != "/var" and disk[:5] != "/boot":
-                            x_offset = min([x for x, _ in stats["data"]] + [0])
-                            html_id = cmd_id + '-' + "volume" + disk.replace("/", "_") + "-usage"
+                            data = stats["data"]
+                            labels = [miliseconds_to_human_time(x)
+                                      for x, _ in data]
+                            values = [y for _, y in data]
+                            id = (
+                                cmd_id +
+                                '-' +
+                                "volume" +
+                                disk.replace("/", "_") +
+                                "-usage"
+                            )
+                            title = f"Used Space on {disk}"
                             append_html(
-                                '<div class="card" style="width: 47.5%; margin: 6pt 1.25% 0; float: left;">'
-                                f'<h5 class="card-title">Used Space on {disk}</h5>'
-                                '<div class="wrapper">',
-                                f'<canvas id="{html_id}">',
-                                '</canvas>',
-                                '</div>',
-                                '</div>',
-                                '<script>\n',
-                                f'var chart = new Chart("{html_id}", {{' + '\n',
-                                '    type: "line",' + '\n',
-                                '    data: {' + '\n',
-                                '        labels: ',
-                                str([datetime.datetime.fromtimestamp(x / 1000.0).strftime('%Y-%m-%d %H:%M:%S.%f') for x, _ in stats["data"]]) + ",\n",
-                                '        datasets: [{' + '\n',
-                                f'            label: "{disk} Usage",' + '\n',
-                                '            showLine: true,' + '\n',
-                                '            lineTension: 0,' + '\n',
-                                '            pointRadius: 0,' + '\n',
-                                '            data: ',
-                                str([y for _, y in stats["data"]]) + '\n',
-                                '        }]' + '\n',
-                                '    },' + '\n',
-                                '    options: {' + '\n',
-                                '        legend: false,' + '\n',
-                                '        tooltips: { enabled: false },' + '\n',
-                                '        scales: ',
-                                '{yAxes:[{ticks:{beginAtZero:true,max:100,stepSize:100}}],xAxes:[{display:false}]}' + '\n',
-                                '    }' + '\n',
-                                '});' + '\n',
-                                '</script>' + '\n',
+                                stat_chart_html(labels, values, title, id),
                                 output=self.html_file
                             )
                 append_html('<div style="clear: left; margin-bottom: 6pt" />',

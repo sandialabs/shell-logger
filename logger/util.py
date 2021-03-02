@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 from . import resources
 from collections.abc import Iterable, Mapping
+import datetime
 import pkgutil
 from io import StringIO
 import itertools
@@ -54,6 +55,12 @@ def filter_junk_from_env(env, junk_list):
         if not is_junk:
             filtered_env += line + '\n'
     return filtered_env
+
+def miliseconds_to_datetime(miliseconds):
+    return datetime.datetime.fromtimestamp(miliseconds / 1000.0)
+
+def miliseconds_to_human_time(miliseconds):
+    return miliseconds_to_datetime(miliseconds).strftime('%Y-%m-%d %H:%M:%S.%f')
 
 def opening_html_text():
     return (
@@ -152,12 +159,14 @@ def output_block_from_file(title, file, cmd_id, indent=0, expanded=False):
     yield f'</div>'
     yield ' '*indent + f"</ul></div></div>\n"
 
-def stat_chart(name, chart, indent=0):
-    return html_list_item(
-        html_bold(f"{name}:", indent=indent),
-        textwrap.indent(chart, ' '*(indent+2)),
-        indent=indent
-    )
+stat_chart_template_file = "resources/templates/stat_chart.html"
+stat_chart_template = pkgutil.get_data(__name__,
+                                       stat_chart_template_file).decode()
+def stat_chart_html(labels, data, title, id):
+    yield stat_chart_template.format(labels=labels,
+                                     data=data,
+                                     title=title,
+                                     id=id)
 
 def output_block_from_str(title, string, cmd_id, indent=0, expanded=False):
     yield (
@@ -280,6 +289,9 @@ def html_header():
         "\n</style>\n" +
         "<style>\n" +
         pkgutil.get_data(__name__, "resources/output_style.css").decode() +
+        "\n</style>\n" +
+        "<style>\n" +
+        pkgutil.get_data(__name__, "resources/stat_chart_style.css").decode() +
         "\n</style>\n" +
         "<script>\n" +
         pkgutil.get_data(__name__, "resources/jquery.slim.min.js").decode() +
