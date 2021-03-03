@@ -208,11 +208,13 @@ def command_card(log, strm_dir):
                 data = log["stats"][stat]["data"]
                 diagnostics.append(timeseries_plot(cmd_id, data, stat_title))
         if log["stats"].get("disk"):
-            # Append the disk usage of this command to
-            # the HTML file
-            # Note: we sort because JSON deserialization may change
+            uninteresting_disks = ["/var", "/var/log", "/var/log/audit",
+                                   "/boot", "/boot/efi"]
+            disk_stats = { x:y for x, y in log["stats"]["disk"].items()
+                           if x not in uninteresting_disks }
+            # We sort because JSON deserialization may change
             # the ordering of the map.
-            for disk, stats in sorted(log["stats"]["disk"].items()):
+            for disk, stats in sorted(disk_stats.items()):
                 data = stats["data"]
                 diagnostics.append(disk_timeseries_plot(cmd_id, data, disk))
     info.append(diagnostics_card(cmd_id, *diagnostics))
