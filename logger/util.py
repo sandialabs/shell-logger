@@ -86,174 +86,98 @@ def append_html(*args, output=None):
 def inline_fixed_width(text):
     return f"<code>{html_encode(text)}</code>"
 
-def simple_details_list(*args, title="Details", indent=0, cmd_id=None):
-    yield (
-        ' '*indent + 
-        '<div class="card" style="display: inline-block; margin-top: 6pt;">' +
-        '<div class="card-body">' +
-        '<ul class="list-group">\n'
-    )
-    if cmd_id:
-        yield (
-            '<h5 class="card-title" ' +
-            'role="button" ' +
-            f'data-target=".{cmd_id}-collapsible" ' +
-            'data-toggle="collapse"' +
-            '>' +
-            f'{title}' +
-            '</h5>'
-        )
-    else:
-        yield f'<h5 class="card-title">{title}</h5>'
+def command_card(message, duration, *args):
+    indent = ' '*8
+    header, footer = split_template(command_template,
+                                    "more_info",
+                                    message=message,
+                                    duration=duration)
+    yield header
     for arg in args:
-        if isinstance(arg, GeneratorType):
-            for element in arg:
-                yield element
         if isinstance(arg, str):
-            yield arg
-        if isinstance(arg, bytes):
-            yield arg.decode()
-    yield ' '*indent + f"</ul></div></div>\n"
+            yield textwrap.indent(arg, indent)
+        elif isinstance(arg, Iterable):
+            for _arg in arg:
+                yield textwrap.indent(_arg, indent)
+    yield footer
 
-def simple_detail_collapsed_list_item(name, value, cmd_id, indent=0):
-    return html_list_item(
-        html_bold(f"{name}:", add_br=False),
-        str(value),
-        indent=indent,
-        add_br=False,
-        element_class=f"list-group-item collapse {cmd_id}-collapsible"
-    )
+def message_card(text):
+    indent = ' '*8
+    header, footer = split_template(message_template, "message")
+    yield header
+    yield textwrap.indent(text.replace('\n', "<br>\n"), indent) + '\n'
+    yield footer
 
-def simple_detail_list_item(name, value, indent=0):
-    return html_list_item(
-        html_bold(f"{name}:", add_br=False),
-        str(value),
-        indent=indent,
-        add_br=False,
-        element_class="list-group-item"
-    )
+def command_detail_list(cmd_id, *args):
+    indent = ' '*16
+    header, footer = split_template(command_detail_list_template,
+                                    "details",
+                                    cmd_id=cmd_id)
+    yield header
+    for arg in args:
+        if isinstance(arg, str):
+            yield textwrap.indent(arg, indent)
+    yield footer
 
-def output_block_from_file(title, file, cmd_id, indent=0, expanded=False):
-    yield (
-        ' '*indent + 
-        '<div class="card" style="margin-top: 6pt;">' +
-        '<div class="card-body">' +
-        '<ul class="list-group">\n'
-    )
-    element_id = cmd_id + '-' + title.replace(' ', '_')
-    yield (
-        '<h5 class="card-title" ' +
-        'role="button" ' +
-        f'data-target="#{element_id}" ' +
-        'data-toggle="collapse"' +
-        '>' +
-        f'{title}' +
-        '</h5>'
-    )
-    if expanded:
-        yield f'<div class="collapse show" id={element_id}>'
+def command_detail(cmd_id, name, value, hidden=False):
+    if hidden:
+        return hidden_command_detail_template.format(cmd_id=cmd_id,
+                                                     name=name,
+                                                     value=value)
     else:
-        yield f'<div class="collapse" id={element_id}>'
-    for element in html_fixed_width_from_file(file, title, cmd_id):
-        yield element
-    yield f'</div>'
-    yield ' '*indent + f"</ul></div></div>\n"
+        return command_detail_template.format(name=name, value=value)
 
-stat_chart_template_file = "resources/templates/stat_chart.html"
-stat_chart_template = pkgutil.get_data(__name__,
-                                       stat_chart_template_file).decode()
-def stat_chart_html(labels, data, title, id):
+def stat_chart_card(labels, data, title, id):
     yield stat_chart_template.format(labels=labels,
                                      data=data,
                                      title=title,
                                      id=id)
 
-def output_block_from_str(title, string, cmd_id, indent=0, expanded=False):
-    yield (
-        ' '*indent + 
-        '<div class="card" style="margin-top: 6pt;">' +
-        '<div class="card-body">' +
-        '<ul class="list-group">\n'
-    )
-    element_id = cmd_id + '-' + title.replace(' ', '_')
-    yield (
-        '<h5 class="card-title" ' +
-        'role="button" ' +
-        f'data-target="#{element_id}" ' +
-        'data-toggle="collapse"' +
-        '>' +
-        f'{title}' +
-        '</h5>'
-    )
-    if expanded:
-        yield f'<div class="collapse show" id={element_id}>'
-    else:
-        yield f'<div class="collapse" id={element_id}>'
-    for element in html_fixed_width_from_str(string, title, cmd_id):
-        yield element
-    yield f'</div>'
-    yield ' '*indent + f"</ul></div></div>\n"
+def output_block_card(title, string, cmd_id):
+    name = title.replace(' ', '_').lower()
+    indent = ' '*12
+    header, footer = split_template(output_block_card_template,
+                                    "output_block",
+                                    name=name,
+                                    title=title,
+                                    cmd_id=cmd_id)
+    yield header
+    for line in output_block(string, name, cmd_id):
+        yield textwrap.indent(line, indent)
+    yield footer
 
-def html_details(*args, summary=None, indent=0):
-    yield ' '*indent + "<details>\n"
-    if summary is not None:
-        yield ' '*(indent+2) + f"<summary>{summary}</summary>\n"
-    for arg in args:
-        if isinstance(arg, GeneratorType):
-            for element in arg:
-                yield element
-        if isinstance(arg, str):
-            yield arg
-        if isinstance(arg, bytes):
-            yield arg.decode()
-    yield ' '*indent + "</details>\n"
-
-def html_list_item(*args, indent=0, add_br=True, element_class=None):
-    li = "<li>" if element_class is None else f'<li class="{element_class}">'
-    if add_br:
-        yield ' '*indent + f"{li}\n"
-    else:
-        yield ' '*indent + f"{li}"
-    for arg in args:
-        if isinstance(arg, GeneratorType):
-            for element in arg:
-                yield element
-        if isinstance(arg, str):
-            yield arg
-        if isinstance(arg, bytes):
-            yield arg.decode()
-    if add_br:
-        yield ' '*indent + "</li>\n"
-    else:
-        yield "</li>\n"
-
-def html_bold(text, indent=0, add_br=True):
-    if add_br:
-        return ' '*indent + f"<b>{text}</b><br>\n"
-    else:
-        return ' '*indent + f"<b>{text}</b> "
-
-def html_fixed_width_from_file(input_file, title, cmd_id, indent=0):
-    with open(input_file) as f:
-        for string in output_block_html(f, title, cmd_id):
+def output_block(input, name, cmd_id):
+    if isinstance(input, Path):
+        with open(input) as f:
+            for string in output_block_html(f, name, cmd_id):
+                yield string
+    if isinstance(input, str):
+        for string in output_block_html(input, name, cmd_id):
             yield string
 
-def html_fixed_width_from_str(input_str, title, cmd_id, indent=0):
-    for string in output_block_html(input_str, title, cmd_id):
-        yield string
+def diagnostics_card(cmd_id, *args):
+    indent = ' '*16
 
-output_block_template_file = "resources/templates/output_block.html"
-output_block_template = pkgutil.get_data(__name__,
-                                         output_block_template_file).decode()
-def output_block_html(lines, title, cmd_id):
-    split_marker = bytes([4]).decode()
+    header, footer = split_template(diagnostics_template,
+                                    "diagnostics",
+                                    cmd_id=cmd_id)
+    yield header
+    for arg in args:
+        if isinstance(arg, str):
+            yield textwrap.indent(arg, indent)
+        elif isinstance(arg, Iterable):
+            for _arg in arg:
+                yield textwrap.indent(_arg, indent)
+    yield footer
+
+def output_block_html(lines, name, cmd_id):
     indent = ' '*12
     if isinstance(lines, str):
         lines = lines.split('\n')
-    placeholder = output_block_template.format(title=title,
-                                               cmd_id=cmd_id,
-                                               table_contents=split_marker)
-    header, footer = placeholder.split(split_marker + '\n')
+    header, footer = split_template(output_block_template,
+                                    "table_contents",
+                                    name=name,
+                                    cmd_id=cmd_id)
     yield header
     lineno = 0
     for line in lines:
@@ -261,9 +185,12 @@ def output_block_html(lines, title, cmd_id):
         yield textwrap.indent(output_line_html(line, lineno), indent)
     yield footer
 
-output_line_template_file = "resources/templates/output_line.html"
-output_line_template = pkgutil.get_data(__name__,
-                                        output_line_template_file).decode()
+def split_template(template, split_at, **kwargs):
+    split_marker = bytes([4]).decode()
+    placeholder = template.format(**{**kwargs, split_at: split_marker})
+    before, after = placeholder.split(split_marker + '\n')
+    return before, after
+
 def output_line_html(line, lineno):
     encoded_line = html_encode(line).rstrip()
     return output_line_template.format(line=encoded_line, lineno=lineno)
@@ -278,34 +205,47 @@ def html_encode(text):
 def html_header():
     return (
         "<head>" +
-        "<style>\n" +
-        pkgutil.get_data(__name__, "resources/bootstrap.min.css").decode() +
-        "\n</style>\n" +
-        "<style>\n" +
-        pkgutil.get_data(__name__, "resources/Chart.min.css").decode() +
-        "\n</style>\n" +
-        "<style>\n" +
-        pkgutil.get_data(__name__, "resources/code_block_style.css").decode() +
-        "\n</style>\n" +
-        "<style>\n" +
-        pkgutil.get_data(__name__, "resources/output_style.css").decode() +
-        "\n</style>\n" +
-        "<style>\n" +
-        pkgutil.get_data(__name__, "resources/stat_chart_style.css").decode() +
-        "\n</style>\n" +
-        "<script>\n" +
-        pkgutil.get_data(__name__, "resources/jquery.slim.min.js").decode() +
-        "\n</script>\n" +
-        "<script>\n" +
-        pkgutil.get_data(__name__,
-                         "resources/bootstrap.bundle.min.js").decode() +
-        "\n</script>\n" +
-        "<script>\n" +
-        pkgutil.get_data(__name__, "resources/Chart.bundle.min.js").decode() +
-        "\n</script>\n" +
-        "<script>\n" +
-        pkgutil.get_data(__name__, "resources/search_output.js").decode() +
-        "\n</script>\n" +
+        embed_style("bootstrap.min.css") +
+        embed_style("Chart.min.css") +
+        embed_style("command_style.css") +
+        embed_style("detail_list_style.css") +
+        embed_style("code_block_style.css") +
+        embed_style("output_style.css") +
+        embed_style("diagnostics_style.css") +
+        embed_style("stat_chart_style.css") +
+        embed_script("jquery.slim.min.js") +
+        embed_script("bootstrap.bundle.min.js") +
+        embed_script("Chart.bundle.min.js") +
+        embed_script("search_output.js") +
         "</head>"
     )
+
+def embed_style(resource):
+    return (
+        "<style>\n" +
+        pkgutil.get_data(__name__, f"resources/{resource}").decode() +
+        "\n</style>\n"
+    )
+
+def embed_script(resource):
+    return (
+        "<script>\n" +
+        pkgutil.get_data(__name__, f"resources/{resource}").decode() +
+        "\n</script>\n"
+    )
+
+def load_template(template):
+    template_file = f"resources/templates/{template}"
+    return pkgutil.get_data(__name__, template_file).decode()
+
+command_detail_list_template   = load_template("command_detail_list.html")
+command_detail_template        = load_template("command_detail.html")
+hidden_command_detail_template = load_template("hidden_command_detail.html")
+stat_chart_template            = load_template("stat_chart.html")
+diagnostics_template           = load_template("diagnostics.html")
+output_block_card_template     = load_template("output_block_card.html")
+output_block_template          = load_template("output_block.html")
+output_line_template           = load_template("output_line.html")
+message_template               = load_template("message.html")
+command_template               = load_template("command.html")
 

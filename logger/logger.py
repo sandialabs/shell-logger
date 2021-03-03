@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 from .classes import Shell, Trace, StatsCollector, Stat, trace_collector, stats_collectors
-from .util import make_svg_line_chart, nested_SimpleNamespace_to_dict, filter_junk_from_env, miliseconds_to_human_time, opening_html_text, closing_html_text, append_html, html_fixed_width_from_file, html_fixed_width_from_str, html_bold, html_list_item, html_details, simple_detail_list_item, simple_detail_collapsed_list_item, output_block_from_file, output_block_from_str, stat_chart_html, simple_details_list, inline_fixed_width
+from .util import make_svg_line_chart, nested_SimpleNamespace_to_dict, filter_junk_from_env, miliseconds_to_human_time, opening_html_text, closing_html_text, append_html, command_detail_list, command_detail, output_block_card, stat_chart_card, inline_fixed_width, diagnostics_card, message_card, command_card
 from collections.abc import Iterable, Mapping
 import datetime
 import distutils.dir_util as dir_util
@@ -386,7 +386,7 @@ class Logger:
                 if log.duration is None:
                     log.__update_duration()
 
-                heading = f"h{min(log.indent + 1, 5)}"
+                heading = f"h{min(log.indent + 1, 4)}"
                 # First print the header text.
                 html_str = (
                     ' '*i + "<details>\n" +
@@ -415,15 +415,7 @@ class Logger:
             # Message Log Entry
             # -----------------
             if log['cmd'] is None:
-                html_str = (
-                    ' '*i + '<div class="card">\n' +
-                    ' '*(i+2) + '<div class="card-body">\n' +
-                    ' '*(i+4) + log['msg'].replace('\n', "<br>") + '\n' +
-                    ' '*(i+2) + '</div>\n' +
-                    ' '*i + '</div>\n'
-                )
-                with open(self.html_file, 'a') as html:
-                    html.write(html_str)
+                append_html(message_card(log["msg"]), output=self.html_file)
 
                 # Skip the regular log entry stuff
                 continue
@@ -431,130 +423,55 @@ class Logger:
             # Command Log Entry
             # -----------------
             # Write the top part of the HTML entry
-            html_str = (
-                '\n' +
-                ' '*i + "<details>\n" +
-                ' '*i + "  <summary>\n" +
-                ' '*i + "    <h6 " +
-                        'style="line-height: 1.5; display: inline;"' +
-                        f">{log['msg']}</h6>\n" +
-                ' '*i + f"    <br>Duration: {log['duration']}\n" +
-                ' '*i + "  </summary>\n" +
-                ' '*i + '  <div style="padding: 0 2.5%;">'
-            )
-            with open(self.html_file, 'a') as html:
-                html.write(html_str)
-
             cmd_id = log['cmd_id']
             stdout_path = self.strm_dir / f"{log['timestamp']}_{cmd_id}_stdout"
             stderr_path = self.strm_dir / f"{log['timestamp']}_{cmd_id}_stderr"
             trace_path = self.strm_dir / f"{log['timestamp']}_{cmd_id}_trace"
-            filtered_env = filter_junk_from_env(log["environment"],
-                                                [
-                                                    "LS_COLORS",
-                                                    "MANPATH",
-                                                    "XDG_SESSION_ID",
-                                                    "XDG_DATA_DIRS",
-                                                    "HISTSIZE",
-                                                    "KDEDIRS",
-                                                    "LESSOPEN",
-                                                ])
 
-            append_html(
-                simple_details_list(
-                    simple_detail_list_item("Time", log["timestamp"], indent=4),
-                    simple_detail_list_item("Command",
-                                            inline_fixed_width(log["cmd"]),
-                                            indent=4),
-                    simple_detail_collapsed_list_item("CWD",
-                                                      log["pwd"],
-                                                      indent=4,
-                                                      cmd_id=cmd_id),
-                    simple_detail_collapsed_list_item("Hostname",
-                                                      log["hostname"],
-                                                      indent=4,
-                                                      cmd_id=cmd_id),
-                    simple_detail_collapsed_list_item("User",
-                                                      log["user"],
-                                                      indent=4,
-                                                      cmd_id=cmd_id),
-                    simple_detail_collapsed_list_item("Group",
-                                                      log["group"],
-                                                      indent=4,
-                                                      cmd_id=cmd_id),
-                    simple_detail_collapsed_list_item("Shell",
-                                                      log["shell"],
-                                                      indent=4,
-                                                      cmd_id=cmd_id),
-                    simple_detail_collapsed_list_item("umask",
-                                                      log["umask"],
-                                                      indent=4,
-                                                      cmd_id=cmd_id),
-                    simple_detail_list_item("Return Code",
-                                            log["return_code"],
-                                            indent=4),
-                    cmd_id=cmd_id
+            info = [
+                command_detail_list(
+                    cmd_id,
+                    command_detail(cmd_id, "Time", log["timestamp"]),
+                    command_detail(cmd_id,
+                                   "Command",
+                                   inline_fixed_width(log["cmd"])),
+                    command_detail(cmd_id, "CWD", log["pwd"], hidden=True),
+                    command_detail(cmd_id,
+                                   "Hostname",
+                                   log["hostname"],
+                                   hidden=True),
+                    command_detail(cmd_id, "User", log["user"], hidden=True),
+                    command_detail(cmd_id, "Group", log["group"], hidden=True),
+                    command_detail(cmd_id, "Shell", log["shell"], hidden=True),
+                    command_detail(cmd_id, "umask", log["umask"], hidden=True),
+                    command_detail(cmd_id, "Return Code", log["return_code"])
                 ),
-                output_block_from_file("stdout",
-                                       stdout_path,
-                                       log["cmd_id"],
-                                       expanded=True),
-                output_block_from_file("stderr",
-                                       stderr_path,
-                                       log["cmd_id"],
-                                       expanded=True),
-                output=self.html_file
-            )
+                output_block_card("stdout", stdout_path, cmd_id),
+                output_block_card("stderr", stderr_path, cmd_id),
+            ]
 
-            html_str = (
-                '<div class="card" style="margin: 6pt 0 6pt">' +
-                '<div class="card-body">' +
-                '<h5 class="card-title" ' +
-                'role="button" ' +
-                f'data-target="#{cmd_id}-diagnostics" ' +
-                'data-toggle="collapse"' +
-                '>' +
-                'Diagnostics' +
-                '</h5>' +
-                f'<div class="collapse" id="{cmd_id}-diagnostics">'
-            )
-            append_html(html_str, output=self.html_file)
-            append_html(
-                output_block_from_str("Environment",
-                                      filtered_env,
-                                      log["cmd_id"]),
-                output_block_from_str("ulimit", log["ulimit"], log["cmd_id"]),
-                output=self.html_file
-            )
+            diagnostics = [
+                output_block_card("Environment",
+                                  log["environment"],
+                                  cmd_id),
+                output_block_card("ulimit", log["ulimit"], cmd_id),
+            ]
             if trace_path.exists():
-                append_html(
-                    output_block_from_file("trace", trace_path, log["cmd_id"]),
-                    output=self.html_file
+                diagnostics.append(
+                    output_block_card("trace", trace_path, cmd_id)
                 )
 
-            # Append HTML text between end of trace and beginning of
-            # Memory Usage.
             if log.get("stats"):
-                if log["stats"].get("memory"):
-                    data = log["stats"]["memory"]["data"]
-                    labels = [miliseconds_to_human_time(x) for x, _ in data]
-                    values = [y for _, y in data]
-                    id = f"{cmd_id}-mem-usage-chart"
-                    title = "Memory Usage"
-                    append_html(
-                        stat_chart_html(labels, values, title, id),
-                        output=self.html_file
-                    )
-                if log["stats"].get("cpu"):
-                    data = log["stats"]["cpu"]["data"]
-                    labels = [miliseconds_to_human_time(x) for x, _ in data]
-                    values = [y for _, y in data]
-                    id = f"{cmd_id}-cpu-usage-chart"
-                    title = "CPU Usage"
-                    append_html(
-                        stat_chart_html(labels, values, title, id),
-                        output=self.html_file
-                    )
+                stats = [("memory", "Memory Usage"), ("cpu", "CPU Usage")]
+                for stat, stat_title in stats:
+                    if log["stats"].get(stat):
+                        data = log["stats"][stat]["data"]
+                        labels = [miliseconds_to_human_time(x) for x, _ in data]
+                        values = [y for _, y in data]
+                        id = f"{cmd_id}-{stat}-usage-chart"
+                        diagnostics.append(
+                            stat_chart_card(labels, values, stat_title, id)
+                        )
                 if log["stats"].get("disk"):
                     # Append the disk usage of this command to
                     # the HTML file
@@ -573,18 +490,16 @@ class Logger:
                                 disk.replace("/", "_") +
                                 "-usage"
                             )
-                            title = f"Used Space on {disk}"
-                            append_html(
-                                stat_chart_html(labels, values, title, id),
-                                output=self.html_file
+                            stat_title = f"Used Space on {disk}"
+                            diagnostics.append(
+                                stat_chart_card(labels, values, stat_title, id)
                             )
-                append_html('<div style="clear: left; margin-bottom: 6pt" />',
-                            output=self.html_file)
+            info.append(diagnostics_card(cmd_id, *diagnostics))
 
-            html_str = ' '*i + "</div></div></div></div></details>"
+            append_html(command_card(log["msg"], log["duration"], *info),
+                        output=self.html_file)
+
             with open(self.html_file, 'a') as html:
-                html.write('\n')
-                html.write(html_str)
                 html.write('\n')
 
         # Final steps (Only for the parent)

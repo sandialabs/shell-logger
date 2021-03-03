@@ -1,18 +1,17 @@
 <div>
     <input type="text"
-           id="{cmd_id}-{title}-search"
+           id="{cmd_id}-{name}-search"
            onkeyup="outputSearch(this)"
-           target="{cmd_id}-{title}-table"
+           target="{cmd_id}-{name}-table"
            placeholder="Regex Search...">
     <input type="checkbox"
-           id="{cmd_id}-{title}-checkbox"
+           id="{cmd_id}-{name}-checkbox"
            onclick="outputSearch(this)"
-           name="{cmd_id}-{title}-show-duplicates">
-    <label for="{cmd_id}-{title}-show-duplicates"> Show duplicates</label><br>
-    <table class="output display table" id="{cmd_id}-{title}-table">
+           name="{cmd_id}-{name}-show-duplicates">
+    <label for="{cmd_id}-{name}-show-duplicates"> Show duplicates</label><br>
+    <table class="output display table" id="{cmd_id}-{name}-table">
         <tbody>
 {table_contents}
         </tbody>
     </table>
 </div>
-
