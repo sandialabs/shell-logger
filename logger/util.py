@@ -190,8 +190,8 @@ def command_card(log, strm_dir):
             command_detail(cmd_id, "umask", log["umask"], hidden=True),
             command_detail(cmd_id, "Return Code", log["return_code"])
         ),
-        output_block_card("stdout", stdout_path, cmd_id),
-        output_block_card("stderr", stderr_path, cmd_id),
+        output_block_card("stdout", stdout_path, cmd_id, collapsed=False),
+        output_block_card("stderr", stderr_path, cmd_id, collapsed=False),
     ]
 
     diagnostics = [
@@ -238,10 +238,14 @@ def stat_chart_card(labels, data, title, id):
                                      title=title,
                                      id=id)
 
-def output_block_card(title, string, cmd_id):
+def output_block_card(title, string, cmd_id, collapsed=True):
     name = title.replace(' ', '_').lower()
     indent = ' '*12
-    header, footer = split_template(output_block_card_template,
+    if collapsed:
+        template = output_card_collapsed_template
+    else:
+        template = output_card_template
+    header, footer = split_template(template,
                                     "output_block",
                                     name=name,
                                     title=title,
@@ -350,7 +354,8 @@ command_detail_template        = load_template("command_detail.html")
 hidden_command_detail_template = load_template("hidden_command_detail.html")
 stat_chart_template            = load_template("stat_chart.html")
 diagnostics_template           = load_template("diagnostics.html")
-output_block_card_template     = load_template("output_block_card.html")
+output_card_template           = load_template("output_card.html")
+output_card_collapsed_template = load_template("output_card_collapsed.html")
 output_block_template          = load_template("output_block.html")
 output_line_template           = load_template("output_line.html")
 message_template               = load_template("message.html")
