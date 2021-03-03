@@ -83,10 +83,31 @@ def append_html(*args, output=None):
             if isinstance(arg, bytes):
                 file.write(arg.decode())
 
-def inline_fixed_width(text):
+def fixed_width(text):
     return f"<code>{html_encode(text)}</code>"
 
-def command_card(message, duration, *args):
+def child_logger_card(log):
+    heading = f"h{min(log.indent + 1, 4)}"
+    child_html = log.to_html()
+    return child_logger_card_html(log.name, heading, log.duration, *child_html)
+
+def child_logger_card_html(name, heading, duration, *args):
+    indent = ' '*8
+    header, footer = split_template(child_logger_template,
+                                    "child_body",
+                                    name=name,
+                                    heading=heading,
+                                    duration=duration)
+    yield header
+    for arg in args:
+        if isinstance(arg, str):
+            yield textwrap.indent(arg, indent)
+        elif isinstance(arg, Iterable):
+            for _arg in arg:
+                yield textwrap.indent(_arg, indent)
+    yield footer
+
+def command_card_html(message, duration, *args):
     indent = ' '*8
     header, footer = split_template(command_template,
                                     "more_info",
@@ -126,6 +147,67 @@ def command_detail(cmd_id, name, value, hidden=False):
                                                      value=value)
     else:
         return command_detail_template.format(name=name, value=value)
+
+def command_card(log, strm_dir):
+    cmd_id = log['cmd_id']
+    stdout_path = strm_dir / f"{log['timestamp']}_{cmd_id}_stdout"
+    stderr_path = strm_dir / f"{log['timestamp']}_{cmd_id}_stderr"
+    trace_path = strm_dir / f"{log['timestamp']}_{cmd_id}_trace"
+
+    info = [
+        command_detail_list(
+            cmd_id,
+            command_detail(cmd_id, "Time", log["timestamp"]),
+            command_detail(cmd_id, "Command", fixed_width(log["cmd"])),
+            command_detail(cmd_id, "CWD", log["pwd"], hidden=True),
+            command_detail(cmd_id, "Hostname", log["hostname"], hidden=True),
+            command_detail(cmd_id, "User", log["user"], hidden=True),
+            command_detail(cmd_id, "Group", log["group"], hidden=True),
+            command_detail(cmd_id, "Shell", log["shell"], hidden=True),
+            command_detail(cmd_id, "umask", log["umask"], hidden=True),
+            command_detail(cmd_id, "Return Code", log["return_code"])
+        ),
+        output_block_card("stdout", stdout_path, cmd_id),
+        output_block_card("stderr", stderr_path, cmd_id),
+    ]
+
+    diagnostics = [
+        output_block_card("Environment", log["environment"], cmd_id),
+        output_block_card("ulimit", log["ulimit"], cmd_id),
+    ]
+    if trace_path.exists():
+        diagnostics.append(output_block_card("trace", trace_path, cmd_id))
+
+    if log.get("stats"):
+        stats = [("memory", "Memory Usage"), ("cpu", "CPU Usage")]
+        for stat, stat_title in stats:
+            if log["stats"].get(stat):
+                data = log["stats"][stat]["data"]
+                diagnostics.append(timeseries_plot(cmd_id, data, stat_title))
+        if log["stats"].get("disk"):
+            # Append the disk usage of this command to
+            # the HTML file
+            # Note: we sort because JSON deserialization may change
+            # the ordering of the map.
+            for disk, stats in sorted(log["stats"]["disk"].items()):
+                data = stats["data"]
+                diagnostics.append(disk_timeseries_plot(cmd_id, data, disk))
+    info.append(diagnostics_card(cmd_id, *diagnostics))
+
+    return command_card_html(log["msg"], log["duration"], *info)
+
+def timeseries_plot(cmd_id, data_tuples, series_title):
+    labels = [miliseconds_to_human_time(x) for x, _ in data_tuples]
+    values = [y for _, y in data_tuples]
+    id = f"{cmd_id}-{series_title.lower().replace(' ', '-')}-chart"
+    return stat_chart_card(labels, values, series_title, id)
+
+def disk_timeseries_plot(cmd_id, data_tuples, volume_name):
+    labels = [miliseconds_to_human_time(x) for x, _ in data_tuples]
+    values = [y for _, y in data_tuples]
+    id = f"{cmd_id}-volume{volume_name.replace('/', '_')}-usage"
+    stat_title = f"Used Space on {volume_name}"
+    return stat_chart_card(labels, values, stat_title, id)
 
 def stat_chart_card(labels, data, title, id):
     yield stat_chart_template.format(labels=labels,
@@ -207,6 +289,7 @@ def html_header():
         "<head>" +
         embed_style("bootstrap.min.css") +
         embed_style("Chart.min.css") +
+        embed_style("child_logger_style.css") +
         embed_style("command_style.css") +
         embed_style("detail_list_style.css") +
         embed_style("code_block_style.css") +
@@ -248,4 +331,5 @@ output_block_template          = load_template("output_block.html")
 output_line_template           = load_template("output_line.html")
 message_template               = load_template("message.html")
 command_template               = load_template("command.html")
+child_logger_template          = load_template("child_logger.html")
 

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 from .classes import Shell, Trace, StatsCollector, Stat, trace_collector, stats_collectors
-from .util import make_svg_line_chart, nested_SimpleNamespace_to_dict, filter_junk_from_env, miliseconds_to_human_time, opening_html_text, closing_html_text, append_html, command_detail_list, command_detail, output_block_card, stat_chart_card, inline_fixed_width, diagnostics_card, message_card, command_card
+from .util import make_svg_line_chart, nested_SimpleNamespace_to_dict, opening_html_text, closing_html_text, append_html, message_card, command_card, child_logger_card
 from collections.abc import Iterable, Mapping
 import datetime
 import distutils.dir_util as dir_util
@@ -360,7 +360,7 @@ class Logger:
         }
         self.log_book.append(log)
 
-    def finalize(self):
+    def to_html(self):
         """
         This method iterates through each entry in this :class:`Logger`
         object's log list and appends corresponding HTML text to the main HTML
@@ -368,15 +368,13 @@ class Logger:
         respective files in the ``strm_dir``.
         """
 
-        i = self.indent * 2  # Each indent is 2 spaces
+        html = []
+
         heading = f"h{min(self.indent + 1, 5)}"
-        html_str = ' '*i + f"\n<{heading}>{self.name} Log</{heading}>\n"
-        with open(self.html_file, 'a') as html:
-            html.write(html_str)
+        html.append(f"\n<{heading}>{self.name} Log</{heading}>\n")
 
         if self.is_parent:
-            with open(self.html_file, 'a') as html:
-                html.write('<div style="padding: 0 1% 1cm;">')
+            html.append('<div style="padding: 0 1% 1cm;">')
 
         for log in self.log_book:
             # Child Logger
@@ -385,128 +383,42 @@ class Logger:
                 # Update the duration of this Logger's commands
                 if log.duration is None:
                     log.__update_duration()
-
-                heading = f"h{min(log.indent + 1, 4)}"
-                # First print the header text.
-                html_str = (
-                    ' '*i + "<details>\n" +
-                    ' '*i + "  <summary>\n" +
-                    ' '*i + f"    <{heading} " +
-                            'style="line-height: 1.5; display: inline;"' +
-                            f">{log.name}</{heading}>\n" +
-                    ' '*i + f"    <br>Duration: {log.duration}\n" +
-                    ' '*i + "  </summary>" +
-                    ' '*i + '  <div style="padding: 0 1.25%;">'
-                )
-                with open(self.html_file, 'a') as html:
-                    html.write(html_str)
-
-                # Let the child Logger save its own commands into HTML
-                log.finalize()
-
-                # Save the ending HTML
-                html_str = ' '*i + "</div></details>"
-                with open(self.html_file, 'a') as html:
-                    html.write(html_str)
+                html.append(child_logger_card(log))
 
                 # Skip the regular log entry stuff
                 continue
 
             # Message Log Entry
             # -----------------
-            if log['cmd'] is None:
-                append_html(message_card(log["msg"]), output=self.html_file)
-
+            if log["cmd"] is None:
+                html.append(message_card(log["msg"]))
                 # Skip the regular log entry stuff
                 continue
 
             # Command Log Entry
             # -----------------
             # Write the top part of the HTML entry
-            cmd_id = log['cmd_id']
-            stdout_path = self.strm_dir / f"{log['timestamp']}_{cmd_id}_stdout"
-            stderr_path = self.strm_dir / f"{log['timestamp']}_{cmd_id}_stderr"
-            trace_path = self.strm_dir / f"{log['timestamp']}_{cmd_id}_trace"
+            html.append(command_card(log, self.strm_dir))
 
-            info = [
-                command_detail_list(
-                    cmd_id,
-                    command_detail(cmd_id, "Time", log["timestamp"]),
-                    command_detail(cmd_id,
-                                   "Command",
-                                   inline_fixed_width(log["cmd"])),
-                    command_detail(cmd_id, "CWD", log["pwd"], hidden=True),
-                    command_detail(cmd_id,
-                                   "Hostname",
-                                   log["hostname"],
-                                   hidden=True),
-                    command_detail(cmd_id, "User", log["user"], hidden=True),
-                    command_detail(cmd_id, "Group", log["group"], hidden=True),
-                    command_detail(cmd_id, "Shell", log["shell"], hidden=True),
-                    command_detail(cmd_id, "umask", log["umask"], hidden=True),
-                    command_detail(cmd_id, "Return Code", log["return_code"])
-                ),
-                output_block_card("stdout", stdout_path, cmd_id),
-                output_block_card("stderr", stderr_path, cmd_id),
-            ]
+        if self.is_parent:
+            html.append("</div>")
+        return html
 
-            diagnostics = [
-                output_block_card("Environment",
-                                  log["environment"],
-                                  cmd_id),
-                output_block_card("ulimit", log["ulimit"], cmd_id),
-            ]
-            if trace_path.exists():
-                diagnostics.append(
-                    output_block_card("trace", trace_path, cmd_id)
-                )
+    def finalize(self):
+        """
+        This method iterates through each entry in this :class:`Logger`
+        object's log list and appends corresponding HTML text to the main HTML
+        file. For each entry, the ``stdout``/``stderr`` are copied from their
+        respective files in the ``strm_dir``.
+        """
 
-            if log.get("stats"):
-                stats = [("memory", "Memory Usage"), ("cpu", "CPU Usage")]
-                for stat, stat_title in stats:
-                    if log["stats"].get(stat):
-                        data = log["stats"][stat]["data"]
-                        labels = [miliseconds_to_human_time(x) for x, _ in data]
-                        values = [y for _, y in data]
-                        id = f"{cmd_id}-{stat}-usage-chart"
-                        diagnostics.append(
-                            stat_chart_card(labels, values, stat_title, id)
-                        )
-                if log["stats"].get("disk"):
-                    # Append the disk usage of this command to
-                    # the HTML file
-                    # Note: we sort because JSON deserialization may change
-                    # the ordering of the map.
-                    for disk, stats in sorted(log["stats"]["disk"].items()):
-                        if disk[:4] != "/var" and disk[:5] != "/boot":
-                            data = stats["data"]
-                            labels = [miliseconds_to_human_time(x)
-                                      for x, _ in data]
-                            values = [y for _, y in data]
-                            id = (
-                                cmd_id +
-                                '-' +
-                                "volume" +
-                                disk.replace("/", "_") +
-                                "-usage"
-                            )
-                            stat_title = f"Used Space on {disk}"
-                            diagnostics.append(
-                                stat_chart_card(labels, values, stat_title, id)
-                            )
-            info.append(diagnostics_card(cmd_id, *diagnostics))
-
-            append_html(command_card(log["msg"], log["duration"], *info),
-                        output=self.html_file)
-
-            with open(self.html_file, 'a') as html:
-                html.write('\n')
+        for element in self.to_html():
+            append_html(element, output=self.html_file)
 
         # Final steps (Only for the parent)
         # ---------------------------------
         if self.is_parent:
             with open(self.html_file, 'a') as html:
-                html.write("</div>")
                 html.write(closing_html_text())
                 html.write('\n')
             # Create a symlink in log_dir to the HTML file in strm_dir.
@@ -663,16 +575,22 @@ class Logger:
             setattr(completed_process, "trace", None)
         if kwargs.get("pwd"):
             self.shell.cd(old_pwd)
-        return SimpleNamespace(**completed_process.__dict__, **aux_info.__dict__)
+        return SimpleNamespace(**completed_process.__dict__,
+                               **aux_info.__dict__)
 
     def auxiliary_information(self):
         pwd, _ = self.shell.auxiliary_command(posix="pwd", nt="cd", strip=True)
         environment, _ = self.shell.auxiliary_command(posix="env", nt="set")
         umask, _ = self.shell.auxiliary_command(posix="umask", strip=True)
-        hostname, _ = self.shell.auxiliary_command(posix="hostname", nt="hostname", strip=True)
-        user, _ = self.shell.auxiliary_command(posix="whoami", nt="whoami", strip=True)
+        hostname, _ = self.shell.auxiliary_command(posix="hostname",
+                                                   nt="hostname",
+                                                   strip=True)
+        user, _ = self.shell.auxiliary_command(posix="whoami",
+                                               nt="whoami",
+                                               strip=True)
         group, _ = self.shell.auxiliary_command(posix="id -gn", strip=True)
-        shell, _ = self.shell.auxiliary_command(posix="printenv SHELL", strip=True)
+        shell, _ = self.shell.auxiliary_command(posix="printenv SHELL",
+                                                strip=True)
         ulimit, _ = self.shell.auxiliary_command(posix="ulimit -a")
         x = SimpleNamespace(
             pwd=pwd,
@@ -725,8 +643,9 @@ class DiskStatsCollector(StatsCollector):
         super().__init__(interval, manager)
         self.stats = manager.dict()
         self.mountpoints = [ p.mountpoint for p in psutil.disk_partitions() ]
-        if not '/tmp' in self.mountpoints:
-            self.mountpoints += ['/tmp']
+        for location in ["/tmp", "/dev/shm", f"/var/run/user/{os.getuid()}"]:
+            if not location in self.mountpoints and Path(location).exists():
+                self.mountpoints.append(location)
         for m in self.mountpoints:
             self.stats[m] = manager.list()
     def collect(self):
