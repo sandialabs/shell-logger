@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-from . import resources
 from collections.abc import Iterable, Mapping
 import datetime
 import pkgutil
@@ -73,18 +72,42 @@ def closing_html_text():
     return "</html>"
 
 def append_html(*args, output=None):
-    with open(output, "a") as file:
+    def _append_html(file, *args):
         for arg in args:
-            if isinstance(arg, GeneratorType):
-                for element in arg:
-                    file.write(element)
             if isinstance(arg, str):
                 file.write(arg)
-            if isinstance(arg, bytes):
+            elif isinstance(arg, bytes):
                 file.write(arg.decode())
+            elif isinstance(arg, Iterable):
+                _append_html(file, *element)
+            else:
+                raise RuntimeError(f"Unsupported type: {type(arg)}")
+    with open(output, "a") as file:
+        _append_html(file, *args)
 
 def fixed_width(text):
     return f"<code>{html_encode(text)}</code>"
+
+def flatten(element):
+    if isinstance(element, str):
+        yield element
+    elif isinstance(element, bytes):
+        file.write(element.decode())
+    elif isinstance(element, Iterable):
+        for _element in element:
+            yield from flatten(_element)
+    else:
+        yield element
+
+def parent_logger_card_html(name, *args):
+    indent = ' '*4
+    header, footer = split_template(parent_logger_template,
+                                    "parent_body",
+                                    name=name)
+    yield header
+    for arg in flatten(args):
+        yield textwrap.indent(arg, indent)
+    yield footer
 
 def child_logger_card(log):
     heading = f"h{min(log.indent + 1, 4)}"
@@ -289,6 +312,7 @@ def html_header():
         "<head>" +
         embed_style("bootstrap.min.css") +
         embed_style("Chart.min.css") +
+        embed_style("parent_logger_style.css") +
         embed_style("child_logger_style.css") +
         embed_style("command_style.css") +
         embed_style("detail_list_style.css") +
@@ -332,4 +356,5 @@ output_line_template           = load_template("output_line.html")
 message_template               = load_template("message.html")
 command_template               = load_template("command.html")
 child_logger_template          = load_template("child_logger.html")
+parent_logger_template         = load_template("parent_logger.html")
 

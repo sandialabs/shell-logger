@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 from .classes import Shell, Trace, StatsCollector, Stat, trace_collector, stats_collectors
-from .util import make_svg_line_chart, nested_SimpleNamespace_to_dict, opening_html_text, closing_html_text, append_html, message_card, command_card, child_logger_card
+from .util import make_svg_line_chart, nested_SimpleNamespace_to_dict, opening_html_text, closing_html_text, append_html, message_card, command_card, child_logger_card, parent_logger_card_html
 from collections.abc import Iterable, Mapping
 import datetime
 import distutils.dir_util as dir_util
@@ -370,12 +370,6 @@ class Logger:
 
         html = []
 
-        heading = f"h{min(self.indent + 1, 5)}"
-        html.append(f"\n<{heading}>{self.name} Log</{heading}>\n")
-
-        if self.is_parent:
-            html.append('<div style="padding: 0 1% 1cm;">')
-
         for log in self.log_book:
             # Child Logger
             # ------------
@@ -401,8 +395,9 @@ class Logger:
             html.append(command_card(log, self.strm_dir))
 
         if self.is_parent:
-            html.append("</div>")
-        return html
+            return parent_logger_card_html(self.name, html)
+        else:
+            return html
 
     def finalize(self):
         """
