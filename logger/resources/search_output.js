@@ -28,6 +28,7 @@ function outputSearch(caller)
         if (td)
         {
             txtValue = td.textContent || td.innerText;
+            txtValue = txtValue.replaceAll("<[^>]*>", "");
             txtValue = txtValue.replaceAll("\u2060", "").toUpperCase();
             if (!filter ||
                 (txtValue.match(filter) && (!(txtValue === lastTxtValue) ||
