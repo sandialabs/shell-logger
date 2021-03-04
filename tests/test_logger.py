@@ -605,4 +605,28 @@ def test_returncode():
         print(f"Warning: os.name is unrecognized: {os.name}; test may fail.")
     result = logger.run(command)
     assert result.returncode == expected_returncode
-    
+
+def test_SGR_gets_converted_to_HTML(logger):
+    logger = Logger(stack()[0][3], Path.cwd())
+    logger.print("\x1B[31mHello\x1B[0m")
+    logger.print("\x1B[31;43m\x1B[4mthere\x1B[0m")
+    logger.print("\x1B[38;5;196m\x1B[48;5;232m\x1B[4mmr.\x1B[0m logger")
+    logger.print("\x1B[38;2;96;140;240m\x1B[48;2;240;140;10mmrs.\x1B[0m logger")
+    logger.finalize()
+
+    # Load the HTML file.
+    html_file = logger.strm_dir / f"{logger.name}.html"
+    assert html_file.exists()
+    with open(html_file, 'r') as hf:
+        html_text = hf.read()
+
+    assert "\x1B" not in html_text
+    assert ">Hello</span>" in html_text
+    assert ">there</span>" in html_text
+    assert ">mr.</span></span></span> logger" in html_text
+    assert "color: rgb(255, 0, 0)" in html_text
+    assert "background-color: rgb(" in html_text
+    assert ">mrs.</span></span> logger" in html_text
+    assert "color: rgb(96, 140, 240)" in html_text
+    assert "background-color: rgb(240, 140, 10)" in html_text
+

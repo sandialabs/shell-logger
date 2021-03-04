@@ -148,8 +148,10 @@ def command_card_html(message, duration, *args):
 def message_card(text):
     indent = ' '*8
     header, footer = split_template(message_template, "message")
+    text = html_encode(text)
+    text = "<pre>" + text.replace('\n', "<br>") + "</pre>"
     yield header
-    yield textwrap.indent(text.replace('\n', "<br>\n"), indent) + '\n'
+    yield textwrap.indent(text, indent) + '\n'
     yield footer
 
 def command_detail_list(cmd_id, *args):
@@ -311,6 +313,122 @@ def html_encode(text):
     text = text.replace('<', "&lt;")
     text = text.replace('>', "&gt;")
     text = text.replace('-', "-&#8288;") # non breaking dashes
+    text = sgr_to_html(text)
+    return text
+
+def sgr_to_html(text):
+    sgr_to_css = {
+        "1": "font-weight: bold;",
+        "2": "font-weight: lighter;",
+        "3": "font-style: italic;",
+        "4": "text-decoration: underline;",
+        "9": "text-decoration: line-through;",
+        "30": "color: black;",   "40":  "background-color: black;",
+        "31": "color: red;",     "41":  "background-color: red;",
+        "32": "color: green;",   "42":  "background-color: green;",
+        "33": "color: yellow;",  "43":  "background-color: yellow;",
+        "34": "color: blue;",    "44":  "background-color: blue;",
+        "35": "color: magenta;", "45":  "background-color: magenta;",
+        "36": "color: cyan;",    "46":  "background-color: cyan;",
+        "37": "color: white;",   "47":  "background-color: white;",
+        "90": "color: black;",   "100": "background-color: black;",
+        "91": "color: red;",     "101": "background-color: red;",
+        "92": "color: green;",   "102": "background-color: green;",
+        "93": "color: yellow;",  "103": "background-color: yellow;",
+        "94": "color: blue;",    "104": "background-color: blue;",
+        "95": "color: magenta;", "105": "background-color: magenta;",
+        "96": "color: cyan;",    "106": "background-color: cyan;",
+        "97": "color: white;",   "107": "background-color: white;",
+        "39": "color: inherit;", "49":  "background-color: inherit;",
+    }
+    span_count = 0
+    while text.find("\x1b[") >= 0:
+        start = text.find("\x1b[")
+        finish = text.find("m", start)
+        sgrs = text[start+2:finish].split(';')
+        span_string = ""
+        if len(sgrs) == 5 and sgrs[:2] == ["38","2"]:
+            span_count += 1
+            span_string = (
+                f'<span style="color: rgb({sgrs[2]}, {sgrs[3]}, {sgrs[4]})">'
+            )
+        elif len(sgrs) == 5 and sgrs[:2] == ["48","2"]:
+            span_count += 1
+            span_string = (
+                '<span style="background-color: ' +
+                f'rgb({sgrs[2]}, {sgrs[3]}, {sgrs[4]})">'
+            )
+        elif len(sgrs) == 3 and sgrs[:2] == ["38","5"]:
+            span_count += 1
+            sgr_256 = int(sgrs[2])
+            if sgr_256 < 0:
+                '<span>'
+            elif sgr_256 < 8:
+                span_string = (
+                    '<span style="' + sgr_to_css[str(30+sgr_256)] + '">'
+                )
+            elif sgr_256 < 16:
+                span_string = (
+                    '<span style="' + sgr_to_css[str(82+sgr_256)] + '">'
+                )
+            elif sgr_256 < 232:
+                red_6bit = (sgr_256 - 16) // 36
+                green_6bit = (sgr_256 - (16 + red_6bit * 36)) // 6
+                blue_6bit = (sgr_256 - 16) % 6
+                red = 51 * red_6bit
+                green = 51 * green_6bit
+                blue = 51 * blue_6bit
+                span_string = (
+                    f'<span style="color: rgb({red}, {green}, {blue})">'
+                )
+            elif sgr_256 < 256:
+                gray = 8 + (sgr_256 - 232) * 10
+                span_string = (
+                    f'<span style="color: rgb({gray}, {gray}, {gray})">'
+                )
+        elif len(sgrs) == 3 and sgrs[:2] == ["48","5"]:
+            span_count += 1
+            sgr_256 = int(sgrs[2])
+            if sgr_256 < 0:
+                '<span>'
+            elif sgr_256 < 8:
+                span_string = (
+                    '<span style="' + sgr_to_css[str(40+sgr_256)] + '">'
+                )
+            elif sgr_256 < 16:
+                span_string = (
+                    '<span style="' + sgr_to_css[str(92+sgr_256)] + '">'
+                )
+            elif sgr_256 < 232:
+                red_6bit = (sgr_256 - 16) // 36
+                green_6bit = (sgr_256 - (16 + red_6bit * 36)) // 6
+                blue_6bit = (sgr_256 - 16) % 6
+                red = 51 * red_6bit
+                green = 51 * green_6bit
+                blue = 51 * blue_6bit
+                span_string = (
+                    '<span style="' +
+                    f'background-color: rgb({red}, {green}, {blue})">'
+                )
+            elif sgr_256 < 256:
+                gray = 8 + (sgr_256 - 232) * 10
+                span_string = (
+                    '<span style="' +
+                    f'background-color: rgb({gray}, {gray}, {gray})">'
+                )
+        elif all([x == "0" or x == "" for x in sgrs]):
+            # Something like ^[[0;0m or ^[[;0m would be highly unusual but
+            # we'll catch it here anyway
+            span_string += "</span>" * span_count
+            span_count = 0
+        else:
+            span_count += 1
+            span_string = (
+                '<span style="' +
+                ' '.join([sgr_to_css[x] for x in sgrs if x in sgr_to_css]) +
+                '">'
+            )
+        text = text[:start] + span_string + text[finish+1:]
     return text
 
 def html_header():
