@@ -289,8 +289,19 @@ def test_under_stress():
 
 def test_heredoc():
     logger = Logger(stack()[0][3], Path.cwd())
-    cmd = ("bash << EOF\necho hello\nEOF")
+    cmd = "bash << EOF\necho hello\nEOF"
     msg = "Test out a heredoc"
+
+    p = Process(target=logger.log, args=(msg, cmd))
+    p.start()
+    p.join(1)
+    assert not p.is_alive()
+
+
+def test_devnull_stdin():
+    logger = Logger(stack()[0][3], Path.cwd())
+    cmd = "cat"
+    msg = "Make sure stdin is redirected to /dev/null by default"
 
     p = Process(target=logger.log, args=(msg, cmd))
     p.start()
