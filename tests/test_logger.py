@@ -478,13 +478,13 @@ def test_traceExpressionAndSummary():
 def test_stats():
     logger = Logger(stack()[0][3], Path.cwd())
     result = logger.run("sleep 1", measure=["cpu", "memory", "disk"], interval=0.1)
-    assert len(result.stats["memory"].data) > 8
-    assert len(result.stats["memory"].data) < 30
-    assert len(result.stats["cpu"].data) > 8
-    assert len(result.stats["cpu"].data) < 30
+    assert len(result.stats["memory"]) > 8
+    assert len(result.stats["memory"]) < 30
+    assert len(result.stats["cpu"]) > 8
+    assert len(result.stats["cpu"]) < 30
     if os.name == "posix":
-        assert len(result.stats["disk"]["/"].data) > 8
-        assert len(result.stats["disk"]["/"].data) < 30
+        assert len(result.stats["disk"]["/"]) > 8
+        assert len(result.stats["disk"]["/"]) < 30
     else:
         print(f"Warning: os.name is not 'posix': {os.name}; disk usage not fully tested.")
 
@@ -499,12 +499,12 @@ def test_traceAndStats():
                             summary=True)
         assert "setlocale" in result.trace
         assert "sleep" not in result.trace
-        assert len(result.stats["memory"].data) > 8
-        assert len(result.stats["memory"].data) < 30
-        assert len(result.stats["cpu"].data) > 8
-        assert len(result.stats["cpu"].data) < 30
-        assert len(result.stats["disk"]["/"].data) > 8
-        assert len(result.stats["disk"]["/"].data) < 30
+        assert len(result.stats["memory"]) > 8
+        assert len(result.stats["memory"]) < 30
+        assert len(result.stats["cpu"]) > 8
+        assert len(result.stats["cpu"]) < 30
+        assert len(result.stats["disk"]["/"]) > 8
+        assert len(result.stats["disk"]["/"]) < 30
     else:
         print(f"Warning: uname is not 'Linux': {os.uname()}; ltrace not tested.")
 
@@ -533,12 +533,6 @@ def test_set_env_trace():
     result = logger.run("TEST_ENV=abdc env | grep TEST_ENV", trace="strace")
     assert "TEST_ENV=abdc" in result.stdout
 
-def test_svg():
-    logger = Logger(stack()[0][3], Path.cwd())
-    result = logger.run("sleep 1", measure=["cpu"], interval=0.1)
-    assert "<svg " in result.stats["cpu"].svg
-    assert "</svg>" in result.stats["cpu"].svg
-
 def test_log_book_traceAndStats():
     if os.uname().sysname == "Linux":
         logger = Logger(stack()[0][3], Path.cwd())
@@ -552,20 +546,14 @@ def test_log_book_traceAndStats():
                             summary=True)
         assert "setlocale" in logger.log_book[0]["trace"]
         assert "sleep" not in logger.log_book[0]["trace"]
-        assert len(logger.log_book[0]["stats"]["memory"]["data"]) > 8
-        assert len(logger.log_book[0]["stats"]["memory"]["data"]) < 30
-        assert len(logger.log_book[0]["stats"]["cpu"]["data"]) > 8
-        assert len(logger.log_book[0]["stats"]["cpu"]["data"]) < 30
-        assert len(logger.log_book[0]["stats"]["disk"]["/"]["data"]) > 8
-        assert len(logger.log_book[0]["stats"]["disk"]["/"]["data"]) < 30
+        assert len(logger.log_book[0]["stats"]["memory"]) > 8
+        assert len(logger.log_book[0]["stats"]["memory"]) < 30
+        assert len(logger.log_book[0]["stats"]["cpu"]) > 8
+        assert len(logger.log_book[0]["stats"]["cpu"]) < 30
+        assert len(logger.log_book[0]["stats"]["disk"]["/"]) > 8
+        assert len(logger.log_book[0]["stats"]["disk"]["/"]) < 30
     else:
         print(f"Warning: uname is not 'Linux': {os.uname()}; ltrace not tested.")
-
-def test_log_book_svg():
-    logger = Logger(stack()[0][3], Path.cwd())
-    result = logger.log("Sleep", "sleep 1", measure=["cpu"], interval=0.1)
-    assert "<svg " in logger.log_book[0]["stats"]["cpu"]["svg"]
-    assert "</svg>" in logger.log_book[0]["stats"]["cpu"]["svg"]
 
 def test_change_pwd():
     logger = Logger(stack()[0][3], Path.cwd())

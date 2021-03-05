@@ -2,36 +2,10 @@
 from collections.abc import Iterable, Mapping
 import datetime
 import pkgutil
-from io import StringIO
-import itertools
-import numpy as np
-import matplotlib.pyplot as pyplot
-from matplotlib.ticker import MultipleLocator, FormatStrFormatter
 import os
 from pathlib import Path
-import subprocess
-import sys
 import textwrap
-import time
 from types import SimpleNamespace, GeneratorType
-
-def make_svg_line_chart(data):
-    fig, ax = pyplot.subplots(figsize=(6, 2), dpi=80)
-    pyplot.plot(*zip(*data))
-    pyplot.yticks(np.arange(0, 110, 10))
-    ax.xaxis.set_ticks([])
-    ax.yaxis.set_major_locator(MultipleLocator(20))
-    ax.yaxis.set_major_formatter(FormatStrFormatter('%d%%'))
-    ax.yaxis.set_minor_locator(MultipleLocator(10))
-    ax.spines['right'].set_visible(False)
-    ax.spines['top'].set_visible(False)
-    string_io = StringIO()
-    fig.savefig(string_io, format='svg')
-    pyplot.close(fig)
-    string_io.seek(0)
-    lines = string_io.readlines()
-    svg = "".join(itertools.dropwhile(lambda line: "<svg" not in line, lines))
-    return svg
 
 def nested_SimpleNamespace_to_dict(object):
     if "_asdict" in dir(object):
@@ -207,7 +181,7 @@ def command_card(log, strm_dir):
         stats = [("memory", "Memory Usage"), ("cpu", "CPU Usage")]
         for stat, stat_title in stats:
             if log["stats"].get(stat):
-                data = log["stats"][stat]["data"]
+                data = log["stats"][stat]
                 diagnostics.append(timeseries_plot(cmd_id, data, stat_title))
         if log["stats"].get("disk"):
             uninteresting_disks = ["/var", "/var/log", "/var/log/audit",
@@ -216,8 +190,7 @@ def command_card(log, strm_dir):
                            if x not in uninteresting_disks }
             # We sort because JSON deserialization may change
             # the ordering of the map.
-            for disk, stats in sorted(disk_stats.items()):
-                data = stats["data"]
+            for disk, data in sorted(disk_stats.items()):
                 diagnostics.append(disk_timeseries_plot(cmd_id, data, disk))
     info.append(diagnostics_card(cmd_id, *diagnostics))
 

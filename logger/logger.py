@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
-from .classes import Shell, Trace, StatsCollector, Stat, trace_collector, stats_collectors
-from .util import make_svg_line_chart, nested_SimpleNamespace_to_dict, opening_html_text, closing_html_text, append_html, message_card, command_card, child_logger_card, parent_logger_card_html
+from .classes import Shell, Trace, StatsCollector, trace_collector, stats_collectors
+from .util import nested_SimpleNamespace_to_dict, opening_html_text, closing_html_text, append_html, message_card, command_card, child_logger_card, parent_logger_card_html
 from collections.abc import Iterable, Mapping
 import datetime
 import distutils.dir_util as dir_util
@@ -648,11 +648,7 @@ class DiskStatsCollector(StatsCollector):
         for m in self.mountpoints:
             self.stats[m].append((timestamp, psutil.disk_usage(m).percent))
     def unproxied_stats(self):
-        def make_stat(stat):
-            data = list(stat)
-            svg = make_svg_line_chart(data)
-            return Stat(data, svg)
-        return {k:make_stat(v) for k,v in self.stats.items()}
+        return { k:list(v) for k,v in self.stats.items() }
 
 @StatsCollector.subclass
 class CPUStatsCollector(StatsCollector):
@@ -664,9 +660,7 @@ class CPUStatsCollector(StatsCollector):
         timestamp = round(time.time() * 1000)
         self.stats.append((timestamp, psutil.cpu_percent(interval=None)))
     def unproxied_stats(self):
-        data = list(self.stats)
-        svg = make_svg_line_chart(data)
-        return Stat(data, svg)
+        return list(self.stats)
 
 @StatsCollector.subclass
 class MemoryStatsCollector(StatsCollector):
@@ -678,7 +672,5 @@ class MemoryStatsCollector(StatsCollector):
         timestamp = round(time.time() * 1000)
         self.stats.append((timestamp, psutil.virtual_memory().percent))
     def unproxied_stats(self):
-        data = list(self.stats)
-        svg = make_svg_line_chart(data)
-        return Stat(data, svg)
+        return list(self.stats)
 

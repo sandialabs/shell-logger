@@ -175,8 +175,6 @@ class Shell:
                 stderr = stderr.strip()
         return stdout, stderr
 
-Stat = namedtuple("Stat", ["data", "svg"])
-
 class Trace:
     trace_name = "undefined"
     subclasses = []
