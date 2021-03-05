@@ -4,6 +4,7 @@ import datetime
 import pkgutil
 import os
 from pathlib import Path
+import re
 import textwrap
 from types import SimpleNamespace, GeneratorType
 
@@ -74,10 +75,9 @@ def flatten(element):
         yield element
 
 def parent_logger_card_html(name, *args):
-    indent = ' '*4
-    header, footer = split_template(parent_logger_template,
-                                    "parent_body",
-                                    name=name)
+    header, indent, footer = split_template(parent_logger_template,
+                                            "parent_body",
+                                            name=name)
     yield header
     for arg in flatten(args):
         yield textwrap.indent(arg, indent)
@@ -89,12 +89,11 @@ def child_logger_card(log):
     return child_logger_card_html(log.name, heading, log.duration, *child_html)
 
 def child_logger_card_html(name, heading, duration, *args):
-    indent = ' '*8
-    header, footer = split_template(child_logger_template,
-                                    "child_body",
-                                    name=name,
-                                    heading=heading,
-                                    duration=duration)
+    header, indent, footer = split_template(child_logger_template,
+                                            "child_body",
+                                            name=name,
+                                            heading=heading,
+                                            duration=duration)
     yield header
     for arg in args:
         if isinstance(arg, str):
@@ -105,11 +104,10 @@ def child_logger_card_html(name, heading, duration, *args):
     yield footer
 
 def command_card_html(message, duration, *args):
-    indent = ' '*8
-    header, footer = split_template(command_template,
-                                    "more_info",
-                                    message=message,
-                                    duration=duration)
+    header, indent, footer = split_template(command_template,
+                                            "more_info",
+                                            message=message,
+                                            duration=duration)
     yield header
     for arg in args:
         if isinstance(arg, str):
@@ -120,8 +118,7 @@ def command_card_html(message, duration, *args):
     yield footer
 
 def message_card(text):
-    indent = ' '*8
-    header, footer = split_template(message_template, "message")
+    header, indent, footer = split_template(message_template, "message")
     text = html_encode(text)
     text = "<pre>" + text.replace('\n', "<br>") + "</pre>"
     yield header
@@ -129,10 +126,9 @@ def message_card(text):
     yield footer
 
 def command_detail_list(cmd_id, *args):
-    indent = ' '*16
-    header, footer = split_template(command_detail_list_template,
-                                    "details",
-                                    cmd_id=cmd_id)
+    header, indent, footer = split_template(command_detail_list_template,
+                                            "details",
+                                            cmd_id=cmd_id)
     yield header
     for arg in args:
         if isinstance(arg, str):
@@ -217,16 +213,15 @@ def stat_chart_card(labels, data, title, id):
 
 def output_block_card(title, string, cmd_id, collapsed=True):
     name = title.replace(' ', '_').lower()
-    indent = ' '*12
     if collapsed:
         template = output_card_collapsed_template
     else:
         template = output_card_template
-    header, footer = split_template(template,
-                                    "output_block",
-                                    name=name,
-                                    title=title,
-                                    cmd_id=cmd_id)
+    header, indent, footer = split_template(template,
+                                            "output_block",
+                                            name=name,
+                                            title=title,
+                                            cmd_id=cmd_id)
     yield header
     for line in output_block(string, name, cmd_id):
         yield textwrap.indent(line, indent)
@@ -242,11 +237,9 @@ def output_block(input, name, cmd_id):
             yield string
 
 def diagnostics_card(cmd_id, *args):
-    indent = ' '*16
-
-    header, footer = split_template(diagnostics_template,
-                                    "diagnostics",
-                                    cmd_id=cmd_id)
+    header, indent, footer = split_template(diagnostics_template,
+                                            "diagnostics",
+                                            cmd_id=cmd_id)
     yield header
     for arg in args:
         if isinstance(arg, str):
@@ -257,13 +250,12 @@ def diagnostics_card(cmd_id, *args):
     yield footer
 
 def output_block_html(lines, name, cmd_id):
-    indent = ' '*12
     if isinstance(lines, str):
         lines = lines.split('\n')
-    header, footer = split_template(output_block_template,
-                                    "table_contents",
-                                    name=name,
-                                    cmd_id=cmd_id)
+    header, indent, footer = split_template(output_block_template,
+                                            "table_contents",
+                                            name=name,
+                                            cmd_id=cmd_id)
     yield header
     lineno = 0
     for line in lines:
@@ -272,10 +264,11 @@ def output_block_html(lines, name, cmd_id):
     yield footer
 
 def split_template(template, split_at, **kwargs):
-    split_marker = bytes([4]).decode()
-    placeholder = template.format(**{**kwargs, split_at: split_marker})
-    before, after = placeholder.split(split_marker + '\n')
-    return before, after
+    format = { k:v for k, v in kwargs.items() if k != split_at }
+    pattern = re.compile(f"(.*\\n)(\\s*)\\{{{split_at}\\}}\\n(.*)",
+                         flags=re.DOTALL)
+    before, indent, after = pattern.search(template).groups()
+    return before.format(**format), indent, after.format(**format)
 
 def output_line_html(line, lineno):
     encoded_line = html_encode(line).rstrip()
