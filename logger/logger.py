@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 from .classes import Shell, Trace, StatsCollector, trace_collector, stats_collectors
-from .util import nested_SimpleNamespace_to_dict, opening_html_text, closing_html_text, append_html, message_card, command_card, child_logger_card, parent_logger_card_html
+from .util import nested_SimpleNamespace_to_dict, opening_html_text, closing_html_text, append_html, html_message_card, message_card, command_card, child_logger_card, parent_logger_card_html
 from collections.abc import Iterable, Mapping
 import datetime
 import distutils.dir_util as dir_util
@@ -360,6 +360,24 @@ class Logger:
         }
         self.log_book.append(log)
 
+    def html_print(self, msg, msg_title="HTML Message"):
+        """
+        Save a message to the log but don't print it in the console.
+
+        Parameters:
+            msg (str):        Message to save to the log.
+            msg_title (str):  Title of the message to save to the log.
+        """
+
+        log = {
+            'msg': msg,
+            'msg_title': msg_title,
+            'timestamp': str(datetime.datetime.now()),
+            'cmd': None
+        }
+        self.log_book.append(log)
+
+
     def to_html(self):
         """
         This method iterates through each entry in this :class:`Logger`
@@ -385,7 +403,10 @@ class Logger:
             # Message Log Entry
             # -----------------
             if log["cmd"] is None:
-                html.append(message_card(log["msg"]))
+                if log.get("msg_title") is None:
+                    html.append(message_card(log))
+                else:
+                    html.append(html_message_card(log))
                 # Skip the regular log entry stuff
                 continue
 

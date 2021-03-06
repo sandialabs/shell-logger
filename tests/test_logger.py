@@ -618,3 +618,28 @@ def test_SGR_gets_converted_to_HTML(logger):
     assert "color: rgb(96, 140, 240)" in html_text
     assert "background-color: rgb(240, 140, 10)" in html_text
 
+def test_html_print(capsys):
+    logger = Logger(stack()[0][3], Path.cwd())
+    logger.html_print("The quick brown fox jumps over the lazy dog.",
+                      msg_title="Brown Fox")
+    logger.print("The quick orange zebra jumps over the lazy dog.")
+    out, err = capsys.readouterr()
+    logger.finalize()
+
+    # Load the HTML file.
+    html_file = logger.strm_dir / f"{logger.name}.html"
+    assert html_file.exists()
+    with open(html_file, 'r') as hf:
+        html_text = hf.read()
+
+    assert "brown fox" not in out
+    assert "brown fox" not in err
+    assert "Brown Fox" not in out
+    assert "Brown Fox" not in err
+    assert "brown fox" in html_text
+    assert "Brown Fox" in html_text
+
+    assert "orange zebra" not in err
+    assert "orange zebra" in out
+    assert "orange zebra" in html_text
+

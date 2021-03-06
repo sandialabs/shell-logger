@@ -117,9 +117,25 @@ def command_card_html(message, duration, *args):
                 yield textwrap.indent(_arg, indent)
     yield footer
 
-def message_card(text):
+def html_message_card(log):
+    timestamp = log["timestamp"]
+    timestamp = timestamp.replace(' ', '_')
+    timestamp = timestamp.replace(':', '-')
+    timestamp = timestamp.replace('/', '_')
+    timestamp = timestamp.replace('.', '-')
+    header, indent, footer = split_template(html_message_template,
+                                            "message",
+                                            title=log["msg_title"],
+                                            timestamp=timestamp)
+    text = html_encode(log["msg"])
+    text = "<pre>" + text.replace('\n', "<br>") + "</pre>"
+    yield header
+    yield textwrap.indent(text, indent) + '\n'
+    yield footer
+
+def message_card(log):
     header, indent, footer = split_template(message_template, "message")
-    text = html_encode(text)
+    text = html_encode(log["msg"])
     text = "<pre>" + text.replace('\n', "<br>") + "</pre>"
     yield header
     yield textwrap.indent(text, indent) + '\n'
@@ -144,7 +160,7 @@ def command_detail(cmd_id, name, value, hidden=False):
         return command_detail_template.format(name=name, value=value)
 
 def command_card(log, strm_dir):
-    cmd_id = log['cmd_id']
+    cmd_id = log["cmd_id"]
     stdout_path = strm_dir / f"{log['timestamp']}_{cmd_id}_stdout"
     stderr_path = strm_dir / f"{log['timestamp']}_{cmd_id}_stderr"
     trace_path = strm_dir / f"{log['timestamp']}_{cmd_id}_trace"
@@ -423,6 +439,7 @@ output_card_collapsed_template = load_template("output_card_collapsed.html")
 output_block_template          = load_template("output_block.html")
 output_line_template           = load_template("output_line.html")
 message_template               = load_template("message.html")
+html_message_template          = load_template("html_message.html")
 command_template               = load_template("command.html")
 child_logger_template          = load_template("child_logger.html")
 parent_logger_template         = load_template("parent_logger.html")
