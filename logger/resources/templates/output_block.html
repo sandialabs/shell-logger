@@ -2,16 +2,14 @@
     <input type="text"
            id="{cmd_id}-{name}-search"
            onkeyup="outputSearch(this)"
-           target="{cmd_id}-{name}-table"
+           target="{cmd_id}-{name}-code"
            placeholder="Regex Search...">
     <input type="checkbox"
            id="{cmd_id}-{name}-checkbox"
            onclick="outputSearch(this)"
            name="{cmd_id}-{name}-show-duplicates">
     <label for="{cmd_id}-{name}-show-duplicates"> Show duplicates</label><br>
-    <table class="output display table" id="{cmd_id}-{name}-table">
-        <tbody>
-            {table_contents}
-        </tbody>
-    </table>
+    <code class="output" id="{cmd_id}-{name}-code">
+        {table_contents}
+    </code>
 </div>

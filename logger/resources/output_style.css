@@ -1,41 +1,25 @@
 div.output-block-card {
     margin-top: 6pt;
 }
-table.output {
+code.output {
+    display: grid;
+    grid-template-columns: auto 1fr;
+}
+code.output pre {
+    line-height: 1.2;
+    font-size: 100%;
+    white-space: pre-wrap;
     width: 100%;
+    margin: 0;
 }
-table.output tr {
-    line-height: 1;
-    table-layout: fixed;
-    width: auto;
-}
-table.output tr[line-number] {
-    text-align: left;
-    clear: left;
-}
-table.output tr[line-number] td {
-    padding: 0;
-    border: 0;
-}
-table.output tr[line-number] td code {
-    white-space: pre;
-}
-table.output code {
-    vertical-align: top;
-}
-table.output td {
-    width: 100%;
-}
-table.output tr[line-number]::before {
+code.output div[line-number]::before {
+    line-height: 1.2;
+    font-size: 100%;
     font-family: SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace;
-    font-size: 87.5%;
     opacity: 0.5;
-    padding-bottom: 2px;
     white-space: pre;
     content: attr(line-number) ". ";
     display: inline-block;
-    float: right;
-    margin-left: auto;
-    text-align: right;
+    float: left;
 }
 
