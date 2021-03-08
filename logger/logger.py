@@ -8,7 +8,10 @@ import distutils.dir_util as dir_util
 import json
 import os
 from pathlib import Path
-import psutil
+try:
+    import psutil
+except:
+    psutil = None
 import random
 import re
 import select
@@ -652,46 +655,81 @@ class Ltrace(Trace):
             args += f" -e '{self.expression}'"
         return args
 
-@StatsCollector.subclass
-class DiskStatsCollector(StatsCollector):
-    stat_name = "disk"
-    def __init__(self, interval, manager):
-        super().__init__(interval, manager)
-        self.stats = manager.dict()
-        self.mountpoints = [ p.mountpoint for p in psutil.disk_partitions() ]
-        for location in ["/tmp", "/dev/shm", f"/var/run/user/{os.getuid()}"]:
-            if not location in self.mountpoints and Path(location).exists():
-                self.mountpoints.append(location)
-        for m in self.mountpoints:
-            self.stats[m] = manager.list()
-    def collect(self):
-        timestamp = round(time.time() * 1000)
-        for m in self.mountpoints:
-            self.stats[m].append((timestamp, psutil.disk_usage(m).percent))
-    def unproxied_stats(self):
-        return { k:list(v) for k,v in self.stats.items() }
+if psutil is not None:
+    @StatsCollector.subclass
+    class DiskStatsCollector(StatsCollector):
+        stat_name = "disk"
+        def __init__(self, interval, manager):
+            super().__init__(interval, manager)
+            self.stats = manager.dict()
+            self.mountpoints = [
+                p.mountpoint for p in psutil.disk_partitions()
+            ]
+            for location in ["/tmp",
+                             "/dev/shm",
+                             f"/var/run/user/{os.getuid()}"]:
+                if not location in self.mountpoints and Path(location).exists():
+                    self.mountpoints.append(location)
+            for m in self.mountpoints:
+                self.stats[m] = manager.list()
+        def collect(self):
+            timestamp = round(time.time() * 1000)
+            for m in self.mountpoints:
+                self.stats[m].append((timestamp, psutil.disk_usage(m).percent))
+        def unproxied_stats(self):
+            return { k:list(v) for k,v in self.stats.items() }
 
-@StatsCollector.subclass
-class CPUStatsCollector(StatsCollector):
-    stat_name = "cpu"
-    def __init__(self, interval, manager):
-        super().__init__(interval, manager)
-        self.stats = manager.list()
-    def collect(self):
-        timestamp = round(time.time() * 1000)
-        self.stats.append((timestamp, psutil.cpu_percent(interval=None)))
-    def unproxied_stats(self):
-        return list(self.stats)
+    @StatsCollector.subclass
+    class CPUStatsCollector(StatsCollector):
+        stat_name = "cpu"
+        def __init__(self, interval, manager):
+            super().__init__(interval, manager)
+            self.stats = manager.list()
+        def collect(self):
+            timestamp = round(time.time() * 1000)
+            self.stats.append((timestamp, psutil.cpu_percent(interval=None)))
+        def unproxied_stats(self):
+            return list(self.stats)
 
-@StatsCollector.subclass
-class MemoryStatsCollector(StatsCollector):
-    stat_name = "memory"
-    def __init__(self, interval, manager):
-        super().__init__(interval, manager)
-        self.stats = manager.list()
-    def collect(self):
-        timestamp = round(time.time() * 1000)
-        self.stats.append((timestamp, psutil.virtual_memory().percent))
-    def unproxied_stats(self):
-        return list(self.stats)
+    @StatsCollector.subclass
+    class MemoryStatsCollector(StatsCollector):
+        stat_name = "memory"
+        def __init__(self, interval, manager):
+            super().__init__(interval, manager)
+            self.stats = manager.list()
+        def collect(self):
+            timestamp = round(time.time() * 1000)
+            self.stats.append((timestamp, psutil.virtual_memory().percent))
+        def unproxied_stats(self):
+            return list(self.stats)
+else:
+    @StatsCollector.subclass
+    class DiskStatsCollector(StatsCollector):
+        stat_name = "disk"
+        def __init__(self, interval, manager):
+            super().__init__(interval, manager)
+        def collect(self):
+            pass
+        def unproxied_stats(self):
+            return None
+
+    @StatsCollector.subclass
+    class CPUStatsCollector(StatsCollector):
+        stat_name = "cpu"
+        def __init__(self, interval, manager):
+            super().__init__(interval, manager)
+        def collect(self):
+            pass
+        def unproxied_stats(self):
+            return None
+
+    @StatsCollector.subclass
+    class MemoryStatsCollector(StatsCollector):
+        stat_name = "memory"
+        def __init__(self, interval, manager):
+            super().__init__(interval, manager)
+        def collect(self):
+            pass
+        def unproxied_stats(self):
+            return None
 
