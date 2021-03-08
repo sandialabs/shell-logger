@@ -1,14 +1,32 @@
 <div>
-    <input type="text"
-           id="{cmd_id}-{name}-search"
-           onkeyup="outputSearch(this)"
-           target="{cmd_id}-{name}-code"
-           placeholder="Regex Search...">
-    <input type="checkbox"
-           id="{cmd_id}-{name}-checkbox"
-           onclick="outputSearch(this)"
-           name="{cmd_id}-{name}-show-duplicates">
-    <label for="{cmd_id}-{name}-show-duplicates"> Show duplicates</label><br>
+    <div class="search-controls">
+        <div class="search-controls-right">
+            <div class="search-inputs">
+                <div class="collapse {cmd_id}-{name}-search-inputs">
+                    <input type="text"
+                           id="{cmd_id}-{name}-search"
+                           onkeyup="outputSearch(this)"
+                           target="{cmd_id}-{name}-code"
+                           placeholder="Regex Search...">
+                    <input type="checkbox"
+                           id="{cmd_id}-{name}-checkbox"
+                           onclick="outputSearch(this)"
+                           name="{cmd_id}-{name}-show-duplicates">
+                    <label for="{cmd_id}-{name}-show-duplicates">
+                        Show duplicates
+                    </label>
+                </div>
+            </div>
+            <svg type="button"
+                 role="button"
+                 data-target=".{cmd_id}-{name}-search-inputs"
+                 data-toggle="collapse"
+                 width="16pt"
+                 height="16pt">
+                <use href="#search-icon" />
+            </svg>
+        </div>
+    </div>
     <code class="output" id="{cmd_id}-{name}-code">
         {table_contents}
     </code>

@@ -404,10 +404,12 @@ def html_header():
         embed_style("output_style.css") +
         embed_style("diagnostics_style.css") +
         embed_style("stat_chart_style.css") +
+        embed_style("search_controls.css") +
         embed_script("jquery.slim.min.js") +
         embed_script("bootstrap.bundle.min.js") +
         embed_script("Chart.bundle.min.js") +
         embed_script("search_output.js") +
+        embed_html("search_icon.svg") +
         "</head>"
     )
 
@@ -424,6 +426,9 @@ def embed_script(resource):
         pkgutil.get_data(__name__, f"resources/{resource}").decode() +
         "\n</script>\n"
     )
+
+def embed_html(resource):
+    return pkgutil.get_data(__name__, f"resources/{resource}").decode()
 
 def load_template(template):
     template_file = f"resources/templates/{template}"
