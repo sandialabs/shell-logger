@@ -27,12 +27,12 @@ function outputSearch(caller)
     tr = table.getElementsByTagName("tr");
     lastTxtValue = null
     neighborOpacity = [
-        { offset: -3, opacity: 0.30 },
-        { offset: -2, opacity: 0.40 },
-        { offset: -1, opacity: 0.50 },
-        { offset:  1, opacity: 0.50 },
-        { offset:  2, opacity: 0.40 },
-        { offset:  3, opacity: 0.30 },
+        { offset: -3, opacity: 0.40 },
+        { offset: -2, opacity: 0.50 },
+        { offset: -1, opacity: 0.60 },
+        { offset:  1, opacity: 0.60 },
+        { offset:  2, opacity: 0.50 },
+        { offset:  3, opacity: 0.40 },
     ]
     matchingIndexes = []
 
