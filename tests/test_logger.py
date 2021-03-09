@@ -643,3 +643,56 @@ def test_html_print(capsys):
     assert "orange zebra" in out
     assert "orange zebra" in html_text
 
+def test_append_mode():
+    logger1 = Logger(stack()[0][3] + "_1", Path.cwd())
+    logger1.log("Print HELLO to stdout", "echo HELLO")
+    logger1.print("Printed once to stdout")
+    logger1.html_print("Printed ONCE to STDOUT")
+    logger1.finalize()
+
+    logger2 = Logger.append(logger1.html_file)
+    logger2.log("Print THERE to stdout", "echo THERE")
+    logger2.print("Printed twice to stdout")
+    logger2.html_print("Printed TWICE to STDOUT")
+    logger2.finalize()
+
+    logger3 = Logger.append(logger2.log_dir)
+    logger3.log("Print LOGGER to stdout", "echo LOGGER")
+    logger3.print("Printed thrice to stdout")
+    logger3.html_print("Printed THRICE to STDOUT")
+    logger3.finalize()
+
+    logger4 = Logger.append(logger3.strm_dir)
+    logger4.log("Print !!! to stdout", "echo '!!!'")
+    logger4.print("Printed finally to stdout")
+    logger4.html_print("Printed FINALLY to STDOUT")
+    logger4.finalize()
+
+    logger5 = Logger.append(logger4.strm_dir / f"{logger4.name}.json")
+    logger5.log("Print 111 to stdout", "echo '111'")
+    logger5.print("Printed for real to stdout")
+    logger5.html_print("Printed FOR REAL to STDOUT")
+    logger5.finalize()
+
+    # Load the HTML file.
+    html_file = logger1.strm_dir / f"{logger1.name}.html"
+    assert html_file.exists()
+    with open(html_file, 'r') as hf:
+        html_text = hf.read()
+
+    assert "once" in html_text
+    assert "ONCE" in html_text
+    assert "HELLO" in html_text
+    assert "twice" in html_text
+    assert "TWICE" in html_text
+    assert "THERE" in html_text
+    assert "thrice" in html_text
+    assert "THRICE" in html_text
+    assert "LOGGER" in html_text
+    assert "finally" in html_text
+    assert "FINALLY" in html_text
+    assert "!!!" in html_text
+    assert "for real" in html_text
+    assert "FOR REAL" in html_text
+    assert "111" in html_text
+

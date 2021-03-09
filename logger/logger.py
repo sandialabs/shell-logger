@@ -170,6 +170,21 @@ class Logger:
             increased by 1.
     """
 
+    def append(path):
+        path = Path(path)
+        if path.is_dir():
+            try:
+                path = next(path.glob("*.html"))
+            except:
+                raise RuntimeError(f"{path} does not have an html file")
+        if path.is_symlink():
+            path = path.resolve(strict=True)
+        if path.is_file() and path.name[-5:] ==".html":
+            path = path.parent / (path.name[:-5] + ".json")
+        with open(path, "r") as jf:
+            loaded_logger = json.load(jf, cls=LoggerDecoder)
+        return loaded_logger
+
     def __init__(self, name, log_dir=Path.cwd(), strm_dir=None, html_file=None,
                  indent=0, log=None, init_time=None, done_time=None,
                  duration=None):
