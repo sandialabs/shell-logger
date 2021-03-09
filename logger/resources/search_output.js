@@ -2,7 +2,7 @@ function outputSearch(caller)
 {
     // The parameter caller may be wither the search bar or the checkbox for
     // "show duplicates"
-    var input, filter, code, pre, i, txtValue, lastTxtValue, checkbox, showDuplicates;
+    var input, filter, table, tr, td, i, txtValue, lastTxtValue, checkbox, showDuplicates;
     for (i = 0; i < caller.parentNode.childNodes.length; i++)
     {
         if (caller.parentNode.childNodes[i].type == "checkbox")
@@ -15,31 +15,29 @@ function outputSearch(caller)
         }
     }
     filter = input.value.toUpperCase();
-    code = document.getElementById(input.getAttribute("target"));
-    pre = code.getElementsByTagName("pre");
-    div = code.querySelectorAll('[line-number]');
+    table = document.getElementById(input.getAttribute("target"));
+    tr = table.getElementsByTagName("tr");
     showDuplicates = checkbox.checked;
 
 
-    // Loop through all code rows, and hide those who don't match the
+    // Loop through all table rows, and hide those who don't match the
     // search query
-    for (i = 0; i < pre.length; i++)
+    for (i = 0; i < tr.length; i++)
     {
-        txtValue = pre[i].textContent || pre[i].innerText;
+        td = tr[i].getElementsByTagName("td");
+        txtValue = td[1].textContent || td[1].innerText;
         txtValue = txtValue.replaceAll("<[^>]*>", "");
         txtValue = txtValue.replaceAll("\u2060", "").toUpperCase();
         if (!filter ||
             (txtValue.match(filter) && (!(txtValue === lastTxtValue) ||
                                         showDuplicates)))
         {
-            pre[i].style.display = "";
-            div[i].style.display = "";
+            tr[i].style.display = "";
             lastTxtValue = txtValue;
         }
         else
         {
-            pre[i].style.display = "none";
-            div[i].style.display = "none";
+            tr[i].style.display = "none";
         }
     }
 }

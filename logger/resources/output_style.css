@@ -1,25 +1,29 @@
 div.output-block-card {
     margin-top: 6pt;
 }
-code.output {
-    display: grid;
-    grid-template-columns: auto 1fr;
+table.output {
+    display: table;
+    table-layout: fixed;
+    word-break: break-all;
 }
-code.output pre {
+table.output td {
+    vertical-align: top;
+}
+table.output pre {
     line-height: 1.2;
-    font-size: 100%;
+    font-size: 87.5%;
     white-space: pre-wrap;
     width: 100%;
     margin: 0;
 }
-code.output div[line-number]::before {
+table.output div[line-number]::before {
     line-height: 1.2;
-    font-size: 100%;
+    font-size: 87.5%;
     font-family: SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace;
     opacity: 0.5;
     white-space: pre;
     content: attr(line-number) ". ";
-    display: inline-block;
+    display: block;
     float: left;
 }
 
