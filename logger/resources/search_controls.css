@@ -1,11 +1,14 @@
 div.search-controls {
     height: 28pt;
 }
-
 div.search-controls-right {
     float: right;
 }
-
 div.search-controls div.search-inputs {
     display: inline-block;
+}
+div.search-controls button.output-search-button {
+    padding-top: 2px;
+    padding-bottom: 2px;
+    vertical-align: top;
 }
