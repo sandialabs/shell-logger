@@ -252,9 +252,12 @@ class Logger:
             self.html_file = self.strm_dir / (name.replace(' ', '_') + '.html')
 
         if self.is_parent:
-            html_text = opening_html_text() + "\n"
-            with open(self.html_file, 'w') as f:
-                f.write(html_text)
+            if self.html_file.exists():
+                with open(self.html_file, 'a') as f:
+                    f.write(f"<!-- {self.init_time:} Append to log started -->")
+            else:
+                self.html_file.touch()
+
 
 
     def update_done_time(self):
@@ -445,6 +448,10 @@ class Logger:
         file. For each entry, the ``stdout``/``stderr`` are copied from their
         respective files in the ``strm_dir``.
         """
+        if self.is_parent:
+            html_text = opening_html_text() + "\n"
+            with open(self.html_file, 'w') as f:
+                f.write(html_text)
 
         for element in self.to_html():
             append_html(element, output=self.html_file)
