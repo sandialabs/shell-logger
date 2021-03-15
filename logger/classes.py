@@ -94,6 +94,7 @@ class Shell:
         try:
             output = self.tee(self.shell.stdout, self.shell.stderr, **kwargs)
         except KeyboardInterrupt:
+            os.close(self.aux_stdin_wfd)
             raise RuntimeError(
                 f"There was a problem running the command ``{command}''. "
                 "This is a fatal error and we cannot continue. Ensure that"
