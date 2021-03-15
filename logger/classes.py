@@ -9,6 +9,7 @@ import os
 from pathlib import Path
 import subprocess
 import sys
+import _thread
 from threading import Thread
 import time
 from types import SimpleNamespace
@@ -90,7 +91,14 @@ class Shell:
         os.write(self.aux_stdin_wfd, f"RET_CODE=$?\n".encode())
         os.write(self.aux_stdin_wfd, f"printf '\\4'\n".encode())
         os.write(self.aux_stdin_wfd, f"printf '\\4' 1>&2\n".encode())
-        output = self.tee(self.shell.stdout, self.shell.stderr, **kwargs)
+        try:
+            output = self.tee(self.shell.stdout, self.shell.stderr, **kwargs)
+        except KeyboardInterrupt:
+            raise RuntimeError(
+                f"There was a problem running the command ``{command}''. "
+                "This is a fatal error and we cannot continue. Ensure that"
+                "the syntax of the command is correct."
+            )
         finish = round(time.time() * 1000)
         aux_out, _ = self.auxiliary_command(posix="echo $RET_CODE")
         try:
@@ -118,11 +126,13 @@ class Shell:
         stderr_tee = [sys_stderr, stderr_io, stderr_path]
         def write(input, outputs):
             chunk = os.read(input.fileno(), 4096)
-            while chunk[-1] != 4:
+            while chunk and chunk[-1] != 4:
                 for output in outputs:
                     if output is not None:
                         output.write(chunk.decode())
                 chunk = os.read(input.fileno(), 4096)
+            if not chunk:
+                _thread.interrupt_main()
             chunk = chunk[:-1]
             for output in outputs:
                 if output is not None:

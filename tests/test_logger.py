@@ -309,6 +309,17 @@ def test_devnull_stdin():
     assert not p.is_alive()
 
 
+def test_syntax_error():
+    logger = Logger(stack()[0][3], Path.cwd())
+    cmd = "echo (this is a syntax error"
+    msg = "Test out a syntax error"
+
+    p = Process(target=logger.log, args=(msg, cmd))
+    p.start()
+    p.join(1)
+    assert not p.is_alive()
+
+
 def test_logger_does_not_store_stdout_string_by_default():
     logger = Logger(stack()[0][3], Path.cwd())
     cmd = ("dd if=/dev/urandom bs=1024 count=262144 | "
