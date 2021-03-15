@@ -97,7 +97,7 @@ class Shell:
             os.close(self.aux_stdin_wfd)
             raise RuntimeError(
                 f"There was a problem running the command ``{command}''. "
-                "This is a fatal error and we cannot continue. Ensure that"
+                "This is a fatal error and we cannot continue. Ensure that "
                 "the syntax of the command is correct."
             )
         finish = round(time.time() * 1000)
