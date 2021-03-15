@@ -52,7 +52,7 @@ class Shell:
 
         os.set_inheritable(self.aux_stdout_wfd, True)
         os.set_inheritable(self.aux_stderr_wfd, True)
-        self.shell = subprocess.Popen(os.environ["SHELL"],
+        self.shell = subprocess.Popen(os.environ.get("SHELL") or "/bin/sh",
                                       stdin=self.aux_stdin_rfd,
                                       stdout=subprocess.PIPE,
                                       stderr=subprocess.PIPE,
