@@ -523,7 +523,9 @@ class Logger:
                                   for i in range(9))
 
         if isinstance(cmd, list):
-            cmd_str = ' '.join(str(x) for x in cmd)
+            cmd_str = ' '.join(
+                "'" + str(x).replace("'", "'\"'\"'") + "'" for x in cmd
+            )
         else:
             cmd_str = str(cmd)
 

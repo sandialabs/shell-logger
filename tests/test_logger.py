@@ -707,3 +707,17 @@ def test_append_mode():
     assert "FOR REAL" in html_text
     assert "111" in html_text
 
+def test_list_commands():
+    logger = Logger(stack()[0][3], Path.cwd())
+    cmd = ["echo" "'"]
+    msg = "Make sure echo \"'\" doesn't hang"
+
+    p = Process(target=logger.log, args=(msg, cmd))
+    p.start()
+    p.join(1)
+    assert not p.is_alive()
+    result = logger.log("Test out commands provided as arrays",
+                        ["echo", "'", '"', "(test)"],
+                        return_info=True)
+    assert result["stdout"] == "' \" (test)\n"
+
