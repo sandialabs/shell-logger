@@ -130,14 +130,14 @@ class Shell:
             while chunk and chunk[-1] != 4:
                 for output in outputs:
                     if output is not None:
-                        output.write(chunk.decode())
+                        output.write(chunk.decode(errors="ignore"))
                 chunk = os.read(input.fileno(), 4096)
             if not chunk:
                 _thread.interrupt_main()
             chunk = chunk[:-1]
             for output in outputs:
                 if output is not None:
-                    output.write(chunk.decode())
+                    output.write(chunk.decode(errors="ignore"))
         threads = [
             Thread(target=write, args=(stdout, stdout_tee)),
             Thread(target=write, args=(stderr, stderr_tee)),

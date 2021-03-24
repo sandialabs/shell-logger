@@ -721,3 +721,11 @@ def test_list_commands():
                         return_info=True)
     assert result["stdout"] == "' \" (test)\n"
 
+def test_invalid_decodings():
+    logger = Logger(stack()[0][3], Path.cwd())
+    result = logger.log("Print invalid start byte for bytes decode()",
+                        "printf '\\xFDHello\\n'",
+                        return_info=True)
+    assert result["stdout"] == "Hello\n"
+
+
