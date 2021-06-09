@@ -6,6 +6,10 @@
     margin: 0 2pt;
 }
 
+.html-message {
+    margin-top: 12pt;
+}
+
 .html-message .html-message-title {
     font-weight: 500;
 }
