@@ -1,10 +1,53 @@
 <div class="output-block card">
     <div class="card-body">
-        <h5 class="card-title"
-            role="button"
-            data-target="#{cmd_id}-{name}"
-            data-toggle="collapse">{title}</h5>
-        <div class="collapse" id={cmd_id}-{name}>
+        <div class="output-title-area">
+            <span class="card-title"
+                role="button"
+                data-target=".{cmd_id}-{name}-collapsable"
+                data-toggle="collapse">{title}</span>
+            <span class="search {cmd_id}-{name}-collapsable collapse">
+                <svg type="button"
+                     role="button"
+                     class="output-search-icon"
+                     data-target=".{cmd_id}-{name}-search-inputs"
+                     data-toggle="collapse"
+                     width="14pt"
+                     height="14pt">
+                    <use href="#search-icon" />
+                </svg>
+                <span class="search-inputs">
+                    <span class="collapse {cmd_id}-{name}-search-inputs">
+                        <input type="checkbox"
+                               id="{cmd_id}-{name}-show-duplicates-checkbox"
+                               onclick="outputSearch(this)"
+                               name="{cmd_id}-{name}-show-duplicates">
+                        <label for="{cmd_id}-{name}-show-duplicates">
+                            Show duplicates
+                        </label>
+                        <input type="checkbox"
+                               id="{cmd_id}-{name}-show-neighbors-checkbox"
+                               onclick="outputSearch(this)"
+                               name="{cmd_id}-{name}-show-neighbors">
+                        <label for="{cmd_id}-{name}-show-neighbors">
+                            Show nearby
+                        </label>
+                        <input type="text"
+                               id="{cmd_id}-{name}-search-text"
+                               target="{cmd_id}-{name}-code"
+                               placeholder="Regex Search...">
+                        </input>
+                        <button type="button"
+                                id="{cmd_id}-{name}-search-button"
+                                onclick="outputSearch(this)"
+                                class="btn btn-primary output-search-button">
+                            Search
+                        </button>
+                    </span>
+                </span>
+            </span>
+        </div>
+        <div class="{cmd_id}-{name}-collapsable collapse"
+             id={cmd_id}-{name}>
             {output_block}
         </div>
     </div>
