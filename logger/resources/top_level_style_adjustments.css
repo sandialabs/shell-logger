@@ -3,4 +3,8 @@
 }
 pre {
     margin: 0;
+    font-family: Courier,Consolas,"Liberation Mono","Courier New",monospace;
+}
+code {
+    font-family: Courier,Consolas,"Liberation Mono","Courier New",monospace;
 }
