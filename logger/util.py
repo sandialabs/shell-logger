@@ -84,15 +84,13 @@ def parent_logger_card_html(name, *args):
     yield footer
 
 def child_logger_card(log):
-    heading = f"h{min(log.indent + 1, 4)}"
     child_html = log.to_html()
-    return child_logger_card_html(log.name, heading, log.duration, *child_html)
+    return child_logger_card_html(log.name, log.duration, *child_html)
 
-def child_logger_card_html(name, heading, duration, *args):
+def child_logger_card_html(name, duration, *args):
     header, indent, footer = split_template(child_logger_template,
                                             "child_body",
                                             name=name,
-                                            heading=heading,
                                             duration=duration)
     yield header
     for arg in args:
@@ -103,11 +101,14 @@ def child_logger_card_html(name, heading, duration, *args):
                 yield textwrap.indent(_arg, indent)
     yield footer
 
-def command_card_html(message, duration, *args):
+def command_card_html(log, *args):
     header, indent, footer = split_template(command_template,
                                             "more_info",
-                                            message=message,
-                                            duration=duration)
+                                            cmd_id=log["cmd_id"],
+                                            command=fixed_width(log["cmd"]),
+                                            message=log["msg"],
+                                            return_code=log["return_code"],
+                                            duration=log["duration"])
     yield header
     for arg in args:
         if isinstance(arg, str):
@@ -206,7 +207,7 @@ def command_card(log, strm_dir):
                 diagnostics.append(disk_timeseries_plot(cmd_id, data, disk))
     info.append(diagnostics_card(cmd_id, *diagnostics))
 
-    return command_card_html(log["msg"], log["duration"], *info)
+    return command_card_html(log, *info)
 
 def timeseries_plot(cmd_id, data_tuples, series_title):
     labels = [miliseconds_to_human_time(x) for x, _ in data_tuples]
@@ -396,14 +397,15 @@ def html_header():
         "<head>" +
         embed_style("bootstrap.min.css") +
         embed_style("Chart.min.css") +
+        embed_style("top_level_style_adjustments.css") +
         embed_style("parent_logger_style.css") +
         embed_style("child_logger_style.css") +
         embed_style("command_style.css") +
+        embed_style("message_style.css") +
         embed_style("detail_list_style.css") +
         embed_style("code_block_style.css") +
         embed_style("output_style.css") +
         embed_style("diagnostics_style.css") +
-        embed_style("stat_chart_style.css") +
         embed_style("search_controls.css") +
         embed_script("jquery.slim.min.js") +
         embed_script("bootstrap.bundle.min.js") +

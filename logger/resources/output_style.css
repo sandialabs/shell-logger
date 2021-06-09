@@ -1,5 +1,29 @@
-div.output-block-card {
+.output-block {
     margin-top: 6pt;
+}
+.output-block .card-title {
+    display: inline;
+    font-weight: 500;
+}
+.output-block .search {
+    height: 95%;
+    float: right;
+}
+.output-block .output-title-area {
+    height: 20pt;
+}
+.output-block .search-inputs {
+    font-size: 10pt;
+    margin-right: 6pt;
+    float: right;
+}
+.output-block .output-search-button {
+    font-size: 10pt;
+    padding: 0pt 1pt 1pt;
+    margin-bottom: 3pt;
+}
+.output-block .output-search-icon {
+    float: right;
 }
 table.output {
     display: table;

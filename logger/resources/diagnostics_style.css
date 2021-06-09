@@ -1,8 +1,23 @@
-div.diagnostics {
-    margin-bottom: 6pt;
+.diagnostics {
+    margin-top: 6pt;
 }
 
-div.diagnostics-body {
-    margin-top: 6pt;
+.diagnostics-body {
+    margin-top: 0;
+    padding: 0;
+}
+
+.diagnostics .card-title {
+    font-weight: 500;
+}
+
+.stat-chart .card-title {
+    font-weight: 500;
+}
+
+.stat-chart {
+    width: 47.5%;
+    margin: 6pt 1.25% 0;
+    float: left;
 }
 

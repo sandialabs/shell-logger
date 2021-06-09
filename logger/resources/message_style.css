@@ -1,0 +1,12 @@
+.message-body {
+    margin-top: 12pt;
+}
+
+.message-body pre {
+    margin: 0 2pt;
+}
+
+.html-message .html-message-title {
+    font-weight: 500;
+}
+

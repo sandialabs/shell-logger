@@ -137,10 +137,10 @@ def test_child_logger_duration_displayed_correctly_in_HTML(logger):
         html_text = hf.read()
 
     assert child2.duration is not None
-    assert f"<br>Duration: {child2.duration}\n" in html_text
+    assert f"Duration: {child2.duration}" in html_text
 
     assert child3.duration is not None
-    assert f"<br>Duration: {child3.duration}\n" in html_text
+    assert f"Duration: {child3.duration}" in html_text
 
 
 def test_finalize_creates_JSON_with_correct_information(logger):
@@ -197,11 +197,11 @@ def test_finalize_creates_HTML_with_correct_information(logger):
     # Command info.
     assert ">test cmd</" in html_text
     assert f"Duration: {logger.log_book[0]['duration']}" in html_text
-    assert f"Time:</b> {logger.log_book[0]['timestamp']}" in html_text
-    assert "Command:</b> <code>echo 'Hello world out'; "\
+    assert f"Time:</span> {logger.log_book[0]['timestamp']}" in html_text
+    assert "Command:</span> <code>echo 'Hello world out'; "\
         "echo 'Hello world error' 1&gt;&amp;2" in html_text
-    assert f"CWD:</b> {Path.cwd()}" in html_text
-    assert "Return Code:</b> 0" in html_text
+    assert f"CWD:</span> {Path.cwd()}" in html_text
+    assert "Return Code:</span> 0" in html_text
 
     # Print statement.
     assert "Hello world child" in html_text
@@ -215,11 +215,11 @@ def test_finalize_creates_HTML_with_correct_information(logger):
     assert 'class="card-title">Used Space on /' in html_text
     assert "Environment</" in html_text
     assert "PATH=" in html_text
-    assert "Hostname:" in html_text
-    assert "User:" in html_text
-    assert "Group:" in html_text
-    assert "Shell:" in html_text
-    assert "umask:" in html_text
+    assert "Hostname:</span>" in html_text
+    assert "User:</span>" in html_text
+    assert "Group:</span>" in html_text
+    assert "Shell:</span>" in html_text
+    assert "umask:</span>" in html_text
     assert "ulimit</" in html_text
 
     # Child Logger

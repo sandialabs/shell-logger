@@ -1,3 +1,12 @@
+.child-logger {
+    margin-top: 12pt;
+}
+
+.child-logger .duration {
+    font-size: 12px;
+    color: darkgray;
+}
+
 .child-logger-heading {
     line-height: 1.5;
     display: inline;
