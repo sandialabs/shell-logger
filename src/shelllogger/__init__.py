@@ -1,1 +1,1 @@
-from .logger import Logger, LoggerDecoder, LoggerEncoder
+from .ShellLogger import ShellLogger, ShellLoggerDecoder, ShellLoggerEncoder
