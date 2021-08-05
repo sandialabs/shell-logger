@@ -22,23 +22,23 @@ import time
 from types import SimpleNamespace
 
 
-class LoggerEncoder(json.JSONEncoder):
+class ShellLoggerEncoder(json.JSONEncoder):
     """
-    This is a helper class to make the :class:`Logger` class JSON serializable.
-    This particular class is used in the process of saving :class:`Logger`
+    This is a helper class to make the :class:`ShellLogger` class JSON serializable.
+    This particular class is used in the process of saving :class:`ShellLogger`
     objects to JSON.
 
     Usage::
 
         import json
         with open('path_to_json_file', 'w') as jf:
-            json.dump(data, jf, cls=LoggerEncoder)
+            json.dump(data, jf, cls=ShellLoggerEncoder)
 
     """
     def default(self, obj):
-        if isinstance(obj, Logger):
+        if isinstance(obj, ShellLogger):
             logger = {
-                **{'__type__': 'Logger'},
+                **{'__type__': 'ShellLogger'},
                 **{k:self.default(v) for k, v in obj.__dict__.items()}
             }
             return logger
@@ -80,17 +80,17 @@ class LoggerEncoder(json.JSONEncoder):
             return json.JSONEncoder.default(self, obj)
 
 
-class LoggerDecoder(json.JSONDecoder):
+class ShellLoggerDecoder(json.JSONDecoder):
     """
-    This is a helper class to make the :class:`Logger` class JSON serializable.
-    This particular class is used in the process of retrieving :class:`Logger`
+    This is a helper class to make the :class:`ShellLogger` class JSON serializable.
+    This particular class is used in the process of retrieving :class:`ShellLogger`
     objects from JSON.
 
     Usage::
 
         import json
         with open('path_to_json_file', 'r') as jf:
-            logger = json.load(jf, cls=LoggerDecoder)
+            logger = json.load(jf, cls=ShellLoggerDecoder)
 
     """
     def __init__(self):
@@ -99,15 +99,15 @@ class LoggerDecoder(json.JSONDecoder):
     def dict_to_object(self, obj):
         """
         This converts data dictionaries given by the JSONDecoder into objects
-        of type :class:`Logger`, :class:`datetime.datetime`, etc.
+        of type :class:`ShellLogger`, :class:`datetime.datetime`, etc.
         """
         if '__type__' not in obj:
             return obj
-        elif obj['__type__'] == 'Logger':
-            logger = Logger(obj['name'], obj['log_dir'],
-                            obj['strm_dir'], obj['html_file'], obj['indent'],
-                            obj['log_book'], obj['init_time'],
-                            obj['done_time'], obj['duration'])
+        elif obj['__type__'] == 'ShellLogger':
+            logger = ShellLogger(obj['name'], obj['log_dir'],
+                                 obj['strm_dir'], obj['html_file'], obj['indent'],
+                                 obj['log_book'], obj['init_time'],
+                                 obj['done_time'], obj['duration'])
             return logger
         elif obj['__type__'] == 'datetime':
             return datetime.datetime.strptime(obj['value'], obj['format'])
@@ -119,23 +119,23 @@ class LoggerDecoder(json.JSONDecoder):
             return Shell(Path(obj['pwd']))
 
 
-class Logger:
+class ShellLogger:
     """
     This class will keep track of commands run in the shell, their durations,
     descriptions, ``stdout``, ``stderr``, and ``return_code``.  When the
-    :func:`finalize` method is called, the :class:`Logger` object will
-    aggregate all the data from its commands and child :class:`Logger` objects
+    :func:`finalize` method is called, the :class:`ShellLogger` object will
+    aggregate all the data from its commands and child :class:`ShellLogger` objects
     (see example below) into both JSON and HTML files.
 
     Example::
 
-        > Parent Logger Object Name
+        > Parent ShellLogger Object Name
             Duration: 18h 20m 35s
           > cmd1  (Click arrow '>' to expand for more details)
             Duration: 0.25s
-          > Child Logger Object Name (i.e. Trilinos)
+          > Child ShellLogger Object Name (i.e. Trilinos)
             Duration: 3h 10m 0s
-            > Child Logger Object Name (i.e. Configure)
+            > Child ShellLogger Object Name (i.e. Configure)
               Duration: 1m 3s
               > cmd1
         etc...
@@ -150,22 +150,22 @@ class Logger:
         file can be recreated again later if needed.
 
     Attributes:
-        done_time (datetime):  The time this :class:`Logger` object is done
+        done_time (datetime):  The time this :class:`ShellLogger` object is done
             with its commands/messages.
-        duration (str):  String formatted duration of this :class:`Logger`,
+        duration (str):  String formatted duration of this :class:`ShellLogger`,
             updated when the :func:`finalize` method is called.
-        init_time (datetime):  The time this :class:`Logger` object was
+        init_time (datetime):  The time this :class:`ShellLogger` object was
             created.
         log (list):  A list containing log entries and child.
-            :class:`Logger` objects in the order they were created.
+            :class:`ShellLogger` objects in the order they were created.
         log_dir (Path):  Path to where the logs are stored for the parent
-            :class:`Logger` and all its children.
-        name (str):  The name of the :class:`Logger` object.
+            :class:`ShellLogger` and all its children.
+        name (str):  The name of the :class:`ShellLogger` object.
         strm_dir (Path):  Path to directory where ``stdout``/``stderr`` stream
             logs are stored.
         html_file (Path):  Path to main HTML file for the parent and
-            children :class:`Logger` objects.
-        indent (int):  The indentation level of this :class:`Logger` object.
+            children :class:`ShellLogger` objects.
+        indent (int):  The indentation level of this :class:`ShellLogger` object.
             The parent has a level 0. Each successive child's indent is
             increased by 1.
     """
@@ -182,7 +182,7 @@ class Logger:
         if path.is_file() and path.name[-5:] ==".html":
             path = path.parent / (path.name[:-5] + ".json")
         with open(path, "r") as jf:
-            loaded_logger = json.load(jf, cls=LoggerDecoder)
+            loaded_logger = json.load(jf, cls=ShellLoggerDecoder)
         return loaded_logger
 
     def __init__(self, name, log_dir=Path.cwd(), strm_dir=None, html_file=None,
@@ -190,29 +190,29 @@ class Logger:
                  duration=None):
         """
         Parameters:
-            name (str):  Name to give to this Logger object.
+            name (str):  Name to give to this ShellLogger object.
             log_dir (Path):  Path to directory where log files will be stored.
             strm_dir (Path):  Path to directory where ``stdout``/``stderr``
-                stream logs are stored.  This is helpful for parent Logger
-                objects to give to child Logger objects in order to keep things
+                stream logs are stored.  This is helpful for parent ShellLogger
+                objects to give to child ShellLogger objects in order to keep things
                 in the same directory.
             html_file (Path):  Path to main HTML file for the parent and
-                children Logger objects. If ``None`` (default), this is the
-                parent Logger object, and it will need to create the file.
-            indent (int):  The indentation level of this Logger object. The
+                children ShellLogger objects. If ``None`` (default), this is the
+                parent ShellLogger object, and it will need to create the file.
+            indent (int):  The indentation level of this ShellLogger object. The
                 parent has a level 0. Each successive child's indent is
                 increased by 1.
             log (list):  Optionally provide an existing log list to the
-                :class:`Logger` object.  This is mainly used when importing
-                :class:`Logger` objects from a JSON file, and can generally be
+                :class:`ShellLogger` object.  This is mainly used when importing
+                :class:`ShellLogger` objects from a JSON file, and can generally be
                 left at the default value - an empty list.
             init_time (datetime):  Optionally provide an init_time to the
-                :class:`Logger` object.  This is mainly used when importing
-                :class:`Logger` objects from a JSON file, and can generally be
+                :class:`ShellLogger` object.  This is mainly used when importing
+                :class:`ShellLogger` objects from a JSON file, and can generally be
                 left at the default value - the current time.
             done_time (datetime):  Optionally provide a done_time to the
-                :class:`Logger` object.  This is mainly used when importing
-                :class:`Logger` objects from a JSON file, and can generally be
+                :class:`ShellLogger` object.  This is mainly used when importing
+                :class:`ShellLogger` objects from a JSON file, and can generally be
                 left at the default value - the current time.
         """
 
@@ -235,7 +235,7 @@ class Logger:
 
         # strm_dir
         # -------
-        # If there isn't a strm_dir given by the parent Logger, this is the
+        # If there isn't a strm_dir given by the parent ShellLogger, this is the
         # parent. Create the strm_dir.
         if strm_dir is None:
             now = self.init_time.strftime("%Y-%m-%d_%H.%M.%S.%f_")
@@ -264,7 +264,7 @@ class Logger:
         """
         Allows the ``done_time`` to be updated before
         :func:`finalize` is called.  This is especially useful for child
-        :class:`Logger` objects who might finish their commands before the
+        :class:`ShellLogger` objects who might finish their commands before the
         parent finalizes everything.
         """
         self.done_time = datetime.datetime.now()
@@ -272,7 +272,7 @@ class Logger:
     def __update_duration(self):
         """
         Updates the `duration` attribute with the time from the beginning of
-        the :class:`Logger` object's creation until now.
+        the :class:`ShellLogger` object's creation until now.
         """
         self.update_done_time()
         dur = self.done_time - self.init_time
@@ -280,7 +280,7 @@ class Logger:
 
     def check_duration(self):
         """
-        Returns the current duration from the beginning of the :class:`Logger`
+        Returns the current duration from the beginning of the :class:`ShellLogger`
         object's creation until now.
 
         Returns:
@@ -292,11 +292,11 @@ class Logger:
 
     def change_log_dir(self, new_log_dir):
         """
-        Change the :attr:`log_dir` of this :class:`Logger` object and all
+        Change the :attr:`log_dir` of this :class:`ShellLogger` object and all
         children recursively.
 
         Warning:
-            Only run this method on the top-level parent :class:`Logger`
+            Only run this method on the top-level parent :class:`ShellLogger`
             object!  Otherwise, parents and children in a tree will have
             different :attr:`log_dir` 's and things will break.
 
@@ -304,37 +304,37 @@ class Logger:
             new_log_dir (Path):  Path to the new :attr:`log_dir`.
         """
 
-        # This only gets executed once by the top-level parent Logger object.
+        # This only gets executed once by the top-level parent ShellLogger object.
         if self.log_dir.exists():
             dir_util.copy_tree(self.log_dir, new_log_dir)
             shutil.rmtree(self.log_dir)
 
-        # Change the strm_dir, html_file, and log_dir for every child Logger
+        # Change the strm_dir, html_file, and log_dir for every child ShellLogger
         # recursively.
         self.strm_dir = new_log_dir / self.strm_dir.relative_to(self.log_dir)
         self.html_file = new_log_dir / self.html_file.relative_to(self.log_dir)
         self.log_dir = new_log_dir.resolve()
         for log in self.log_book:
-            if isinstance(log, Logger):
+            if isinstance(log, ShellLogger):
                 log.change_log_dir(self.log_dir)
 
     def add_child(self, child_name):
         """
-        Creates and returns a 'child' :class:`Logger` object. This will be one
+        Creates and returns a 'child' :class:`ShellLogger` object. This will be one
         step indented in the tree of the output log (see example in class
         docstring). The total time for this child will be recorded when the
         :func:`finalize` method is called in the child object.
 
         Parameters:
-            child_name (str):  Name of the child :class:`Logger` object.
+            child_name (str):  Name of the child :class:`ShellLogger` object.
 
         Returns:
-            Logger:  Child :class:`Logger` object.
+            ShellLogger:  Child :class:`ShellLogger` object.
         """
 
         # Create the child object and add it to the list of children.
-        child = Logger(child_name, self.log_dir, self.strm_dir, self.html_file,
-                       self.indent+1)
+        child = ShellLogger(child_name, self.log_dir, self.strm_dir, self.html_file,
+                            self.indent + 1)
         self.log_book.append(child)
 
         return child
@@ -401,7 +401,7 @@ class Logger:
 
     def to_html(self):
         """
-        This method iterates through each entry in this :class:`Logger`
+        This method iterates through each entry in this :class:`ShellLogger`
         object's log list and appends corresponding HTML text to the main HTML
         file. For each entry, the ``stdout``/``stderr`` are copied from their
         respective files in the ``strm_dir``.
@@ -410,10 +410,10 @@ class Logger:
         html = []
 
         for log in self.log_book:
-            # Child Logger
+            # Child ShellLogger
             # ------------
-            if isinstance(log, Logger):
-                # Update the duration of this Logger's commands
+            if isinstance(log, ShellLogger):
+                # Update the duration of this ShellLogger's commands
                 if log.duration is None:
                     log.__update_duration()
                 html.append(child_logger_card(log))
@@ -443,7 +443,7 @@ class Logger:
 
     def finalize(self):
         """
-        This method iterates through each entry in this :class:`Logger`
+        This method iterates through each entry in this :class:`ShellLogger`
         object's log list and appends corresponding HTML text to the main HTML
         file. For each entry, the ``stdout``/``stderr`` are copied from their
         respective files in the ``strm_dir``.
@@ -474,7 +474,7 @@ class Logger:
             json_file = self.strm_dir / json_file
 
             with open(json_file, 'w') as jf:
-                json.dump(self, jf, cls=LoggerEncoder, sort_keys=True, indent=4)
+                json.dump(self, jf, cls=ShellLoggerEncoder, sort_keys=True, indent=4)
 
     def log(self, msg, cmd, cwd=None, live_stdout=False,
             live_stderr=False, return_info=False, verbose=False,

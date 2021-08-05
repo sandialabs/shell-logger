@@ -4,34 +4,31 @@ import os
 import psutil
 import pytest
 import re
-import sys
 import time
 from multiprocessing import Process
 from pathlib import Path
-build_script_dir = Path(__file__).resolve().parent.parent
-sys.path.insert(0, build_script_dir / "logger")
-from logger import Logger, LoggerDecoder
+from src.shelllogger import ShellLogger, ShellLoggerDecoder
 
 
 def test_initialization_creates_strm_dir():
     """
-    Verify the initialization of a parent :class:`Logger` object creates a
+    Verify the initialization of a parent :class:`ShellLogger` object creates a
     temporary directory (``log_dir/%Y-%m-%d_%H%M%S``<random string>) if not
     already created.
     """
 
-    logger = Logger(stack()[0][3], Path.cwd())
+    logger = ShellLogger(stack()[0][3], Path.cwd())
     timestamp = logger.init_time.strftime("%Y-%m-%d_%H.%M.%S.%f")
     assert len(list(Path.cwd().glob(f"{timestamp}_*"))) == 1
 
 
 def test_initialization_creates_html_file():
     """
-    Verify the initialization of a parent :class:`Logger` object creates a
+    Verify the initialization of a parent :class:`ShellLogger` object creates a
     starting HTML file in the :attr:`log_dir`.
     """
 
-    logger = Logger(stack()[0][3], Path.cwd())
+    logger = ShellLogger(stack()[0][3], Path.cwd())
     timestamp = logger.init_time.strftime("%Y-%m-%d_%H.%M.%S.%f")
     strm_dir = next(Path.cwd().glob(f"{timestamp}_*"))
     assert (strm_dir / f'{stack()[0][3]}.html').exists()
@@ -39,7 +36,7 @@ def test_initialization_creates_html_file():
 
 def test_log_method_creates_tmp_stdout_stderr_files(logger):
     """
-    Verify that logging a command will create files in the :class:`Logger`
+    Verify that logging a command will create files in the :class:`ShellLogger`
     object's :attr:`strm_dir` corresponding to the ``stdout`` and ``stderr`` of
     the command.
     """
@@ -76,7 +73,7 @@ def test_log_method_return_info_works_correctly(return_info):
     ``return_code``, but ``stdout`` and ``stderr`` are ``None``.
     """
 
-    logger = Logger(stack()[0][3], Path.cwd())
+    logger = ShellLogger(stack()[0][3], Path.cwd())
 
     #            stdout          ;        stderr
     cmd = "echo 'Hello world out'; echo 'Hello world error' 1>&2"
@@ -101,7 +98,7 @@ def test_log_method_live_stdout_stderr_works_correctly(capsys, live_stdout,
     for the :func:`log` method.
     """
 
-    logger = Logger(stack()[0][3], Path.cwd())
+    logger = ShellLogger(stack()[0][3], Path.cwd())
 
     #            stdout          ;        stderr
     cmd = "echo 'Hello world out'; echo 'Hello world error' 1>&2"
@@ -155,9 +152,9 @@ def test_finalize_creates_JSON_with_correct_information(logger):
     json_file = logger.strm_dir / "Parent.json"
     assert json_file.exists()
     with open(json_file, 'r') as jf:
-        loaded_logger = json.load(jf, cls=LoggerDecoder)
+        loaded_logger = json.load(jf, cls=ShellLoggerDecoder)
 
-    # Parent Logger
+    # Parent ShellLogger
     assert logger.log_dir == loaded_logger.log_dir
     assert logger.strm_dir == loaded_logger.strm_dir
     assert logger.html_file == loaded_logger.html_file
@@ -167,7 +164,7 @@ def test_finalize_creates_JSON_with_correct_information(logger):
     assert logger.done_time == loaded_logger.done_time
     assert logger.log_book[0] == loaded_logger.log_book[0]
 
-    # Child Logger
+    # Child ShellLogger
     child = logger.log_book[2]
     loaded_child = loaded_logger.log_book[2]
     assert child.log_dir == loaded_child.log_dir
@@ -222,7 +219,7 @@ def test_finalize_creates_HTML_with_correct_information(logger):
     assert "umask:</span>" in html_text
     assert "ulimit</" in html_text
 
-    # Child Logger
+    # Child ShellLogger
     assert "Child</" in html_text
 
 
@@ -264,9 +261,9 @@ def test_JSON_file_can_reproduce_HTML_file(logger):
     json_file = logger.strm_dir / "Parent.json"
     assert json_file.exists()
     with open(json_file, 'r') as jf:
-        loaded_logger = json.load(jf, cls=LoggerDecoder)
+        loaded_logger = json.load(jf, cls=ShellLoggerDecoder)
 
-    # Call finalize on the loaded Logger object.
+    # Call finalize on the loaded ShellLogger object.
     loaded_logger.finalize()
 
     # Load the new HTML file's contents and compare.
@@ -279,7 +276,7 @@ def test_JSON_file_can_reproduce_HTML_file(logger):
 
 
 def test_under_stress():
-    logger = Logger(stack()[0][3], Path.cwd())
+    logger = ShellLogger(stack()[0][3], Path.cwd())
     cmd = ("dd if=/dev/urandom bs=1024 count=262144 | "
            "LC_ALL=C tr -c '[:print:]' '*' ; sleep 1")
     msg = "Get 256 MB of stdout from /dev/urandom"
@@ -288,7 +285,7 @@ def test_under_stress():
 
 
 def test_heredoc():
-    logger = Logger(stack()[0][3], Path.cwd())
+    logger = ShellLogger(stack()[0][3], Path.cwd())
     cmd = "bash << EOF\necho hello\nEOF"
     msg = "Test out a heredoc"
 
@@ -299,7 +296,7 @@ def test_heredoc():
 
 
 def test_devnull_stdin():
-    logger = Logger(stack()[0][3], Path.cwd())
+    logger = ShellLogger(stack()[0][3], Path.cwd())
     cmd = "cat"
     msg = "Make sure stdin is redirected to /dev/null by default"
 
@@ -310,7 +307,7 @@ def test_devnull_stdin():
 
 
 def test_syntax_error():
-    logger = Logger(stack()[0][3], Path.cwd())
+    logger = ShellLogger(stack()[0][3], Path.cwd())
     cmd = "echo (this is a syntax error"
     msg = "Test out a syntax error"
 
@@ -321,7 +318,7 @@ def test_syntax_error():
 
 
 def test_logger_does_not_store_stdout_string_by_default():
-    logger = Logger(stack()[0][3], Path.cwd())
+    logger = ShellLogger(stack()[0][3], Path.cwd())
     cmd = ("dd if=/dev/urandom bs=1024 count=262144 | "
            "LC_ALL=C tr -c '[:print:]' '*' ; sleep 1")
     msg = "Get 256 MB of stdout from /dev/urandom"
@@ -345,7 +342,7 @@ def test_logger_does_not_store_stdout_string_by_default():
     assert mem_usage > 134217728
 
 def test_logger_does_not_store_trace_string_by_default():
-    logger = Logger(stack()[0][3], Path.cwd())
+    logger = ShellLogger(stack()[0][3], Path.cwd())
 
     logger.log("echo hello",
                "echo hello",
@@ -361,26 +358,26 @@ def test_logger_does_not_store_trace_string_by_default():
     assert logger.log_book[1]["trace"] is not None
 
 def test_stdout():
-    logger = Logger(stack()[0][3], Path.cwd())
+    logger = ShellLogger(stack()[0][3], Path.cwd())
     assert logger.run(":").stdout == ""
     assert logger.run("echo hello").stdout == "hello\n"
 
 def test_returncode():
-    logger = Logger(stack()[0][3], Path.cwd())
+    logger = ShellLogger(stack()[0][3], Path.cwd())
     assert logger.run(":").returncode == 0
 
 def test_args():
-    logger = Logger(stack()[0][3], Path.cwd())
+    logger = ShellLogger(stack()[0][3], Path.cwd())
     assert logger.run("echo hello").args == "echo hello"
 
 def test_stderr():
-    logger = Logger(stack()[0][3], Path.cwd())
+    logger = ShellLogger(stack()[0][3], Path.cwd())
     command = "echo hello 1>&2"
     assert logger.run(command).stderr == "hello\n"
     assert logger.run(command).stdout == ""
 
 def test_timing():
-    logger = Logger(stack()[0][3], Path.cwd())
+    logger = ShellLogger(stack()[0][3], Path.cwd())
     command = "sleep 1"
     if os.name == "posix":
         command = "sleep 1"
@@ -394,7 +391,7 @@ def test_timing():
     assert result.finish >= result.start
 
 def test_auxiliaryData():
-    logger = Logger(stack()[0][3], Path.cwd())
+    logger = ShellLogger(stack()[0][3], Path.cwd())
     result = logger.run("pwd")
     assert result.pwd == result.stdout.strip()
     result = logger.run(":")
@@ -411,7 +408,7 @@ def test_auxiliaryData():
                "group, shell, and ulimit not tested.")
 
 def test_workingDirectory():
-    logger = Logger(stack()[0][3], Path.cwd())
+    logger = ShellLogger(stack()[0][3], Path.cwd())
     command = "pwd"
     directory = "/tmp"
     if os.name == "posix":
@@ -427,7 +424,7 @@ def test_workingDirectory():
     assert result.pwd == directory
 
 def test_trace():
-    logger = Logger(stack()[0][3], Path.cwd())
+    logger = ShellLogger(stack()[0][3], Path.cwd())
     if os.uname().sysname == "Linux":
         result = logger.run("echo letter", trace="ltrace")
         assert 'getenv("POSIXLY_CORRECT")' in result.trace
@@ -439,7 +436,7 @@ def test_trace():
                "not tested.")
 
 def test_traceExpression():
-    logger = Logger(stack()[0][3], Path.cwd())
+    logger = ShellLogger(stack()[0][3], Path.cwd())
     if os.uname().sysname == "Linux":
         result = logger.run("echo hello",
                          trace="ltrace",
@@ -451,7 +448,7 @@ def test_traceExpression():
                "expression not tested.")
 
 def test_traceSummary():
-    logger = Logger(stack()[0][3], Path.cwd())
+    logger = ShellLogger(stack()[0][3], Path.cwd())
     if os.uname().sysname == "Linux":
         result = logger.run("echo hello", trace="ltrace", summary=True)
         assert 'getenv("POSIXLY_CORRECT")' not in result.trace
@@ -465,7 +462,7 @@ def test_traceSummary():
                "summary not tested.")
 
 def test_traceExpressionAndSummary():
-    logger = Logger(stack()[0][3], Path.cwd())
+    logger = ShellLogger(stack()[0][3], Path.cwd())
     if os.uname().sysname == "Linux":
         echoLocation = logger.run("which echo").stdout.strip()
         result = logger.run("echo hello",
@@ -487,7 +484,7 @@ def test_traceExpressionAndSummary():
                "expression+summary not tested.")
 
 def test_stats():
-    logger = Logger(stack()[0][3], Path.cwd())
+    logger = ShellLogger(stack()[0][3], Path.cwd())
     result = logger.run("sleep 1", measure=["cpu", "memory", "disk"], interval=0.1)
     assert len(result.stats["memory"]) > 8
     assert len(result.stats["memory"]) < 30
@@ -500,7 +497,7 @@ def test_stats():
         print(f"Warning: os.name is not 'posix': {os.name}; disk usage not fully tested.")
 
 def test_traceAndStats():
-    logger = Logger(stack()[0][3], Path.cwd())
+    logger = ShellLogger(stack()[0][3], Path.cwd())
     if os.uname().sysname == "Linux":
         result = logger.run("sleep 1",
                             measure=["cpu", "memory", "disk"],
@@ -520,7 +517,7 @@ def test_traceAndStats():
         print(f"Warning: uname is not 'Linux': {os.uname()}; ltrace not tested.")
 
 def test_traceAndStat():
-    logger = Logger(stack()[0][3], Path.cwd())
+    logger = ShellLogger(stack()[0][3], Path.cwd())
     if os.uname().sysname == "Linux":
         result = logger.run("sleep 1",
                             measure=["cpu"],
@@ -538,7 +535,7 @@ def test_traceAndStat():
 
 @pytest.mark.skip(reason="Not sure it's worth it to fix this or not")
 def test_set_env_trace():
-    logger = Logger(stack()[0][3], Path.cwd())
+    logger = ShellLogger(stack()[0][3], Path.cwd())
     result = logger.run("TEST_ENV=abdc env | grep TEST_ENV", trace="ltrace")
     assert "TEST_ENV=abdc" in result.stdout
     result = logger.run("TEST_ENV=abdc env | grep TEST_ENV", trace="strace")
@@ -546,7 +543,7 @@ def test_set_env_trace():
 
 def test_log_book_traceAndStats():
     if os.uname().sysname == "Linux":
-        logger = Logger(stack()[0][3], Path.cwd())
+        logger = ShellLogger(stack()[0][3], Path.cwd())
         result = logger.log("Sleep",
                             "sleep 1",
                             return_info=True,
@@ -567,7 +564,7 @@ def test_log_book_traceAndStats():
         print(f"Warning: uname is not 'Linux': {os.uname()}; ltrace not tested.")
 
 def test_change_pwd():
-    logger = Logger(stack()[0][3], Path.cwd())
+    logger = ShellLogger(stack()[0][3], Path.cwd())
     pwd_command = "pwd"
     directory1 = "/"
     directory2 = "/tmp"
@@ -591,7 +588,7 @@ def test_change_pwd():
     assert result.pwd == directory2
 
 def test_returncode():
-    logger = Logger(stack()[0][3], Path.cwd())
+    logger = ShellLogger(stack()[0][3], Path.cwd())
     command = "false"
     expected_returncode = 1
     if os.name == "posix":
@@ -606,7 +603,7 @@ def test_returncode():
     assert result.returncode == expected_returncode
 
 def test_SGR_gets_converted_to_HTML(logger):
-    logger = Logger(stack()[0][3], Path.cwd())
+    logger = ShellLogger(stack()[0][3], Path.cwd())
     logger.print("\x1B[31mHello\x1B[0m")
     logger.print("\x1B[31;43m\x1B[4mthere\x1B[0m")
     logger.print("\x1B[38;5;196m\x1B[48;5;232m\x1B[4mmr.\x1B[0m logger")
@@ -630,7 +627,7 @@ def test_SGR_gets_converted_to_HTML(logger):
     assert "background-color: rgb(240, 140, 10)" in html_text
 
 def test_html_print(capsys):
-    logger = Logger(stack()[0][3], Path.cwd())
+    logger = ShellLogger(stack()[0][3], Path.cwd())
     logger.html_print("The quick brown fox jumps over the lazy dog.",
                       msg_title="Brown Fox")
     logger.print("The quick orange zebra jumps over the lazy dog.")
@@ -655,31 +652,31 @@ def test_html_print(capsys):
     assert "orange zebra" in html_text
 
 def test_append_mode():
-    logger1 = Logger(stack()[0][3] + "_1", Path.cwd())
+    logger1 = ShellLogger(stack()[0][3] + "_1", Path.cwd())
     logger1.log("Print HELLO to stdout", "echo HELLO")
     logger1.print("Printed once to stdout")
     logger1.html_print("Printed ONCE to STDOUT")
     logger1.finalize()
 
-    logger2 = Logger.append(logger1.html_file)
+    logger2 = ShellLogger.append(logger1.html_file)
     logger2.log("Print THERE to stdout", "echo THERE")
     logger2.print("Printed twice to stdout")
     logger2.html_print("Printed TWICE to STDOUT")
     logger2.finalize()
 
-    logger3 = Logger.append(logger2.log_dir)
+    logger3 = ShellLogger.append(logger2.log_dir)
     logger3.log("Print LOGGER to stdout", "echo LOGGER")
     logger3.print("Printed thrice to stdout")
     logger3.html_print("Printed THRICE to STDOUT")
     logger3.finalize()
 
-    logger4 = Logger.append(logger3.strm_dir)
+    logger4 = ShellLogger.append(logger3.strm_dir)
     logger4.log("Print !!! to stdout", "echo '!!!'")
     logger4.print("Printed finally to stdout")
     logger4.html_print("Printed FINALLY to STDOUT")
     logger4.finalize()
 
-    logger5 = Logger.append(logger4.strm_dir / f"{logger4.name}.json")
+    logger5 = ShellLogger.append(logger4.strm_dir / f"{logger4.name}.json")
     logger5.log("Print 111 to stdout", "echo '111'")
     logger5.print("Printed for real to stdout")
     logger5.html_print("Printed FOR REAL to STDOUT")
@@ -708,7 +705,7 @@ def test_append_mode():
     assert "111" in html_text
 
 def test_list_commands():
-    logger = Logger(stack()[0][3], Path.cwd())
+    logger = ShellLogger(stack()[0][3], Path.cwd())
     cmd = ["echo" "'"]
     msg = "Make sure echo \"'\" doesn't hang"
 
@@ -722,7 +719,7 @@ def test_list_commands():
     assert result["stdout"] == "' \" (test)\n"
 
 def test_invalid_decodings():
-    logger = Logger(stack()[0][3], Path.cwd())
+    logger = ShellLogger(stack()[0][3], Path.cwd())
     result = logger.log("Print invalid start byte for bytes decode()",
                         "printf '\\xFDHello\\n'",
                         return_info=True)
