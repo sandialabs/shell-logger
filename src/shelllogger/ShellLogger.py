@@ -3,7 +3,7 @@
 from __future__ import annotations
 from .classes import (Shell, Trace, StatsCollector, trace_collector,
                       stats_collectors)
-from .util import (nested_SimpleNamespace_to_dict, opening_html_text,
+from .util import (nested_simplenamespace_to_dict, opening_html_text,
                    closing_html_text, append_html, html_message_card,
                    message_card, command_card, child_logger_card,
                    parent_logger_card_html)
@@ -29,8 +29,8 @@ from types import SimpleNamespace
 class ShellLoggerEncoder(json.JSONEncoder):
     """
     This is a helper class to make the :class:`ShellLogger` class JSON
-    serializable.  This particular class is used in the process of
-    saving :class:`ShellLogger` objects to JSON.
+    serializable.  It is used in the process of saving
+    :class:`ShellLogger` objects to JSON.
 
     Usage::
 
@@ -80,8 +80,8 @@ class ShellLoggerEncoder(json.JSONEncoder):
 class ShellLoggerDecoder(json.JSONDecoder):
     """
     This is a helper class to make the :class:`ShellLogger` class JSON
-    serializable.  This particular class is used in the process of
-    retrieving :class:`ShellLogger` objects from JSON.
+    serializable.  It is used in the process of retrieving
+    :class:`ShellLogger` objects from JSON.
 
     Usage::
 
@@ -100,8 +100,7 @@ class ShellLoggerDecoder(json.JSONDecoder):
     def dict_to_object(obj: dict) -> object:
         """
         This converts data dictionaries given by the JSONDecoder into
-        objects of type :class:`ShellLogger`,
-        :class:`datetime`, etc.
+        objects of type :class:`ShellLogger`, :class:`datetime`, etc.
 
         Args:
             obj:  The JSON-serialized representation of an object.
@@ -167,7 +166,7 @@ class ShellLogger:
         stream_dir (Path):  Path to directory where
             ``stdout``/``stderr`` stream logs are stored.
         html_file (Path):  Path to main HTML file for the parent and
-            children :class:`ShellLogger` objects.
+            child :class:`ShellLogger` objects.
         indent (int):  The indentation level of this
             :class:`ShellLogger` object.  The parent has a level 0.
             Each successive child's indent is increased by 1.
@@ -177,7 +176,7 @@ class ShellLogger:
             was created.
         done_time (datetime):  The time this :class:`ShellLogger` object
             is done with its commands/messages.
-        duration (str):  String formatted duration of this
+        duration (str):  The string-formatted duration of this
             :class:`ShellLogger`, updated when the :func:`finalize`
             method is called.
         shell (Shell):  The :class:`Shell` in which all commands will be
@@ -401,7 +400,7 @@ class ShellLogger:
 
         Parameters:
             tdelta:  The time delta object.
-            fmt (str):  The delta format string.
+            fmt:  The delta format string.
 
         Returns:
             A string representation of the time delta.
@@ -461,7 +460,7 @@ class ShellLogger:
         the :attr:`stream_dir`.
 
         Returns:
-            Todo:  Figure this out.
+            Todo:  Figure this out.  List[str] or List[List[str]] or...
         """
         html = []
         for log in self.log_book:
@@ -526,7 +525,7 @@ class ShellLogger:
     def log(
             self,
             msg: str,
-            cmd: Union[str, List[str]],
+            cmd: str,
             cwd: Optional[Path] = None,
             live_stdout: bool = False,
             live_stderr: bool = False,
@@ -536,9 +535,7 @@ class ShellLogger:
             **kwargs
     ) -> dict:
         """
-        Add something to the log.  To conserve memory, ``stdout`` and
-        ``stderr`` will be written to the files as they are being
-        generated.
+        Execute a command, and log the corresponding information.
 
         Parameters:
             msg:  A message to be recorded with the command. This could
@@ -563,7 +560,7 @@ class ShellLogger:
                 causes problems, and we need the flexibility to revert
                 back to standard behavior.
             **kwargs:  Any other keyword arguments to pass on to
-                :func:`run`.
+                :func:`_run`.
 
         Returns:
             A dictionary containing ``stdout``, ``stderr``, ``trace``,
@@ -574,16 +571,11 @@ class ShellLogger:
             dictionary will contain the output of the specified trace;
             otherwise, it will be ``None``.
 
-        Todo:
-            Deprecate the ability to pass in a ``List[str]`` for the
-            ``cmd``.  We automatically convert the list to a string
-            anyway, and there's no need to maintain a similar interface
-            to ``subprocess.Popen()``.
+        Note:
+            To conserve memory, ``stdout`` and ``stderr`` will be
+            written to the files as they are being generated.
         """
         start_time = datetime.now()
-        if isinstance(cmd, list):
-            cmd = ' '.join("'" + str(x).replace("'", "'\"'\"'") + "'"
-                           for x in cmd)
 
         # Create a unique command ID that will be used to find the
         # location of the `stdout`/`stderr` files in the temporary
@@ -591,7 +583,7 @@ class ShellLogger:
         cmd_id = 'cmd_' + ''.join(random.choice(string.ascii_lowercase)
                                   for _ in range(9))
 
-        # Create & open files for `stdout` and `stderr`.
+        # Create & open files for `stdout`, `stderr`, and trace data.
         time_str = start_time.strftime("%Y-%m-%d_%H%M%S")
         stdout_path = self.stream_dir / f"{time_str}_{cmd_id}_stdout"
         stderr_path = self.stream_dir / f"{time_str}_{cmd_id}_stderr"
@@ -613,18 +605,18 @@ class ShellLogger:
                'return_code': 0}
 
         # Execute the command.
-        result = self.run(cmd,
-                          quiet_stdout=not live_stdout,
-                          quiet_stderr=not live_stderr,
-                          stdout_str=return_info,
-                          stderr_str=return_info,
-                          trace_str=return_info,
-                          stdout_path=stdout_path,
-                          stderr_path=stderr_path,
-                          trace_path=trace_path,
-                          devnull_stdin=stdin_redirect,
-                          pwd=cwd,
-                          **kwargs)
+        result = self._run(cmd,
+                           quiet_stdout=not live_stdout,
+                           quiet_stderr=not live_stderr,
+                           stdout_str=return_info,
+                           stderr_str=return_info,
+                           trace_str=return_info,
+                           stdout_path=stdout_path,
+                           stderr_path=stderr_path,
+                           trace_path=trace_path,
+                           devnull_stdin=stdin_redirect,
+                           pwd=cwd,
+                           **kwargs)
 
         # Update the log information and save it to the `log_book`.
         h = int(result.wall / 3600000)
@@ -632,24 +624,25 @@ class ShellLogger:
         s = int(result.wall / 1000) % 60
         log["duration"] = f"{h}h {m}m {s}s"
         log["return_code"] = result.returncode
-        log = {**log, **nested_SimpleNamespace_to_dict(result)}
+        log = {**log, **nested_simplenamespace_to_dict(result)}
         self.log_book.append(log)
         return {'return_code': log['return_code'],
                 'stdout': result.stdout, 'stderr': result.stderr}
 
-    def run(self, command: str, **kwargs) -> SimpleNamespace:
+    def _run(self, command: str, **kwargs) -> SimpleNamespace:
         """
-        Todo:  Fill this out.
+        Execute a command, capturing various information as you go.
 
         Parameters:
-            command:
+            command:  The command to execute.
             **kwargs:
 
         Returns:
 
         Todo:
-            Finish commenting this function.  Figure out how it works
-            first.
+            * Finish commenting this function.  Figure out how it works
+              first.
+            * Replace `**kwargs` with actual parameters.
         """
         completed_process, trace_output = None, None
         for key in ["stdout_str", "stderr_str", "trace_str"]:
@@ -672,6 +665,8 @@ class ShellLogger:
         # /usr/include/linux/un.h`.
         old_tmpdir = os.environ.get("TMPDIR")
         os.environ["TMPDIR"] = "/tmp"
+
+        # Start up any stats or trace collectors the user has requested.
         collectors = stats_collectors(**kwargs)
         stats = {} if len(collectors) > 0 else None
         for collector in collectors:
@@ -685,6 +680,8 @@ class ShellLogger:
             trace = trace_collector(**kwargs)
             command = trace.command(command, **kwargs)
             trace_output = trace.output_path
+
+        # Run the command, and stop any collectors that were started.
         completed_process = self.shell.run(command, **kwargs)
         for collector in collectors:
             stats[collector.stat_name] = collector.finish()
@@ -704,10 +701,12 @@ class ShellLogger:
 
     def auxiliary_information(self) -> SimpleNamespace:
         """
-        Todo:  Insert docstring.
+        Capture all sorts of auxiliary information before running a
+        command.
 
         Returns:
-
+            The working directory, environment, umask, hostname, user,
+            group, shell, and ulimit.
         """
         pwd, _ = self.shell.auxiliary_command(posix="pwd", nt="cd", strip=True)
         environment, _ = self.shell.auxiliary_command(posix="env", nt="set")
@@ -735,11 +734,12 @@ class ShellLogger:
 @Trace.subclass
 class Strace(Trace):
     """
-    Todo:  Insert docstring.
+    An interface between :class:`ShellLogger` and the ``strace``
+    command.
     """
     trace_name = "strace"
 
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs) -> None:
         """
         Todo:  Insert docstring.
         """
@@ -748,9 +748,9 @@ class Strace(Trace):
         self.expression = kwargs.get("expression")
 
     @property
-    def trace_args(self):
+    def trace_args(self) -> str:
         """
-        Todo:  Insert docstring.
+        Wraps a command in a ``strace`` command.
         """
         args = f"strace -f -o {self.output_path}"
         if self.summary:
@@ -796,9 +796,13 @@ if psutil is not None:
         """
         stat_name = "disk"
 
-        def __init__(self, interval, manager):
+        def __init__(self, interval: float, manager: object) -> None:
             """
             Todo:  Insert docstring.
+
+            Args:
+                interval:
+                manager:
             """
             super().__init__(interval, manager)
             self.stats = manager.dict()
@@ -814,17 +818,21 @@ if psutil is not None:
             for m in self.mountpoints:
                 self.stats[m] = manager.list()
 
-        def collect(self):
+        def collect(self) -> None:
             """
-            Todo:  Insert docstring.
+            Poll the disks to determine how much free space you have.
             """
             timestamp = round(time.time() * 1000)
             for m in self.mountpoints:
                 self.stats[m].append((timestamp, psutil.disk_usage(m).percent))
 
-        def unproxied_stats(self):
+        def unproxied_stats(self) -> dict:
             """
-            Todo:  Insert docstring.
+            Todo:  FOO
+
+            Returns:
+                A mapping from the disk mount points to tuples of
+                timestamps and percent of disk space free.
             """
             return {k: list(v) for k, v in self.stats.items()}
 
@@ -881,6 +889,8 @@ if psutil is not None:
             Todo:  Insert docstring.
             """
             return list(self.stats)
+
+# If we don't have `psutil`, return null objects.
 else:
     @StatsCollector.subclass
     class DiskStatsCollector(StatsCollector):

@@ -1,80 +1,147 @@
 #!/usr/bin/env python3
 from collections.abc import Iterable, Mapping
-import datetime
+from datetime import datetime
 import pkgutil
-import os
 from pathlib import Path
 import re
 import textwrap
-from types import SimpleNamespace, GeneratorType
+from types import SimpleNamespace
+from typing import TextIO, Tuple
 
-def nested_SimpleNamespace_to_dict(object):
-    if "_asdict" in dir(object):
-        return nested_SimpleNamespace_to_dict(object._asdict())
-    elif isinstance(object, (str, bytes, tuple)):
-        return object
-    elif isinstance(object, Mapping):
-        return {k:nested_SimpleNamespace_to_dict(v) for k,v in object.items()}
-    elif isinstance(object, Iterable):
-        return [nested_SimpleNamespace_to_dict(x) for x in object]
-    elif isinstance(object, SimpleNamespace):
-        return nested_SimpleNamespace_to_dict(object.__dict__)
+
+def nested_simplenamespace_to_dict(namespace: object) -> object:
+    """
+    Todo:  Figure this out.
+
+    Parameters:
+        namespace:
+
+    Returns:
+
+    """
+    if "_asdict" in dir(namespace):
+        return nested_simplenamespace_to_dict(namespace._asdict())
+    elif isinstance(namespace, (str, bytes, tuple)):
+        return namespace
+    elif isinstance(namespace, Mapping):
+        return {k: nested_simplenamespace_to_dict(v) for k, v in
+                namespace.items()}
+    elif isinstance(namespace, Iterable):
+        return [nested_simplenamespace_to_dict(x) for x in namespace]
+    elif isinstance(namespace, SimpleNamespace):
+        return nested_simplenamespace_to_dict(namespace.__dict__)
     else:
-        return object
+        return namespace
 
-def filter_junk_from_env(env, junk_list):
-    filtered_env = ""
-    for line in env.split('\n'):
-        is_junk = any([line[:len(junk)+1] == f"{junk}=" for junk in junk_list])
-        if not is_junk:
-            filtered_env += line + '\n'
-    return filtered_env
 
-def miliseconds_to_datetime(miliseconds):
-    return datetime.datetime.fromtimestamp(miliseconds / 1000.0)
+def get_human_time(milliseconds: float) -> str:
+    """
+    Get a human-readable date/time.
 
-def miliseconds_to_human_time(miliseconds):
-    return miliseconds_to_datetime(miliseconds).strftime('%Y-%m-%d %H:%M:%S.%f')
+    Parameters:
+        milliseconds:  The number of milliseconds since epoch.
 
-def opening_html_text():
-    return (
-        "<!DOCTYPE html>" +
-        "<html>" +
-        html_header()
+    Returns:
+        A string representation of the date and time.
+    """
+    return datetime.fromtimestamp(milliseconds / 1000.0).strftime(
+        '%Y-%m-%d %H:%M:%S.%f'
     )
 
-def closing_html_text():
+
+def opening_html_text() -> str:
+    """
+    Get the opening HTML text.
+
+    Returns:
+        A string containing the first line of the HTML document through
+        ``</head>``.
+    """
+    return ("<!DOCTYPE html>"
+            + "<html>"
+            + html_header())
+
+
+def closing_html_text() -> str:
+    """
+    Get the closing HTML tag.
+
+    Returns:
+        A string with the closing HTML tag in it.
+    """
     return "</html>"
 
-def append_html(*args, output=None):
-    def _append_html(file, *args):
-        for arg in args:
+
+def append_html(*args: object, output: Path) -> None:
+    """
+    Todo:  Figure this out.
+
+    Parameters:
+        *args: 
+        output:  The HTML file to append to.
+    """
+    def _append_html(f: TextIO, *inner_args: object) -> None:
+        """
+        Todo:  Figure this out.
+
+        Parameters:
+            f:  The HTML file to write to.
+            *inner_args:
+        """
+        for arg in inner_args:
             if isinstance(arg, str):
-                file.write(arg)
+                f.write(arg)
             elif isinstance(arg, bytes):
-                file.write(arg.decode())
+                f.write(arg.decode())
             elif isinstance(arg, Iterable):
-                _append_html(file, *element)
+                _append_html(f, *arg)
             else:
                 raise RuntimeError(f"Unsupported type: {type(arg)}")
-    with open(output, "a") as file:
-        _append_html(file, *args)
 
-def fixed_width(text):
+    with open(output, "a") as output_file:
+        _append_html(output_file, *args)
+
+
+def fixed_width(text: str) -> str:
+    """
+    Wrap the given ``text`` in a ``<code>...</code>`` block such that it
+    displays in a fixed-width font.
+
+    Parameters:
+        text:  The text to wrap.
+
+    Returns:
+        The ``<code>...</code>`` block.
+    """
     return f"<code>{html_encode(text)}</code>"
 
-def flatten(element):
+
+def flatten(element: object) -> object:
+    """
+    Takes a tree of lists and turns it into a flat iterables.  Ish.
+
+    Parameters:
+        element:
+    """
     if isinstance(element, str):
         yield element
     elif isinstance(element, bytes):
-        file.write(element.decode())
+        yield element.decode()
     elif isinstance(element, Iterable):
         for _element in element:
             yield from flatten(_element)
     else:
         yield element
 
-def parent_logger_card_html(name, *args):
+
+def parent_logger_card_html(name: object, *args: object) -> object:
+    """
+    Todo:  Figure this out.
+
+    Parameters:
+        name:
+        *args:
+    """
     header, indent, footer = split_template(parent_logger_template,
                                             "parent_body",
                                             name=name)
@@ -83,11 +150,30 @@ def parent_logger_card_html(name, *args):
         yield textwrap.indent(arg, indent)
     yield footer
 
-def child_logger_card(log):
+
+def child_logger_card(log: object) -> object:
+    """
+    Todo:  Figure this out.
+
+    Parameters:
+        log:
+
+    Returns:
+
+    """
     child_html = log.to_html()
     return child_logger_card_html(log.name, log.duration, *child_html)
 
-def child_logger_card_html(name, duration, *args):
+
+def child_logger_card_html(name: object, duration: object, *args: object) -> object:
+    """
+    Todo:  Figure this out.
+
+    Parameters:
+        name:
+        duration:
+        *args:
+    """
     header, indent, footer = split_template(child_logger_template,
                                             "child_body",
                                             name=name,
@@ -101,7 +187,15 @@ def child_logger_card_html(name, duration, *args):
                 yield textwrap.indent(_arg, indent)
     yield footer
 
-def command_card_html(log, *args):
+
+def command_card_html(log: object, *args: object) -> object:
+    """
+    Todo:  Figure this out.
+
+    Parameters:
+        log:
+        *args:
+    """
     header, indent, footer = split_template(command_template,
                                             "more_info",
                                             cmd_id=log["cmd_id"],
@@ -118,7 +212,14 @@ def command_card_html(log, *args):
                 yield textwrap.indent(_arg, indent)
     yield footer
 
-def html_message_card(log):
+
+def html_message_card(log: object) -> object:
+    """
+    Todo:  Figure this out.
+
+    Parameters:
+        log:
+    """
     timestamp = log["timestamp"]
     timestamp = timestamp.replace(' ', '_')
     timestamp = timestamp.replace(':', '-')
@@ -134,7 +235,14 @@ def html_message_card(log):
     yield textwrap.indent(text, indent) + '\n'
     yield footer
 
-def message_card(log):
+
+def message_card(log: object) -> object:
+    """
+    Todo:  Figure this out.
+
+    Parameters:
+        log:
+    """
     header, indent, footer = split_template(message_template, "message")
     text = html_encode(log["msg"])
     text = "<pre>" + text.replace('\n', "<br>") + "</pre>"
@@ -142,7 +250,15 @@ def message_card(log):
     yield textwrap.indent(text, indent) + '\n'
     yield footer
 
-def command_detail_list(cmd_id, *args):
+
+def command_detail_list(cmd_id: object, *args: object) -> object:
+    """
+    Todo:  Figure this out.
+
+    Parameters:
+        cmd_id:
+        *args:
+    """
     header, indent, footer = split_template(command_detail_list_template,
                                             "details",
                                             cmd_id=cmd_id)
@@ -152,7 +268,20 @@ def command_detail_list(cmd_id, *args):
             yield textwrap.indent(arg, indent)
     yield footer
 
-def command_detail(cmd_id, name, value, hidden=False):
+
+def command_detail(cmd_id: object, name: object, value: object, hidden: object = False) -> object:
+    """
+    Todo:  Figure this out.
+
+    Parameters:
+        cmd_id:
+        name:
+        value:
+        hidden:
+
+    Returns:
+
+    """
     if hidden:
         return hidden_command_detail_template.format(cmd_id=cmd_id,
                                                      name=name,
@@ -160,7 +289,18 @@ def command_detail(cmd_id, name, value, hidden=False):
     else:
         return command_detail_template.format(name=name, value=value)
 
-def command_card(log, strm_dir):
+
+def command_card(log: object, strm_dir: object) -> object:
+    """
+    Todo:  Figure this out.
+
+    Parameters:
+        log:
+        strm_dir:
+
+    Returns:
+
+    """
     cmd_id = log["cmd_id"]
     stdout_path = strm_dir / f"{log['timestamp']}_{cmd_id}_stdout"
     stderr_path = strm_dir / f"{log['timestamp']}_{cmd_id}_stderr"
@@ -199,8 +339,8 @@ def command_card(log, strm_dir):
         if log["stats"].get("disk"):
             uninteresting_disks = ["/var", "/var/log", "/var/log/audit",
                                    "/boot", "/boot/efi"]
-            disk_stats = { x:y for x, y in log["stats"]["disk"].items()
-                           if x not in uninteresting_disks }
+            disk_stats = {x: y for x, y in log["stats"]["disk"].items()
+                          if x not in uninteresting_disks}
             # We sort because JSON deserialization may change
             # the ordering of the map.
             for disk, data in sorted(disk_stats.items()):
@@ -209,26 +349,70 @@ def command_card(log, strm_dir):
 
     return command_card_html(log, *info)
 
-def timeseries_plot(cmd_id, data_tuples, series_title):
-    labels = [miliseconds_to_human_time(x) for x, _ in data_tuples]
+
+def timeseries_plot(cmd_id: object, data_tuples: object, series_title: object) -> object:
+    """
+    Todo:  Figure this out.
+
+    Parameters:
+        cmd_id:
+        data_tuples:
+        series_title:
+
+    Returns:
+
+    """
+    labels = [get_human_time(x) for x, _ in data_tuples]
     values = [y for _, y in data_tuples]
     id = f"{cmd_id}-{series_title.lower().replace(' ', '-')}-chart"
     return stat_chart_card(labels, values, series_title, id)
 
-def disk_timeseries_plot(cmd_id, data_tuples, volume_name):
-    labels = [miliseconds_to_human_time(x) for x, _ in data_tuples]
+
+def disk_timeseries_plot(cmd_id: object, data_tuples: object, volume_name: object) -> object:
+    """
+    Todo:  Figure this out.
+
+    Parameters:
+        cmd_id:
+        data_tuples:
+        volume_name:
+
+    Returns:
+
+    """
+    labels = [get_human_time(x) for x, _ in data_tuples]
     values = [y for _, y in data_tuples]
     id = f"{cmd_id}-volume{volume_name.replace('/', '_')}-usage"
     stat_title = f"Used Space on {volume_name}"
     return stat_chart_card(labels, values, stat_title, id)
 
-def stat_chart_card(labels, data, title, id):
+
+def stat_chart_card(labels: object, data: object, title: object, id: object) -> object:
+    """
+    Todo:  Figure this out.
+
+    Parameters:
+        labels:
+        data:
+        title:
+        id:
+    """
     yield stat_chart_template.format(labels=labels,
                                      data=data,
                                      title=title,
                                      id=id)
 
-def output_block_card(title, string, cmd_id, collapsed=True):
+
+def output_block_card(title: object, string: object, cmd_id: object, collapsed: object = True) -> object:
+    """
+    Todo:  Figure this out.
+
+    Parameters:
+        title:
+        string:
+        cmd_id:
+        collapsed:
+    """
     name = title.replace(' ', '_').lower()
     if collapsed:
         template = output_card_collapsed_template
@@ -244,16 +428,33 @@ def output_block_card(title, string, cmd_id, collapsed=True):
         yield textwrap.indent(line, indent)
     yield footer
 
-def output_block(input, name, cmd_id):
-    if isinstance(input, Path):
-        with open(input) as f:
+
+def output_block(input_file_or_str: object, name: object, cmd_id: object) -> object:
+    """
+    Todo:  Figure this out.
+
+    Parameters:
+        input_file_or_str:
+        name:
+        cmd_id:
+    """
+    if isinstance(input_file_or_str, Path):
+        with open(input_file_or_str) as f:
             for string in output_block_html(f, name, cmd_id):
                 yield string
-    if isinstance(input, str):
-        for string in output_block_html(input, name, cmd_id):
+    if isinstance(input_file_or_str, str):
+        for string in output_block_html(input_file_or_str, name, cmd_id):
             yield string
 
-def diagnostics_card(cmd_id, *args):
+
+def diagnostics_card(cmd_id: object, *args: object) -> object:
+    """
+    Todo:  Figure this out.
+
+    Parameters:
+        cmd_id:
+        *args:
+    """
     header, indent, footer = split_template(diagnostics_template,
                                             "diagnostics",
                                             cmd_id=cmd_id)
@@ -266,7 +467,16 @@ def diagnostics_card(cmd_id, *args):
                 yield textwrap.indent(_arg, indent)
     yield footer
 
-def output_block_html(lines, name, cmd_id):
+
+def output_block_html(lines: object, name: object, cmd_id: object) -> object:
+    """
+    Todo:  Figure this out.
+
+    Parameters:
+        lines:
+        name:
+        cmd_id:
+    """
     if isinstance(lines, str):
         lines = lines.split('\n')
     header, indent, footer = split_template(output_block_template,
@@ -280,26 +490,74 @@ def output_block_html(lines, name, cmd_id):
         yield textwrap.indent(output_line_html(line, lineno), indent)
     yield footer
 
-def split_template(template, split_at, **kwargs):
-    format = { k:v for k, v in kwargs.items() if k != split_at }
+
+def split_template(
+        template: str,
+        split_at: str,
+        **kwargs: object
+) -> Tuple[str, str, str]:
+    """
+    Todo:  Figure this out.
+
+    Parameters:
+        template:  A templated HTML snippet.
+        split_at:  A substring used to split the ``template`` into
+            before and after chunks.
+        **kwargs:
+
+    Returns:
+
+    """
+    fmt = {k: v for k, v in kwargs.items() if k != split_at}
     pattern = re.compile(f"(.*\\n)(\\s*)\\{{{split_at}\\}}\\n(.*)",
                          flags=re.DOTALL)
     before, indent, after = pattern.search(template).groups()
-    return before.format(**format), indent, after.format(**format)
+    return before.format(**fmt), indent, after.format(**fmt)
 
-def output_line_html(line, lineno):
+
+def output_line_html(line: object, lineno: object) -> object:
+    """
+    Todo:  Figure this out.
+
+    Parameters:
+        line:
+        lineno:
+
+    Returns:
+
+    """
     encoded_line = html_encode(line).rstrip()
     return output_line_template.format(line=encoded_line, lineno=lineno)
 
-def html_encode(text):
+
+def html_encode(text: str) -> str:
+    """
+    Replace special characters with their HTML encodings.
+
+    Parameters:
+        text:  The text to encode.
+
+    Returns:
+        The encoded text.
+    """
     text = text.replace('&', "&amp;")
     text = text.replace('<', "&lt;")
     text = text.replace('>', "&gt;")
-    text = text.replace('-', "-&#8288;") # non breaking dashes
+    text = text.replace('-', "-&#8288;")  # Non-breaking dashes.
     text = sgr_to_html(text)
     return text
 
-def sgr_to_html(text):
+
+def sgr_to_html(text: object) -> object:
+    """
+    Todo:  Figure this out.
+
+    Parameters:
+        text:
+
+    Returns:
+
+    """
     span_count = 0
     while text.find("\x1b[") >= 0:
         start = text.find("\x1b[")
@@ -330,7 +588,17 @@ def sgr_to_html(text):
         text = text[:start] + span_string + text[finish+1:]
     return text
 
-def sgr_4bit_color_and_style_to_html(sgr):
+
+def sgr_4bit_color_and_style_to_html(sgr: object) -> object:
+    """
+    Todo:  Figure this out.
+
+    Parameters:
+        sgr:
+
+    Returns:
+
+    """
     sgr_to_css = {
         "1": "font-weight: bold;",
         "2": "font-weight: lighter;",
@@ -357,11 +625,21 @@ def sgr_4bit_color_and_style_to_html(sgr):
     }
     return f'<span style="{sgr_to_css.get(sgr) or str()}">'
 
-def sgr_8bit_color_to_html(sgr_params):
+
+def sgr_8bit_color_to_html(sgr_params: object) -> object:
+    """
+    Todo:  Figure this out.
+
+    Parameters:
+        sgr_params:
+
+    Returns:
+
+    """
     sgr_256 = int(sgr_params[2]) if len(sgr_params) > 2 else 0
     if sgr_256 < 0 or sgr_256 > 255 or not sgr_params:
         '<span>'
-    if sgr_256 > 15 and sgr_256 < 232:
+    if 15 < sgr_256 < 232:
         red_6cube = (sgr_256 - 16) // 36
         green_6cube = (sgr_256 - (16 + red_6cube * 36)) // 6
         blue_6cube = (sgr_256 - 16) % 6
@@ -369,7 +647,7 @@ def sgr_8bit_color_to_html(sgr_params):
         green = str(51 * green_6cube)
         blue = str(51 * blue_6cube)
         return sgr_24bit_color_to_html([sgr_params[0], "2", red, green, blue])
-    elif sgr_256 < 256 and sgr_256 > 231:
+    elif 231 < sgr_256 < 256:
         gray = str(8 + (sgr_256 - 232) * 10)
         return sgr_24bit_color_to_html([sgr_params[0], "2", gray, gray, gray])
     elif sgr_params[0] == "38":
@@ -383,71 +661,128 @@ def sgr_8bit_color_to_html(sgr_params):
         elif sgr_256 < 16:
             return sgr_4bit_color_and_style_to_html(str(92+sgr_256))
 
-def sgr_24bit_color_to_html(sgr_params):
+
+def sgr_24bit_color_to_html(sgr_params: object) -> object:
+    """
+    Todo:  Figure this out.
+
+    Parameters:
+        sgr_params:
+
+    Returns:
+
+    """
     r, g, b = sgr_params[2:5] if len(sgr_params) == 5 else ("0", "0", "0")
-    if len(sgr_params) > 1 and sgr_params[:2] == ["38","2"]:
+    if len(sgr_params) > 1 and sgr_params[:2] == ["38", "2"]:
         return f'<span style="color: rgb({r}, {g}, {b})">'
-    elif len(sgr_params) > 1 and sgr_params[:2] == ["48","2"]:
+    elif len(sgr_params) > 1 and sgr_params[:2] == ["48", "2"]:
         return f'<span style="background-color: rgb({r}, {g}, {b})">'
     else:
         return '<span>'
 
-def html_header():
-    return (
-        "<head>" +
-        embed_style("bootstrap.min.css") +
-        embed_style("Chart.min.css") +
-        embed_style("top_level_style_adjustments.css") +
-        embed_style("parent_logger_style.css") +
-        embed_style("child_logger_style.css") +
-        embed_style("command_style.css") +
-        embed_style("message_style.css") +
-        embed_style("detail_list_style.css") +
-        embed_style("code_block_style.css") +
-        embed_style("output_style.css") +
-        embed_style("diagnostics_style.css") +
-        embed_style("search_controls.css") +
-        embed_script("jquery.slim.min.js") +
-        embed_script("bootstrap.bundle.min.js") +
-        embed_script("Chart.bundle.min.js") +
-        embed_script("search_output.js") +
-        embed_html("search_icon.svg") +
-        "</head>"
-    )
 
-def embed_style(resource):
-    return (
-        "<style>\n" +
-        pkgutil.get_data(__name__, f"resources/{resource}").decode() +
-        "\n</style>\n"
-    )
+def html_header() -> str:
+    """
+    Get the HTML header, complete with embedded styles and scripts.
 
-def embed_script(resource):
-    return (
-        "<script>\n" +
-        pkgutil.get_data(__name__, f"resources/{resource}").decode() +
-        "\n</script>\n"
-    )
+    Returns:
+        A string with the ``<head>...</head>`` contents.
+    """
+    return ("<head>"
+            + embed_style("bootstrap.min.css")
+            + embed_style("Chart.min.css")
+            + embed_style("top_level_style_adjustments.css")
+            + embed_style("parent_logger_style.css")
+            + embed_style("child_logger_style.css")
+            + embed_style("command_style.css")
+            + embed_style("message_style.css")
+            + embed_style("detail_list_style.css")
+            + embed_style("code_block_style.css")
+            + embed_style("output_style.css")
+            + embed_style("diagnostics_style.css")
+            + embed_style("search_controls.css")
+            + embed_script("jquery.slim.min.js")
+            + embed_script("bootstrap.bundle.min.js")
+            + embed_script("Chart.bundle.min.js")
+            + embed_script("search_output.js")
+            + embed_html("search_icon.svg")
+            + "</head>")
 
-def embed_html(resource):
+
+def embed_style(resource: str) -> str:
+    """
+    Wrap the given ``resource`` in an appropriate ``<style>...</style>``
+    block for embedding in the HTML header.
+
+    Parameters:
+        resource:  The name of a style file to embed.
+
+    Returns:
+        A string containing the ``<style>...</style>`` block.
+    """
+    return ("<style>\n"
+            + pkgutil.get_data(__name__, f"resources/{resource}").decode()
+            + "\n</style>\n")
+
+
+def embed_script(resource: str) -> str:
+    """
+    Wrap the given ``resource`` in an appropriate
+    ``<script>...</script>`` block for embedding in the HTML header.
+
+    Parameters:
+        resource:  The name of a script file to embed.
+
+    Returns:
+        A string containing the ``<script>...</script>`` block.
+    """
+    return ("<script>\n"
+            + pkgutil.get_data(__name__, f"resources/{resource}").decode()
+            + "\n</script>\n")
+
+
+def embed_html(resource: str) -> str:
+    """
+    Get a HTML ``resource`` froma file for the sake of embedding it into
+    the HTML header.
+
+    Parameters:
+        resource:  The name of a HTML file to embed.
+
+    Returns:
+        The contents of the file.
+
+    Todo:  Why do we use ``pkgutil.get_data()`` instead of a simple
+        ``read()``.
+    """
     return pkgutil.get_data(__name__, f"resources/{resource}").decode()
 
-def load_template(template):
+
+def load_template(template: str) -> str:
+    """
+    Load a template HTML file.
+
+    Parameters:
+        template:  The file name to load.
+
+    Returns:
+        A string containing the contents of the file.
+    """
     template_file = f"resources/templates/{template}"
     return pkgutil.get_data(__name__, template_file).decode()
 
-command_detail_list_template   = load_template("command_detail_list.html")
-command_detail_template        = load_template("command_detail.html")
-hidden_command_detail_template = load_template("hidden_command_detail.html")
-stat_chart_template            = load_template("stat_chart.html")
-diagnostics_template           = load_template("diagnostics.html")
-output_card_template           = load_template("output_card.html")
-output_card_collapsed_template = load_template("output_card_collapsed.html")
-output_block_template          = load_template("output_block.html")
-output_line_template           = load_template("output_line.html")
-message_template               = load_template("message.html")
-html_message_template          = load_template("html_message.html")
-command_template               = load_template("command.html")
-child_logger_template          = load_template("child_logger.html")
-parent_logger_template         = load_template("parent_logger.html")
 
+command_detail_list_template = load_template("command_detail_list.html")
+command_detail_template = load_template("command_detail.html")
+hidden_command_detail_template = load_template("hidden_command_detail.html")
+stat_chart_template = load_template("stat_chart.html")
+diagnostics_template = load_template("diagnostics.html")
+output_card_template = load_template("output_card.html")
+output_card_collapsed_template = load_template("output_card_collapsed.html")
+output_block_template = load_template("output_block.html")
+output_line_template = load_template("output_line.html")
+message_template = load_template("message.html")
+html_message_template = load_template("html_message.html")
+command_template = load_template("command.html")
+child_logger_template = load_template("child_logger.html")
+parent_logger_template = load_template("parent_logger.html")

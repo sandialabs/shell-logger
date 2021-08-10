@@ -14,18 +14,20 @@ import _thread
 from threading import Thread
 from time import sleep, time
 from types import SimpleNamespace
-from typing import List, Tuple
+from typing import List, TextIO, Tuple
 
 
 def trace_collector(**kwargs) -> object:
     """
-    Todo:  Insert docstring.
+    Todo:  Insert docstring.  Factory.  Returns any subclass of Trace
+        that has the @Trace.subclass annotation.
 
     Parameters:
-        **kwargs:
+        **kwargs:  Any supported arguments of the :class:`Trace`
+            subclass.
 
     Returns:
-        Todo:  Figure this out.
+        Todo:  Figure this out.  Single Trace subclass instance.
     """
     trace_name = kwargs["trace"]
     collectors = [c for c in Trace.subclasses if c.trace_name == trace_name]
@@ -40,13 +42,13 @@ def trace_collector(**kwargs) -> object:
 
 def stats_collectors(**kwargs) -> List[object]:
     """
-    Todo:  Insert docstring.
+    Todo:  Insert docstring.  See above.
 
     Parameters:
         **kwargs:
 
     Returns:
-        Todo:  Figure this out.
+        Todo:  Figure this out.  List[StatsCollector subclasses]
     """
     collectors = []
     if "measure" in kwargs:
@@ -60,7 +62,8 @@ def stats_collectors(**kwargs) -> List[object]:
 
 class Shell:
     """
-    Todo:  Insert docstring.
+    Spawns a shell subprocess that inherits five unnamed pipes (stdout,
+    stderr, stdin, aux_stdout, aux_stderr).
     """
 
     def __init__(self, pwd: Path = Path.cwd()) -> None:
@@ -71,23 +74,29 @@ class Shell:
             pwd:  The directory to change to when starting the
                 :class:`Shell`.
         """
+
+        # Corresponds to 0,1,2 file descriptors of the shell we're going
+        # to spawn.
         self.aux_stdin_rfd, self.aux_stdin_wfd = os.pipe()
         self.aux_stdout_rfd, self.aux_stdout_wfd = os.pipe()
         self.aux_stderr_rfd, self.aux_stderr_wfd = os.pipe()
 
-        # Todo:  What's happening here?
+        # Get the current flags of the file descriptors.
         aux_stdout_write_flags = fcntl.fcntl(self.aux_stdout_wfd,
                                              fcntl.F_GETFL)
+        aux_stderr_write_flags = fcntl.fcntl(self.aux_stderr_wfd,
+                                             fcntl.F_GETFL)
+
+        # Make writes non-blocking.
         fcntl.fcntl(self.aux_stdout_wfd,
                     fcntl.F_SETFL,
                     aux_stdout_write_flags | os.O_NONBLOCK)
-        aux_stderr_write_flags = fcntl.fcntl(self.aux_stderr_wfd,
-                                             fcntl.F_GETFL)
         fcntl.fcntl(self.aux_stderr_wfd,
                     fcntl.F_SETFL,
                     aux_stderr_write_flags | os.O_NONBLOCK)
 
-        # Todo:  What's happening here?
+        # Ensure the file descriptors are inheritable by the shell
+        # subprocess.
         os.set_inheritable(self.aux_stdout_wfd, True)
         os.set_inheritable(self.aux_stderr_wfd, True)
         self.shell = subprocess.Popen(os.environ.get("SHELL") or "/bin/sh",
@@ -97,6 +106,8 @@ class Shell:
                                       close_fds=False)
         os.set_inheritable(self.aux_stdout_wfd, False)
         os.set_inheritable(self.aux_stderr_wfd, False)
+
+        # Change to the directory FOOBAR
         self.cd(pwd)
 
     def __del__(self) -> None:
@@ -141,18 +152,17 @@ class Shell:
 
         Parameters:
             path:  The directory to change to.
-
-        Todo:  Figure out if ``path`` is a ``str`` or ``Path``.
         """
         os.chdir(path)
         self.auxiliary_command(posix=f"cd {path}", nt=f"cd {path}")
 
     def run(self, command: str, **kwargs) -> SimpleNamespace:
         """
-        Todo:  Insert docstring.
+        Write a ``command`` to the :class:`Shell` class' shell
+        subprocess' ``stdin``, and pull the ``stdout`` and ``stderr``.
 
         Parameters:
-            command:  The command to run in the :class:`Shell`.
+            command:  The command to run in the shell subprocess.
             **kwargs:
 
         Returns:
@@ -160,23 +170,34 @@ class Shell:
         """
         start = round(time() * 1000)
 
-        # Todo:  Why are the enclosing braces necessary?
+        # Wrap the `command` in {braces} to support newlines and
+        # heredocs to tell the shell "this is one giant statement".
+        # Then run the command.
         if kwargs.get("devnull_stdin"):
             os.write(self.aux_stdin_wfd,
                      f"{{\n{command}\n}} </dev/null\n".encode())
         else:
             os.write(self.aux_stdin_wfd, f"{{\n{command}\n}}\n".encode())
 
-        # Todo:  What are these next three lines doing?
+        # Set the `RET_CODE` environment variable, such that we can
+        # access it later.
         os.write(self.aux_stdin_wfd, f"RET_CODE=$?\n".encode())
+
+        # Because these writes are non-blocking, tell the shell that the
+        # writes are complete.
         os.write(self.aux_stdin_wfd, f"printf '\\4'\n".encode())
         os.write(self.aux_stdin_wfd, f"printf '\\4' 1>&2\n".encode())
+
+        # Tee the output to multiple sinks (files, strings,
+        # stdout/stderr).
         try:
             output = self.tee(self.shell.stdout, self.shell.stderr, **kwargs)
+
+        # Note:  If something goes wrong in `tee()`, the only way to reliably
+        # propagate an exception from a thread that's spawned is to raise a
+        # KeyboardInterrupt.
         except KeyboardInterrupt:
             os.close(self.aux_stdin_wfd)
-
-            # Todo:  Should this error message be changed?
             raise RuntimeError(
                 f"There was a problem running the command `{command}`.  "
                 "This is a fatal error and we cannot continue.  Ensure that "
@@ -184,7 +205,9 @@ class Shell:
             )
         finish = round(time() * 1000)
 
-        # Todo:  Why is there no `nt="foo"`?
+        # Pull the return code and return the results.  Note that if the
+        # command executed spawns a sub-shell, you won't really have a
+        # return code.
         aux_out, _ = self.auxiliary_command(posix="echo $RET_CODE")
         try:
             returncode = int(aux_out)
@@ -201,7 +224,11 @@ class Shell:
         )
 
     @staticmethod
-    def tee(stdout, stderr, **kwargs) -> SimpleNamespace:
+    def tee(
+            stdout: TextIO,
+            stderr: TextIO,
+            **kwargs
+    ) -> SimpleNamespace:
         """
         Todo:  Insert docstring.
 
@@ -224,24 +251,27 @@ class Shell:
         stdout_tee = [sys_stdout, stdout_io, stdout_path]
         stderr_tee = [sys_stderr, stderr_io, stderr_path]
 
-        def write(input_file, output_files) -> None:
+        def write(input_file: TextIO, output_files: List[TextIO]) -> None:
             """
             Todo:  Insert docstring.
 
             Parameters:
                 input_file:
                 output_files:
-
-            Todo:  Determine types for inputs.
             """
-            chunk = os.read(input_file.fileno(), 4096)
+            chunk_size = 4096  # 4 KB
+            chunk = os.read(input_file.fileno(), chunk_size)
             while chunk and chunk[-1] != 4:
                 for output_file in output_files:
                     if output_file is not None:
                         output_file.write(chunk.decode(errors="ignore"))
                 chunk = os.read(input_file.fileno(), 4096)
             if not chunk:
+
+                # If something goes wrong in the `tee()`, see the note elsewhere.
                 _thread.interrupt_main()
+
+            # Remove the EOT character, and write the last chunk.
             chunk = chunk[:-1]
             for output_file in output_files:
                 if output_file is not None:
@@ -269,7 +299,15 @@ class Shell:
 
     def auxiliary_command(self, **kwargs) -> Tuple[str, str]:
         """
-        Todo:  Insert docstring.
+        Todo:  Insert docstring.  The same as the `run` command, but:
+            1. stdout/stderr get redirected to the aux fds
+            2. you don't tee any out/err
+
+        Purpose is to run aux commands like umask, pwd, env, etc.
+
+        Could maybe combine this with `run` with extra flags.
+
+        Todo:  Rip out Windows support.
 
         Parameters:
             **kwargs:
@@ -290,17 +328,17 @@ class Shell:
             stdout = ""
             stderr = ""
 
-            # Todo:  What's with the magic numbers?
-            aux = os.read(self.aux_stdout_rfd, 65536)
+            magic_number = 65536  # Max amount of info you can write to an unnamed pipe without flushing it.  https://unix.stackexchange.com/questions/343302/anonymous-pipe-kernel-buffer-size
+            aux = os.read(self.aux_stdout_rfd, magic_number)
             while aux[-1] != 4:
                 stdout += aux.decode()
-                aux = os.read(self.aux_stdout_rfd, 65536)
+                aux = os.read(self.aux_stdout_rfd, magic_number)
             aux = aux[:-1]
             stdout += aux.decode()
-            aux = os.read(self.aux_stderr_rfd, 65536)
+            aux = os.read(self.aux_stderr_rfd, magic_number)
             while aux[-1] != 4:
                 stderr += aux.decode()
-                aux = os.read(self.aux_stderr_rfd, 65536)
+                aux = os.read(self.aux_stderr_rfd, magic_number)
             aux = aux[:-1]
             stderr += aux.decode()
             if kwargs.get("strip"):
@@ -313,23 +351,27 @@ class Shell:
 
 class Trace:
     """
-    Todo:  Insert docstring.
+    Provides an interface for the :class:`ShellLogger` to run commands
+    with a certain trace (e.g., ``strace`` or ``ltrace``).
     """
-    trace_name = "undefined"
+    trace_name = "undefined"  # Should be defined by subclasses.
     subclasses = []
 
-    def subclass(TraceSubclass):
+    @staticmethod  # Or is there some @decorator annotation?
+    def subclass(tracesubclass: type):
         """
-        Todo:  Insert docstring.
+        Todo:  Insert docstring.  Decorator.  Adds to a list of supported Trace classes for the trace_collector factory method.
         """
-        if issubclass(TraceSubclass, Trace):
-            Trace.subclasses.append(TraceSubclass)
-        return TraceSubclass
+        if issubclass(tracesubclass, Trace):
+            Trace.subclasses.append(tracesubclass)
+        return tracesubclass
 
     def __init__(self, **kwargs):
         """
         Todo:  Insert docstring.
         """
+
+        # Set up the output file where you'll write the trace info.
         if kwargs.get("trace_path"):
             self.output_path = Path(kwargs["trace_path"])
         else:
@@ -339,13 +381,13 @@ class Trace:
     @abstractmethod
     def trace_args(self):
         """
-        Todo:  Insert docstring.
+        Todo:  Insert docstring.  The trace command + the arguments you pass to it (but not the command you're tracing).  Needs to be overridden in subclasses.  E.g. return `strace -f -c -e "open"`.
         """
         raise AbstractMethod()
 
     def command(self, command, **kwargs):
         """
-        Todo:  Insert docstring.
+        Return a command that runs a trace on a command.  E.g. "ls -l" -> "strace -f -c -e 'open' -- ls -l"
         """
         return f"{self.trace_args} -- {command}"
 
@@ -357,13 +399,13 @@ class StatsCollector:
     stat_name = "undefined"
     subclasses = []
 
-    def subclass(StatsCollectorSubclass):
+    def subclass(statscollectorsubclass: type):
         """
         Todo:  Insert docstring.
         """
-        if issubclass(StatsCollectorSubclass, StatsCollector):
-            StatsCollector.subclasses.append(StatsCollectorSubclass)
-        return StatsCollectorSubclass
+        if issubclass(statscollectorsubclass, StatsCollector):
+            StatsCollector.subclasses.append(statscollectorsubclass)
+        return statscollectorsubclass
 
     def __init__(self, interval, manager):
         """
@@ -374,13 +416,15 @@ class StatsCollector:
 
     def start(self):
         """
-        Todo:  Insert docstring.
+        Start a subprocess to poll at a certain interval for certain
+        statistics.
         """
         self.process.start()
 
     def loop(self):
         """
-        Todo:  Insert docstring.
+        Infinitely loop, collecting stats, until the subprocess is
+        terminated.
         """
         while True:
             self.collect()
@@ -389,32 +433,26 @@ class StatsCollector:
     @abstractmethod
     def collect(self):
         """
-        Todo:  Insert docstring.
+        Meant to be overridden.  Called at an interval.  Instantaneous
+        collection of a stat.
         """
         raise AbstractMethod()
 
     @abstractmethod
     def unproxied_stats(self):
         """
-        Todo:  Insert docstring.
+        Convert from Python's Manager's datastrcutrues to base Python
+        datastructures.
         """
         raise AbstractMethod()
 
     def finish(self):
         """
-        Todo:  Insert docstring.
+        Terminate the infinite loop that's collecting the stats, and
+        then return the unproxied stats.
         """
         self.process.terminate()
         return self.unproxied_stats()
-
-
-class FileAlreadyExists(RuntimeError):
-    def __init__(self, file):
-        """
-        Todo:  Insert docstring.
-        """
-        super().__init__(f"{file.resolve()} already exists! "
-                         "Delete or rename and try rerunning this.")
 
 
 class AbstractMethod(NotImplementedError):
