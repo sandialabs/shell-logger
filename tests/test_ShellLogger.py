@@ -270,7 +270,7 @@ def test_json_file_can_reproduce_html_file(logger):
     assert html_file.exists()
     with open(html_file, 'r') as hf:
         new_html = hf.read()
-    print(f"New Read: {html_file.resolve()}") #^#^#^#^#
+    print(f"New Read: {html_file.resolve()}")
 
     assert original_html == new_html
 
@@ -341,6 +341,7 @@ def test_logger_does_not_store_stdout_string_by_default():
     # 134217728 bytes = 128 MB
     assert mem_usage > 134217728
 
+
 def test_logger_does_not_store_trace_string_by_default():
     logger = ShellLogger(stack()[0][3], Path.cwd())
 
@@ -357,24 +358,29 @@ def test_logger_does_not_store_trace_string_by_default():
                trace="ltrace")
     assert logger.log_book[1]["trace"] is not None
 
+
 def test_stdout():
     logger = ShellLogger(stack()[0][3], Path.cwd())
     assert logger.run(":").stdout == ""
     assert logger.run("echo hello").stdout == "hello\n"
 
+
 def test_returncode():
     logger = ShellLogger(stack()[0][3], Path.cwd())
     assert logger.run(":").returncode == 0
 
+
 def test_args():
     logger = ShellLogger(stack()[0][3], Path.cwd())
     assert logger.run("echo hello").args == "echo hello"
+
 
 def test_stderr():
     logger = ShellLogger(stack()[0][3], Path.cwd())
     command = "echo hello 1>&2"
     assert logger.run(command).stderr == "hello\n"
     assert logger.run(command).stdout == ""
+
 
 def test_timing():
     logger = ShellLogger(stack()[0][3], Path.cwd())
@@ -389,6 +395,7 @@ def test_timing():
     assert result.wall >= 1000
     assert result.wall < 2000
     assert result.finish >= result.start
+
 
 def test_auxiliary_data():
     logger = ShellLogger(stack()[0][3], Path.cwd())
@@ -405,7 +412,8 @@ def test_auxiliary_data():
         assert logger.run("ulimit -a").stdout == result.ulimit
     else:
         print(f"Warning: os.name is not 'posix': {os.name}; umask, "
-               "group, shell, and ulimit not tested.")
+              "group, shell, and ulimit not tested.")
+
 
 def test_working_directory():
     logger = ShellLogger(stack()[0][3], Path.cwd())
@@ -423,6 +431,7 @@ def test_working_directory():
     assert result.stdout.strip() == directory
     assert result.pwd == directory
 
+
 def test_trace():
     logger = ShellLogger(stack()[0][3], Path.cwd())
     if os.uname().sysname == "Linux":
@@ -433,19 +442,21 @@ def test_trace():
         assert f'execve("{echoLocation}' in result.trace
     else:
         print(f"Warning: uname is not 'Linux': {os.uname()}; strace/ltrace "
-               "not tested.")
+              "not tested.")
+
 
 def test_trace_expression():
     logger = ShellLogger(stack()[0][3], Path.cwd())
     if os.uname().sysname == "Linux":
         result = logger.run("echo hello",
-                         trace="ltrace",
-                         expression='getenv')
+                            trace="ltrace",
+                            expression='getenv')
         assert 'getenv("POSIXLY_CORRECT")' in result.trace
         assert result.trace.count('\n') == 2
     else:
         print(f"Warning: uname is not 'Linux': {os.uname()}; ltrace "
-               "expression not tested.")
+              "expression not tested.")
+
 
 def test_trace_summary():
     logger = ShellLogger(stack()[0][3], Path.cwd())
@@ -459,33 +470,36 @@ def test_trace_summary():
         assert "execve" in result.trace
     else:
         print(f"Warning: uname is not 'Linux': {os.uname()}; strace/ltrace "
-               "summary not tested.")
+              "summary not tested.")
+
 
 def test_trace_expression_and_summary():
     logger = ShellLogger(stack()[0][3], Path.cwd())
     if os.uname().sysname == "Linux":
         echoLocation = logger.run("which echo").stdout.strip()
         result = logger.run("echo hello",
-                         trace="strace",
-                         expression="execve",
-                         summary=True)
+                            trace="strace",
+                            expression="execve",
+                            summary=True)
         assert f'execve("{echoLocation}' not in result.trace
         assert "execve" in result.trace
         assert "getenv" not in result.trace
         result = logger.run("echo hello",
-                         trace="ltrace",
-                         expression="getenv",
-                         summary=True)
+                            trace="ltrace",
+                            expression="getenv",
+                            summary=True)
         assert 'getenv("POSIXLY_CORRECT")' not in result.trace
         assert "getenv" in result.trace
         assert "strcmp" not in result.trace
     else:
         print(f"Warning: uname is not 'Linux': {os.uname()}; strace/ltrace "
-               "expression+summary not tested.")
+              "expression+summary not tested.")
+
 
 def test_stats():
     logger = ShellLogger(stack()[0][3], Path.cwd())
-    result = logger.run("sleep 1", measure=["cpu", "memory", "disk"], interval=0.1)
+    result = logger.run("sleep 1", measure=["cpu", "memory", "disk"],
+                        interval=0.1)
     assert len(result.stats["memory"]) > 8
     assert len(result.stats["memory"]) < 30
     assert len(result.stats["cpu"]) > 8
@@ -494,7 +508,9 @@ def test_stats():
         assert len(result.stats["disk"]["/"]) > 8
         assert len(result.stats["disk"]["/"]) < 30
     else:
-        print(f"Warning: os.name is not 'posix': {os.name}; disk usage not fully tested.")
+        print(f"Warning: os.name is not 'posix': {os.name}; disk usage not "
+              "fully tested.")
+
 
 def test_trace_and_stats():
     logger = ShellLogger(stack()[0][3], Path.cwd())
@@ -514,7 +530,9 @@ def test_trace_and_stats():
         assert len(result.stats["disk"]["/"]) > 8
         assert len(result.stats["disk"]["/"]) < 30
     else:
-        print(f"Warning: uname is not 'Linux': {os.uname()}; ltrace not tested.")
+        print(f"Warning: uname is not 'Linux': {os.uname()}; ltrace not "
+              "tested.")
+
 
 def test_trace_and_stat():
     logger = ShellLogger(stack()[0][3], Path.cwd())
@@ -531,7 +549,9 @@ def test_trace_and_stat():
         assert result.stats.get("disk") is None
         assert result.stats.get("cpu") is not None
     else:
-        print(f"Warning: uname is not 'Linux': {os.uname()}; ltrace not tested.")
+        print(f"Warning: uname is not 'Linux': {os.uname()}; ltrace not "
+              "tested.")
+
 
 @pytest.mark.skip(reason="Not sure it's worth it to fix this or not")
 def test_set_env_trace():
@@ -540,6 +560,7 @@ def test_set_env_trace():
     assert "TEST_ENV=abdc" in result.stdout
     result = logger.run("TEST_ENV=abdc env | grep TEST_ENV", trace="strace")
     assert "TEST_ENV=abdc" in result.stdout
+
 
 def test_log_book_trace_and_stats():
     if os.uname().sysname == "Linux":
@@ -561,7 +582,9 @@ def test_log_book_trace_and_stats():
         assert len(logger.log_book[0]["stats"]["disk"]["/"]) > 8
         assert len(logger.log_book[0]["stats"]["disk"]["/"]) < 30
     else:
-        print(f"Warning: uname is not 'Linux': {os.uname()}; ltrace not tested.")
+        print(f"Warning: uname is not 'Linux': {os.uname()}; ltrace not "
+              "tested.")
+
 
 def test_change_pwd():
     logger = ShellLogger(stack()[0][3], Path.cwd())
@@ -587,6 +610,7 @@ def test_change_pwd():
     assert result.stdout.strip() == directory2
     assert result.pwd == directory2
 
+
 def test_returncode():
     logger = ShellLogger(stack()[0][3], Path.cwd())
     command = "false"
@@ -602,12 +626,14 @@ def test_returncode():
     result = logger.run(command)
     assert result.returncode == expected_returncode
 
+
 def test_sgr_gets_converted_to_html(logger):
     logger = ShellLogger(stack()[0][3], Path.cwd())
     logger.print("\x1B[31mHello\x1B[0m")
     logger.print("\x1B[31;43m\x1B[4mthere\x1B[0m")
     logger.print("\x1B[38;5;196m\x1B[48;5;232m\x1B[4mmr.\x1B[0m logger")
-    logger.print("\x1B[38;2;96;140;240m\x1B[48;2;240;140;10mmrs.\x1B[0m logger")
+    logger.print("\x1B[38;2;96;140;240m\x1B[48;2;240;140;10mmrs.\x1B[0m "
+                 "logger")
     logger.finalize()
 
     # Load the HTML file.
@@ -625,6 +651,7 @@ def test_sgr_gets_converted_to_html(logger):
     assert ">mrs.</span></span> logger" in html_text
     assert "color: rgb(96, 140, 240)" in html_text
     assert "background-color: rgb(240, 140, 10)" in html_text
+
 
 def test_html_print(capsys):
     logger = ShellLogger(stack()[0][3], Path.cwd())
@@ -650,6 +677,7 @@ def test_html_print(capsys):
     assert "orange zebra" not in err
     assert "orange zebra" in out
     assert "orange zebra" in html_text
+
 
 def test_append_mode():
     logger1 = ShellLogger(stack()[0][3] + "_1", Path.cwd())
@@ -704,6 +732,7 @@ def test_append_mode():
     assert "FOR REAL" in html_text
     assert "111" in html_text
 
+
 def test_list_commands():
     logger = ShellLogger(stack()[0][3], Path.cwd())
     cmd = ["echo" "'"]
@@ -718,11 +747,10 @@ def test_list_commands():
                         return_info=True)
     assert result["stdout"] == "' \" (test)\n"
 
+
 def test_invalid_decodings():
     logger = ShellLogger(stack()[0][3], Path.cwd())
     result = logger.log("Print invalid start byte for bytes decode()",
                         "printf '\\xFDHello\\n'",
                         return_info=True)
     assert result["stdout"] == "Hello\n"
-
-
