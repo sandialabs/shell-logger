@@ -437,9 +437,9 @@ def test_trace():
     if os.uname().sysname == "Linux":
         result = logger.run("echo letter", trace="ltrace")
         assert 'getenv("POSIXLY_CORRECT")' in result.trace
-        echoLocation = logger.run("which echo").stdout.strip()
+        echo_location = logger.run("which echo").stdout.strip()
         result = logger.run("echo hello", trace="strace")
-        assert f'execve("{echoLocation}' in result.trace
+        assert f'execve("{echo_location}' in result.trace
     else:
         print(f"Warning: uname is not 'Linux': {os.uname()}; strace/ltrace "
               "not tested.")
@@ -464,9 +464,9 @@ def test_trace_summary():
         result = logger.run("echo hello", trace="ltrace", summary=True)
         assert 'getenv("POSIXLY_CORRECT")' not in result.trace
         assert "getenv" in result.trace
-        echoLocation = logger.run("which echo").stdout.strip()
+        echo_location = logger.run("which echo").stdout.strip()
         result = logger.run("echo hello", trace="strace", summary=True)
-        assert f'execve("{echoLocation}' not in result.trace
+        assert f'execve("{echo_location}' not in result.trace
         assert "execve" in result.trace
     else:
         print(f"Warning: uname is not 'Linux': {os.uname()}; strace/ltrace "
@@ -476,12 +476,12 @@ def test_trace_summary():
 def test_trace_expression_and_summary():
     logger = ShellLogger(stack()[0][3], Path.cwd())
     if os.uname().sysname == "Linux":
-        echoLocation = logger.run("which echo").stdout.strip()
+        echo_location = logger.run("which echo").stdout.strip()
         result = logger.run("echo hello",
                             trace="strace",
                             expression="execve",
                             summary=True)
-        assert f'execve("{echoLocation}' not in result.trace
+        assert f'execve("{echo_location}' not in result.trace
         assert "execve" in result.trace
         assert "getenv" not in result.trace
         result = logger.run("echo hello",
