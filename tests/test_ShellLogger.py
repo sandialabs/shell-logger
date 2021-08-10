@@ -365,7 +365,7 @@ def test_stdout():
     assert logger.run("echo hello").stdout == "hello\n"
 
 
-def test_returncode():
+def test_returncode_2():
     logger = ShellLogger(stack()[0][3], Path.cwd())
     assert logger.run(":").returncode == 0
 
@@ -565,14 +565,14 @@ def test_set_env_trace():
 def test_log_book_trace_and_stats():
     if os.uname().sysname == "Linux":
         logger = ShellLogger(stack()[0][3], Path.cwd())
-        result = logger.log("Sleep",
-                            "sleep 1",
-                            return_info=True,
-                            measure=["cpu", "memory", "disk"],
-                            interval=0.1,
-                            trace="ltrace",
-                            expression="setlocale",
-                            summary=True)
+        logger.log("Sleep",
+                   "sleep 1",
+                   return_info=True,
+                   measure=["cpu", "memory", "disk"],
+                   interval=0.1,
+                   trace="ltrace",
+                   expression="setlocale",
+                   summary=True)
         assert "setlocale" in logger.log_book[0]["trace"]
         assert "sleep" not in logger.log_book[0]["trace"]
         assert len(logger.log_book[0]["stats"]["memory"]) > 8
@@ -601,11 +601,11 @@ def test_change_pwd():
         directory2 = "C:\\Users"
     else:
         print(f"Warning: os.name is unrecognized: {os.name}; test may fail.")
-    result = logger.run(f"cd {directory1}")
+    logger.run(f"cd {directory1}")
     result = logger.run(pwd_command)
     assert result.stdout.strip() == directory1
     assert result.pwd == directory1
-    result = logger.run(f"cd {directory2}")
+    logger.run(f"cd {directory2}")
     result = logger.run(pwd_command)
     assert result.stdout.strip() == directory2
     assert result.pwd == directory2
@@ -627,7 +627,7 @@ def test_returncode():
     assert result.returncode == expected_returncode
 
 
-def test_sgr_gets_converted_to_html(logger):
+def test_sgr_gets_converted_to_html():
     logger = ShellLogger(stack()[0][3], Path.cwd())
     logger.print("\x1B[31mHello\x1B[0m")
     logger.print("\x1B[31;43m\x1B[4mthere\x1B[0m")
