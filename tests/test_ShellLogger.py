@@ -166,22 +166,21 @@ def test_log_method_live_stdout_stderr_works_correctly(capsys, live_stdout,
         assert re.search(r"^Hello world error(\r)?\n", err) is None
 
 
-@pytest.mark.skip(reason="Broken")
-def test_child_logger_duration_displayed_correctly_in_html(logger):
+def test_child_logger_duration_displayed_correctly_in_html(shell_logger):
     """
     Verify that the overview of child loggers in the HTML file displays the
     correct child logger duration, not the entire log's duration.
     """
 
-    child2 = logger.add_child("Child 2")
+    child2 = shell_logger.add_child("Child 2")
     child2.log("Wait 0.005s", ["sleep", "0.005"])
 
-    child3 = logger.add_child("Child 3")
+    child3 = shell_logger.add_child("Child 3")
     child3.log("Wait 0.006s", ["sleep", "0.006"])
 
-    logger.finalize()
+    shell_logger.finalize()
 
-    with open(logger.html_file, 'r') as hf:
+    with open(shell_logger.html_file, 'r') as hf:
         html_text = hf.read()
 
     assert child2.duration is not None
@@ -191,33 +190,32 @@ def test_child_logger_duration_displayed_correctly_in_html(logger):
     assert f"Duration: {child3.duration}" in html_text
 
 
-@pytest.mark.skip(reason="Broken")
-def test_finalize_creates_json_with_correct_information(logger):
+def test_finalize_creates_json_with_correct_information(shell_logger):
     """
     Verify that the :func:`finalize` method creates a JSON file with the proper
     data.
     """
 
-    logger.finalize()
+    shell_logger.finalize()
 
     # Load from JSON.
-    json_file = logger.strm_dir / "Parent.json"
+    json_file = shell_logger.strm_dir / "Parent.json"
     assert json_file.exists()
     with open(json_file, 'r') as jf:
         loaded_logger = json.load(jf, cls=ShellLoggerDecoder)
 
     # Parent ShellLogger
-    assert logger.log_dir == loaded_logger.log_dir
-    assert logger.strm_dir == loaded_logger.strm_dir
-    assert logger.html_file == loaded_logger.html_file
-    assert logger.indent == loaded_logger.indent
-    assert logger.name == loaded_logger.name
-    assert logger.init_time == loaded_logger.init_time
-    assert logger.done_time == loaded_logger.done_time
-    assert logger.log_book[0] == loaded_logger.log_book[0]
+    assert shell_logger.log_dir == loaded_logger.log_dir
+    assert shell_logger.strm_dir == loaded_logger.strm_dir
+    assert shell_logger.html_file == loaded_logger.html_file
+    assert shell_logger.indent == loaded_logger.indent
+    assert shell_logger.name == loaded_logger.name
+    assert shell_logger.init_time == loaded_logger.init_time
+    assert shell_logger.done_time == loaded_logger.done_time
+    assert shell_logger.log_book[0] == loaded_logger.log_book[0]
 
     # Child ShellLogger
-    child = logger.log_book[2]
+    child = shell_logger.log_book[2]
     loaded_child = loaded_logger.log_book[2]
     assert child.log_dir == loaded_child.log_dir
     assert child.strm_dir == loaded_child.strm_dir
@@ -276,35 +274,33 @@ def test_finalize_creates_html_with_correct_information(logger):
     assert "Child</" in html_text
 
 
-@pytest.mark.skip(reason="Broken")
-def test_log_dir_html_symlinks_to_strm_dir_html(logger):
+def test_log_dir_html_symlinks_to_strm_dir_html(shell_logger):
     """
     Verify that the :func:`finalize` method symlinks log_dir/html_file to
     strm_dir/html_file.
     """
 
-    logger.finalize()
+    shell_logger.finalize()
 
     # Load the HTML file.
-    html_file = logger.strm_dir / "Parent.html"
-    html_symlink = logger.log_dir / "Parent.html"
+    html_file = shell_logger.strm_dir / "Parent.html"
+    html_symlink = shell_logger.log_dir / "Parent.html"
     assert html_file.exists()
     assert html_symlink.exists()
 
     assert html_symlink.resolve() == html_file
 
 
-@pytest.mark.skip(reason="Broken")
-def test_json_file_can_reproduce_html_file(logger):
+def test_json_file_can_reproduce_html_file(shell_logger):
     """
     Verify that a JSON file can properly recreate the original HTML file
     created when :func:`finalize` is called.
     """
 
-    logger.finalize()
+    shell_logger.finalize()
 
     # Load the original HTML file's contents.
-    html_file = logger.log_dir / "Parent.html"
+    html_file = shell_logger.log_dir / "Parent.html"
     assert html_file.exists()
     with open(html_file, 'r') as hf:
         original_html = hf.read()
@@ -313,7 +309,7 @@ def test_json_file_can_reproduce_html_file(logger):
     html_file.unlink()
 
     # Load the JSON data.
-    json_file = logger.strm_dir / "Parent.json"
+    json_file = shell_logger.strm_dir / "Parent.json"
     assert json_file.exists()
     with open(json_file, 'r') as jf:
         loaded_logger = json.load(jf, cls=ShellLoggerDecoder)
