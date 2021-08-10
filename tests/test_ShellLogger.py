@@ -10,6 +10,51 @@ from pathlib import Path
 from src.shelllogger import ShellLogger, ShellLoggerDecoder
 
 
+@pytest.fixture()
+def shell_logger() -> ShellLogger:
+    """
+    **@pytest.fixture()**
+
+    This fixture creates a :class:`ShellLogger` object with some sample
+    data to be used in tests.  It first creates a sample
+    :class:`ShellLogger` object.  Then it logs a command (whose
+    ``stdout`` is ``'Hello world'`` and ``stderr`` is ``'Hello world
+    error'``).  Next, it adds a child :class:`ShellLogger` object and
+    prints something using that child logger.
+
+    Returns:
+        The parent :class:`ShellLogger` object described above.
+    """
+
+    # Initialize.
+    parent = ShellLogger('Parent', Path.cwd())
+
+    # Run command.
+    #            stdout          ;        stderr
+    cmd = "echo 'Hello world out'; echo 'Hello world error' 1>&2"
+    parent.log("test cmd",
+               cmd,
+               Path.cwd(),
+               measure=["cpu", "memory", "disk"],
+               return_info=True,
+               interval=0.1,
+               trace="ltrace",
+               expression="setlocale",
+               summary=True)
+    parent.print("This is a message")
+
+    # Add child and print statement.
+    child = parent.add_child("Child")
+    child.print("Hello world child")
+    child.log("Test out HTML characters", "echo '<hello> &\"'\"'\"")
+    child.log("ls", "ls")
+    child.print("Hello again child")
+
+    # Add more to the parent and return the object.
+    parent.print("This is another message")
+    return parent
+
+
 def test_initialization_creates_strm_dir():
     """
     Verify the initialization of a parent :class:`ShellLogger` object creates a
