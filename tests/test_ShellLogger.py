@@ -26,24 +26,29 @@ def shell_logger() -> ShellLogger:
         The parent :class:`ShellLogger` object described above.
     """
 
-    # Initialize.
+    # Initialize a parent ShellLogger.
     parent = ShellLogger('Parent', Path.cwd())
 
-    # Run command.
+    # Run the command.
     #            stdout          ;        stderr
     cmd = "echo 'Hello world out'; echo 'Hello world error' 1>&2"
+    kwargs = {"measure": ["cpu", "memory", "disk"],
+              "return_info": True,
+              "interval": 0.1}
+    if os.uname().sysname == "Linux":
+        kwargs.update({"trace": "ltrace",
+                       "expression": "setlocale",
+                       "summary": True})
+    else:
+        print(f"Warning: uname is not 'Linux': {os.uname()}; ltrace not "
+              "tested.")
     parent.log("test cmd",
                cmd,
                Path.cwd(),
-               measure=["cpu", "memory", "disk"],
-               return_info=True,
-               interval=0.1,
-               trace="ltrace",
-               expression="setlocale",
-               summary=True)
+               **kwargs)
     parent.print("This is a message")
 
-    # Add child and print statement.
+    # Add a child and run some commands.
     child = parent.add_child("Child")
     child.print("Hello world child")
     child.log("Test out HTML characters", "echo '<hello> &\"'\"'\"")
@@ -79,8 +84,7 @@ def test_initialization_creates_html_file():
     assert (strm_dir / f'{stack()[0][3]}.html').exists()
 
 
-@pytest.mark.skip(reason="Broken")
-def test_log_method_creates_tmp_stdout_stderr_files(logger):
+def test_log_method_creates_tmp_stdout_stderr_files(shell_logger):
     """
     Verify that logging a command will create files in the :class:`ShellLogger`
     object's :attr:`strm_dir` corresponding to the ``stdout`` and ``stderr`` of
@@ -88,10 +92,10 @@ def test_log_method_creates_tmp_stdout_stderr_files(logger):
     """
 
     # Get the paths for the stdout/stderr files.
-    cmd_id = logger.log_book[0]['cmd_id']
-    cmd_ts = logger.log_book[0]['timestamp']
-    stdout_file = logger.strm_dir / f"{cmd_ts}_{cmd_id}_stdout"
-    stderr_file = logger.strm_dir / f"{cmd_ts}_{cmd_id}_stderr"
+    cmd_id = shell_logger.log_book[0]['cmd_id']
+    cmd_ts = shell_logger.log_book[0]['timestamp']
+    stdout_file = shell_logger.strm_dir / f"{cmd_ts}_{cmd_id}_stdout"
+    stderr_file = shell_logger.strm_dir / f"{cmd_ts}_{cmd_id}_stderr"
 
     assert stdout_file.exists()
     assert stderr_file.exists()
