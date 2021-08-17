@@ -42,7 +42,8 @@ def shell_logger() -> ShellLogger:
 
     # Run the command.
     #            stdout          ;        stderr
-    cmd = "echo 'Hello world out'; echo 'Hello world error' 1>&2"
+    cmd = ("sleep 1; echo 'Hello world out'; sleep 1; echo 'Hello world "
+           "error' 1>&2")
     kwargs = {"measure": ["cpu", "memory", "disk"],
               "return_info": True,
               "interval": 0.1}
@@ -238,34 +239,37 @@ def test_finalize_creates_json_with_correct_information(shell_logger):
     assert child.log_book[0] == loaded_child.log_book[0]
 
 
-@pytest.mark.skip(reason="Broken")
-def test_finalize_creates_html_with_correct_information(logger):
+def test_finalize_creates_html_with_correct_information(shell_logger):
     """
     Verify that the :func:`finalize` method creates an HTML file with the
     proper data.
     """
 
-    logger.finalize()
+    shell_logger.finalize()
 
     # Load the HTML file.
-    html_file = logger.strm_dir / "Parent.html"
+    html_file = shell_logger.strm_dir / "Parent.html"
     assert html_file.exists()
     with open(html_file, 'r') as hf:
         html_text = hf.read()
 
     # Command info.
     assert ">test cmd</" in html_text
-    assert f"Duration: {logger.log_book[0]['duration']}" in html_text
-    assert f"Time:</span> {logger.log_book[0]['timestamp']}" in html_text
-    assert "Command:</span> <code>echo 'Hello world out'; "\
-        "echo 'Hello world error' 1&gt;&amp;2" in html_text
+    assert f"Duration: {shell_logger.log_book[0]['duration']}" in html_text
+    assert f"Time:</span> {shell_logger.log_book[0]['timestamp']}" in html_text
+    assert ("Command:</span> <code>sleep 1; echo 'Hello world out'; sleep 1; "
+            "echo 'Hello world error' 1&gt;&amp;2") in html_text
     assert f"CWD:</span> {Path.cwd()}" in html_text
     assert "Return Code:</span> 0" in html_text
 
     # Print statement.
     assert "Hello world child" in html_text
-    assert "trace</" in html_text
-    assert "setlocale" in html_text
+    if os.uname().sysname == "Linux":
+        assert "trace</" in html_text
+        assert "setlocale" in html_text
+    else:
+        print(f"Warning:  uname is not 'Linux':  {os.uname()}; trace not "
+              "tested.")
     assert "getenv" not in html_text
     assert 'class="card-title">Memory Usage' in html_text
     assert "<canvas" in html_text
