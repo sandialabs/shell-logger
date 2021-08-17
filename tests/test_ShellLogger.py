@@ -10,6 +10,17 @@ from pathlib import Path
 from src.shelllogger import ShellLogger, ShellLoggerDecoder
 
 
+@pytest.fixture(autouse=True)
+def use_tmpdir(monkeypatch, tmpdir):
+    """
+    **@pytest.fixture(autouse=True)**
+
+    Automatically use a temporary directory as the current working
+    directory for all tests.
+    """
+    monkeypatch.chdir(tmpdir)
+
+
 @pytest.fixture()
 def shell_logger() -> ShellLogger:
     """
@@ -736,7 +747,6 @@ def test_html_print(capsys):
     assert "orange zebra" in html_text
 
 
-@pytest.mark.skip(reason="Broken")
 def test_append_mode():
     logger1 = ShellLogger(stack()[0][3] + "_1", Path.cwd())
     logger1.log("Print HELLO to stdout", "echo HELLO")
