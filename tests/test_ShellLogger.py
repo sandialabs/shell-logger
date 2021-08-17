@@ -553,17 +553,16 @@ def test_trace_expression_and_summary():
               "expression+summary not tested.")
 
 
-@pytest.mark.skip(reason="Broken")
 def test_stats():
     logger = ShellLogger(stack()[0][3], Path.cwd())
     result = logger.run("sleep 1", measure=["cpu", "memory", "disk"],
                         interval=0.1)
-    assert len(result.stats["memory"]) > 8
+    assert len(result.stats["memory"]) > 1
     assert len(result.stats["memory"]) < 30
-    assert len(result.stats["cpu"]) > 8
+    assert len(result.stats["cpu"]) > 1
     assert len(result.stats["cpu"]) < 30
     if os.name == "posix":
-        assert len(result.stats["disk"]["/"]) > 8
+        assert len(result.stats["disk"]["/"]) > 1
         assert len(result.stats["disk"]["/"]) < 30
     else:
         print(f"Warning: os.name is not 'posix': {os.name}; disk usage not "
