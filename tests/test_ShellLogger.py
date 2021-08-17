@@ -397,7 +397,8 @@ def test_logger_does_not_store_stdout_string_by_default():
     assert mem_usage > 134217728
 
 
-@pytest.mark.skip(reason="Broken")
+@pytest.mark.skipif(os.uname().sysname == "Darwin",
+                    reason="`ltrace` doesn't exist for Darwin")
 def test_logger_does_not_store_trace_string_by_default():
     logger = ShellLogger(stack()[0][3], Path.cwd())
 
