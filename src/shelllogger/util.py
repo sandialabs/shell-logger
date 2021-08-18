@@ -121,7 +121,7 @@ def flatten(element: object) -> object:
     Takes a tree of lists and turns it into a flat iterables.  Ish.
 
     Parameters:
-        element:
+        element:  Todo:  Figure this out.
     """
     if isinstance(element, str):
         yield element
@@ -719,6 +719,8 @@ def embed_style(resource: str) -> str:
 
     Returns:
         A string containing the ``<style>...</style>`` block.
+
+    Todo:  Combine this with the two below?
     """
     return ("<style>\n"
             + pkgutil.get_data(__name__, f"resources/{resource}").decode()
@@ -767,6 +769,8 @@ def load_template(template: str) -> str:
 
     Returns:
         A string containing the contents of the file.
+
+    Todo:  Combine with the one above?
     """
     template_file = f"resources/templates/{template}"
     return pkgutil.get_data(__name__, template_file).decode()

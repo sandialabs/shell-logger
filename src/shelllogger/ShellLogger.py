@@ -393,13 +393,13 @@ class ShellLogger:
         return child
 
     @staticmethod
-    def strfdelta(tdelta: timedelta, fmt: str) -> str:
+    def strfdelta(delta: timedelta, fmt: str) -> str:
         """
         Format a time delta object.  Use this like you would
         :func:`datetime.strftime`.
 
         Parameters:
-            tdelta:  The time delta object.
+            delta:  The time delta object.
             fmt:  The delta format string.
 
         Returns:
@@ -407,8 +407,8 @@ class ShellLogger:
         """
 
         # Dictionary to hold time delta info.
-        d = {'days': tdelta.days}
-        total_ms = tdelta.microseconds + (tdelta.seconds * 1000000)
+        d = {'days': delta.days}
+        total_ms = delta.microseconds + (delta.seconds * 1000000)
         d['hrs'], rem = divmod(total_ms, 3600000000)
         d['min'], rem = divmod(rem, 60000000)
         d['sec'] = rem / 1000000
@@ -573,7 +573,7 @@ class ShellLogger:
 
         Note:
             To conserve memory, ``stdout`` and ``stderr`` will be
-            written to the files as they are being generated.
+            written to files as they are being generated.
         """
         start_time = datetime.now()
 
