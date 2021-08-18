@@ -5,7 +5,7 @@ import psutil
 import pytest
 import re
 from pathlib import Path
-from src.shelllogger import ShellLogger, ShellLoggerDecoder
+from shelllogger import ShellLogger, ShellLoggerDecoder
 
 
 @pytest.fixture(autouse=True)
