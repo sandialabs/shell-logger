@@ -602,6 +602,8 @@ def test_trace_and_stat():
               "tested.")
 
 
+@pytest.mark.skipif(os.uname().sysname == "Darwin",
+                    reason="`ltrace`/`strace` don't exist for Darwin")
 @pytest.mark.skip(reason="Not sure it's worth it to fix this or not")
 def test_set_env_trace():
     logger = ShellLogger(stack()[0][3], Path.cwd())
