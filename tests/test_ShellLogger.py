@@ -350,66 +350,43 @@ def test_under_stress():
     assert logger.log_book[0]["returncode"] == 0
 
 
-@pytest.mark.skip(reason="Broken")
 def test_heredoc():
     logger = ShellLogger(stack()[0][3], Path.cwd())
     cmd = "bash << EOF\necho hello\nEOF"
     msg = "Test out a heredoc"
-
-    p = Process(target=logger.log, args=(msg, cmd))
-    p.start()
-    p.join(1)
-    assert not p.is_alive()
+    result = logger.log(msg, cmd)
+    assert result["return_code"] == 0
 
 
-@pytest.mark.skip(reason="Broken")
 def test_devnull_stdin():
     logger = ShellLogger(stack()[0][3], Path.cwd())
     cmd = "cat"
     msg = "Make sure stdin is redirected to /dev/null by default"
-
-    p = Process(target=logger.log, args=(msg, cmd))
-    p.start()
-    p.join(1)
-    assert not p.is_alive()
+    result = logger.log(msg, cmd)
+    assert result["return_code"] == 0
 
 
-@pytest.mark.skip(reason="Broken")
 def test_syntax_error():
     logger = ShellLogger(stack()[0][3], Path.cwd())
     cmd = "echo (this is a syntax error"
     msg = "Test out a syntax error"
-
-    p = Process(target=logger.log, args=(msg, cmd))
-    p.start()
-    p.join(1)
-    assert not p.is_alive()
+    with pytest.raises(RuntimeError) as excinfo:
+        logger.log(msg, cmd)
+    assert "There was a problem running the command" in excinfo.value.args[0]
 
 
-@pytest.mark.skip(reason="Broken")
 def test_logger_does_not_store_stdout_string_by_default():
     logger = ShellLogger(stack()[0][3], Path.cwd())
     cmd = ("dd if=/dev/urandom bs=1024 count=262144 | "
            "LC_ALL=C tr -c '[:print:]' '*' ; sleep 1")
     msg = "Get 256 MB of stdout from /dev/urandom"
-
-    p = Process(target=logger.log, args=(msg, cmd))
-    p.start()
-    time.sleep(1)
-    psutil_process = psutil.Process(p.pid)
-    mem_usage = psutil_process.memory_info().rss
-    p.join()
-    # 134217728 bytes = 128 MB
-    assert mem_usage < 134217728
-
-    p = Process(target=logger.log, args=(msg, cmd, None, False, False, True))
-    p.start()
-    time.sleep(1)
-    psutil_process = psutil.Process(p.pid)
-    mem_usage = psutil_process.memory_info().rss
-    p.join()
-    # 134217728 bytes = 128 MB
-    assert mem_usage > 134217728
+    logger.log(msg, cmd)
+    mem_usage = psutil.Process().memory_info().rss
+    bytes_in_128_mb = 134217728
+    assert mem_usage < bytes_in_128_mb
+    logger.log(msg, cmd, return_info=True)
+    mem_usage = psutil.Process().memory_info().rss
+    assert mem_usage > bytes_in_128_mb
 
 
 @pytest.mark.skipif(os.uname().sysname == "Darwin",
@@ -805,16 +782,12 @@ def test_append_mode():
     assert "111" in html_text
 
 
-@pytest.mark.skip(reason="Broken")
 def test_list_commands():
     logger = ShellLogger(stack()[0][3], Path.cwd())
-    cmd = ["echo" "'"]
+    cmd = ["echo", "'"]
     msg = "Make sure echo \"'\" doesn't hang"
-
-    p = Process(target=logger.log, args=(msg, cmd))
-    p.start()
-    p.join(1)
-    assert not p.is_alive()
+    result = logger.log(msg, cmd)
+    assert result["return_code"] == 0
     result = logger.log("Test out commands provided as arrays",
                         ["echo", "'", '"', "(test)"],
                         return_info=True)
