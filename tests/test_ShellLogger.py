@@ -4,8 +4,6 @@ import os
 import psutil
 import pytest
 import re
-import time
-from multiprocessing import Process
 from pathlib import Path
 from src.shelllogger import ShellLogger, ShellLoggerDecoder
 
