@@ -63,12 +63,14 @@ class Shell:
         self.cd(pwd)
 
     def __del__(self):
-        os.close(self.aux_stdin_rfd)
-        os.close(self.aux_stdin_wfd)
-        os.close(self.aux_stdout_rfd)
-        os.close(self.aux_stdout_wfd)
-        os.close(self.aux_stderr_rfd)
-        os.close(self.aux_stderr_wfd)
+        for fd in [self.aux_stdin_rfd, self.aux_stdin_wfd,
+                   self.aux_stdout_rfd, self.aux_stdout_wfd,
+                   self.aux_stderr_rfd, self.aux_stderr_wfd]:
+            try:
+                os.close(fd)
+            except OSError as e:
+                if "Bad file descriptor" not in e.strerror:
+                    raise e
 
     def __eq__(self, other):
         return type(self) == type(other) and self.pwd() == other.pwd()

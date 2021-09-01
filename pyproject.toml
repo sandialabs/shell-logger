@@ -1,0 +1,63 @@
+[tool.poetry]
+name = "shelllogger"
+version = "1.0.0"
+license = ""
+readme = "README.md"
+keywords = ["shell", "logging"]
+repository = "https://internal.gitlab.server/ShellLogger/ShellLogger"
+description = "A tool for keeping track of Python's interactions with the shell."
+documentation = "INSERT URL FOR SPHINX DOCS HERE"
+authors = [
+    "Josh Braun <josbrau@sandia.gov>",
+    "David Collins <dcollin@sandia.gov>",
+    "Jason M. Gates <jmgate@sandia.gov>"
+]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Information Technology",
+    "Intended Audience :: System Administrators",
+    # "Licence :: FILL THIS OUT",  UNCOMMENT AFTER ADDING LICENSE
+    "Natural Language :: English",
+    "Operating System :: MacOS",
+    "Operating System :: POSIX",
+    "Operating System :: UNIX",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.8",
+    "Topic :: Software Development",
+    "Topic :: Software Development :: Debuggers",
+    "Topic :: Software Development :: Documentation",
+    "Topic :: System :: Logging",
+    "Topic :: System :: Shells",
+    "Topic :: System :: System Shells",
+    # "Typing :: Typed"  UNCOMMENT AFTER ADDING TYPE HINTS
+]
+packages = [
+    { include = "shelllogger", from = "src" },
+]
+# include = ["CHANGELOG.md"]  UNCOMMENT WHEN WE ADD A CHANGELOG
+
+
+[tool.poetry.urls]
+CI = "https://internal.gitlab.server/ShellLogger/ShellLogger/-/pipelines"
+Issues = "https://internal.gitlab.server/ShellLogger/ShellLogger/-/issues"
+
+
+[tool.poetry.dependencies]
+python = "^3.8"
+
+
+[tool.poetry.dev-dependencies]
+mock = "^4.0"
+pytest = "^6.2"
+pytest-cov = "^2.12"
+pytest-mock = "^3.6"
+sphinx = "^4.0"
+sphinx-argparse = "^0.2"
+sphinx-rtd-theme = "^0.5"
+
+
+[build-system]
+requires = ["poetry-core>=1.0"]
+build-backend = "poetry.core.masonry.api"
