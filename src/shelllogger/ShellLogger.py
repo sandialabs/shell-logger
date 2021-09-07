@@ -408,10 +408,17 @@ class ShellLogger:
 
         # Dictionary to hold time delta info.
         d = {'days': delta.days}
-        total_ms = delta.microseconds + (delta.seconds * 1000000)
-        d['hrs'], rem = divmod(total_ms, 3600000000)
-        d['min'], rem = divmod(rem, 60000000)
-        d['sec'] = rem / 1000000
+        microseconds_per_second = 10**6
+        seconds_per_minute = 60
+        minutes_per_hour = 60
+        total_ms = delta.microseconds + (delta.seconds
+                                         * microseconds_per_second)
+        d['hrs'], rem = divmod(total_ms, (minutes_per_hour
+                                          * seconds_per_minute
+                                          * microseconds_per_second))
+        d['min'], rem = divmod(rem, (seconds_per_minute
+                                     * microseconds_per_second))
+        d['sec'] = rem / microseconds_per_second
 
         # Round to 2 decimals
         d['sec'] = round(d['sec'], 2)
@@ -437,7 +444,7 @@ class ShellLogger:
 
     def html_print(self, msg: str, msg_title: str = "HTML Message") -> None:
         """
-        Save a message to the log but, don't print it in the console.
+        Save a message to the log but don't print it in the console.
 
         Parameters:
             msg:  Message to save to the log.

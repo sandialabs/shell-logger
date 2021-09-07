@@ -14,7 +14,7 @@ import _thread
 from threading import Thread
 from time import sleep, time
 from types import SimpleNamespace
-from typing import List, TextIO, Tuple
+from typing import List, Optional, TextIO, Tuple
 
 
 def trace_collector(**kwargs) -> object:
@@ -75,8 +75,8 @@ class Shell:
                 :class:`Shell`.
         """
 
-        # Corresponds to 0,1,2 file descriptors of the shell we're going
-        # to spawn.
+        # Corresponds to the 0, 1, and 2 file descriptors of the shell
+        # we're going to spawn.
         self.aux_stdin_rfd, self.aux_stdin_wfd = os.pipe()
         self.aux_stdout_rfd, self.aux_stdout_wfd = os.pipe()
         self.aux_stderr_rfd, self.aux_stderr_wfd = os.pipe()
@@ -107,7 +107,7 @@ class Shell:
         os.set_inheritable(self.aux_stdout_wfd, False)
         os.set_inheritable(self.aux_stderr_wfd, False)
 
-        # Change to the directory FOOBAR
+        # Start the shell in the given directory.
         self.cd(pwd)
 
     def __del__(self) -> None:
@@ -163,12 +163,13 @@ class Shell:
 
         Parameters:
             command:  The command to run in the shell subprocess.
-            **kwargs:
+            **kwargs:  Any additional arguments to pass to :func:`tee`.
 
         Returns:
             Todo:  Figure this out.
         """
-        start = round(time() * 1000)
+        milliseconds_per_second = 10**3
+        start = round(time() * milliseconds_per_second)
 
         # Wrap the `command` in {braces} to support newlines and
         # heredocs to tell the shell "this is one giant statement".
@@ -203,25 +204,23 @@ class Shell:
                 "This is a fatal error and we cannot continue.  Ensure that "
                 "the syntax of the command is correct."
             )
-        finish = round(time() * 1000)
+        finish = round(time() * milliseconds_per_second)
 
         # Pull the return code and return the results.  Note that if the
         # command executed spawns a sub-shell, you won't really have a
         # return code.
         aux_out, _ = self.auxiliary_command(posix="echo $RET_CODE")
         try:
-            returncode = int(aux_out)
+            return_code = int(aux_out)
         except ValueError:
-            returncode = "N/A"
-        return SimpleNamespace(
-            returncode=returncode,
-            args=command,
-            stdout=output.stdout_str,
-            stderr=output.stderr_str,
-            start=start,
-            finish=finish,
-            wall=finish - start
-        )
+            return_code = "N/A"
+        return SimpleNamespace(returncode=return_code,
+                               args=command,
+                               stdout=output.stdout_str,
+                               stderr=output.stderr_str,
+                               start=start,
+                               finish=finish,
+                               wall=finish - start)
 
     @staticmethod
     def tee(
@@ -230,17 +229,19 @@ class Shell:
             **kwargs
     ) -> SimpleNamespace:
         """
-        Todo:  Insert docstring.
+        Split stdout and stderr file objects to write to multiple files.
 
         Parameters:
-            stdout:
-            stderr:
-            **kwargs:
+            stdout:  The stdout file object to be split.
+            stderr:  The stderr file object to be split.
+            **kwargs:  Additional arguments.
 
-        Todo:  Figure out the types of the inputs.
+        Todo:
+          * Figure out the types of the inputs.
+          * Replace **kwargs with function arguments.
 
         Returns:
-            Todo:  Figure this out.
+            The stdout and stderr as strings.
         """
         sys_stdout = None if kwargs.get("quiet_stdout") else sys.stdout
         sys_stderr = None if kwargs.get("quiet_stderr") else sys.stderr
@@ -253,30 +254,37 @@ class Shell:
 
         def write(input_file: TextIO, output_files: List[TextIO]) -> None:
             """
-            Todo:  Insert docstring.
+            Take the data from an input file object and write it to
+            multiple output file objects.
 
             Parameters:
-                input_file:
-                output_files:
+                input_file:  The file object from which to read.
+                output_files:  A list of file objects to write to.
             """
+
+            # Read chunks from the input file.
             chunk_size = 4096  # 4 KB
             chunk = os.read(input_file.fileno(), chunk_size)
             while chunk and chunk[-1] != 4:
                 for output_file in output_files:
                     if output_file is not None:
                         output_file.write(chunk.decode(errors="ignore"))
-                chunk = os.read(input_file.fileno(), 4096)
-            if not chunk:
+                chunk = os.read(input_file.fileno(), chunk_size)
 
-                # If something goes wrong in the `tee()`, see the note elsewhere.
+            # If something goes wrong in the `tee()`, the only way to
+            # reliably propagate an exception from a thread that's
+            # spawned is to raise a KeyboardInterrupt.
+            if not chunk:
                 _thread.interrupt_main()
 
-            # Remove the EOT character, and write the last chunk.
+            # Remove the end-of-transmission character, and write the
+            # last chunk.
             chunk = chunk[:-1]
             for output_file in output_files:
                 if output_file is not None:
                     output_file.write(chunk.decode(errors="ignore"))
 
+        # Spawn threads to write to stdout and stderr.
         threads = [
             Thread(target=write, args=(stdout, stdout_tee)),
             Thread(target=write, args=(stderr, stderr_tee)),
@@ -288,6 +296,8 @@ class Shell:
             thread.join()
         stdout_str = stdout_io.getvalue() if stdout_io is not None else None
         stderr_str = stderr_io.getvalue() if stderr_io is not None else None
+
+        # Close any open file descriptors and return the stdout and stderr.
         for file in (stdout_tee + stderr_tee):
             if (file not in [None, sys.stdout, sys.stderr, sys.stdin]
                     and not file.closed):
@@ -297,48 +307,53 @@ class Shell:
             stderr_str=stderr_str
         )
 
-    def auxiliary_command(self, **kwargs) -> Tuple[str, str]:
+    def auxiliary_command(
+            self,
+            **kwargs
+    ) -> Tuple[Optional[str], Optional[str]]:
         """
-        Todo:  Insert docstring.  The same as the `run` command, but:
-            1. stdout/stderr get redirected to the aux fds
-            2. you don't tee any out/err
-
-        Purpose is to run aux commands like umask, pwd, env, etc.
-
-        Could maybe combine this with `run` with extra flags.
-
-        Todo:  Rip out Windows support.
+        Run auxiliary commands like `umask`, `pwd`, `env`, etc.
 
         Parameters:
-            **kwargs:
+            **kwargs:  Additional arguments.
+
+        Note:  This is effectively the same as :func:`run`, but:
+            1. The stdout and stderr get redirected to the auxiliary
+               file descriptors.
+            2. You don't tee the stdout or stderr.
+
+        Todo:
+          * Rip out Windows support.
+          * Maybe combine this with :func:`run` with extra flags.
+          * Replace **kwargs with function arguments.
 
         Returns:
-            Todo:  Figure this out.
+            The stdout and stderr of the command run.
         """
         stdout, stderr = None, None
-
-        # Todo:  Should these lines be inside the `if` below?
-        cmd = kwargs[os.name]
         out = self.aux_stdout_wfd
         err = self.aux_stderr_wfd
         if os.name in kwargs:
+            cmd = kwargs[os.name]
             os.write(self.aux_stdin_wfd, f"{cmd} 1>&{out} 2>&{err}\n".encode())
             os.write(self.aux_stdin_wfd, f"printf '\\4' 1>&{out}\n".encode())
             os.write(self.aux_stdin_wfd, f"printf '\\4' 1>&{err}\n".encode())
             stdout = ""
             stderr = ""
 
-            magic_number = 65536  # Max amount of info you can write to an unnamed pipe without flushing it.  https://unix.stackexchange.com/questions/343302/anonymous-pipe-kernel-buffer-size
-            aux = os.read(self.aux_stdout_rfd, magic_number)
+            max_anonymous_pipe_buffer_size = 65536
+            aux = os.read(self.aux_stdout_rfd, max_anonymous_pipe_buffer_size)
             while aux[-1] != 4:
                 stdout += aux.decode()
-                aux = os.read(self.aux_stdout_rfd, magic_number)
+                aux = os.read(self.aux_stdout_rfd,
+                              max_anonymous_pipe_buffer_size)
             aux = aux[:-1]
             stdout += aux.decode()
-            aux = os.read(self.aux_stderr_rfd, magic_number)
+            aux = os.read(self.aux_stderr_rfd, max_anonymous_pipe_buffer_size)
             while aux[-1] != 4:
                 stderr += aux.decode()
-                aux = os.read(self.aux_stderr_rfd, magic_number)
+                aux = os.read(self.aux_stderr_rfd,
+                              max_anonymous_pipe_buffer_size)
             aux = aux[:-1]
             stderr += aux.decode()
             if kwargs.get("strip"):
@@ -357,21 +372,22 @@ class Trace:
     trace_name = "undefined"  # Should be defined by subclasses.
     subclasses = []
 
-    @staticmethod  # Or is there some @decorator annotation?
-    def subclass(tracesubclass: type):
+    @staticmethod
+    def subclass(trace_subclass: type):
         """
-        Todo:  Insert docstring.  Decorator.  Adds to a list of supported Trace classes for the trace_collector factory method.
+        This is a class decorator that adds to a list of supported
+        :class:`Trace` classes for the :func:`trace_collector` factory
+        method.
         """
-        if issubclass(tracesubclass, Trace):
-            Trace.subclasses.append(tracesubclass)
-        return tracesubclass
+        if issubclass(trace_subclass, Trace):
+            Trace.subclasses.append(trace_subclass)
+        return trace_subclass
 
     def __init__(self, **kwargs):
         """
-        Todo:  Insert docstring.
+        Initialize the :class:`Trace` object, setting up the output file
+        where the trace information will be written.
         """
-
-        # Set up the output file where you'll write the trace info.
         if kwargs.get("trace_path"):
             self.output_path = Path(kwargs["trace_path"])
         else:
@@ -379,15 +395,24 @@ class Trace:
 
     @property
     @abstractmethod
-    def trace_args(self):
+    def trace_args(self) -> None:
         """
-        Todo:  Insert docstring.  The trace command + the arguments you pass to it (but not the command you're tracing).  Needs to be overridden in subclasses.  E.g. return `strace -f -c -e "open"`.
+        The trace command and the arguments you pass to it, but not the
+        command you're tracing.  E.g., return `strace -f -c -e "open"`.
+
+        Raises:
+            AbstractMethod:  This needs to be overridden by subclasses.
         """
         raise AbstractMethod()
 
-    def command(self, command, **kwargs):
+    def command(self, command: str):
         """
-        Return a command that runs a trace on a command.  E.g. "ls -l" -> "strace -f -c -e 'open' -- ls -l"
+        Return a command that runs a trace on ``command``.  E.g., ``ls
+        -l`` might get translated to ``strace -f -c -e 'open' -- ls
+        -l``.
+
+        Parameters:
+            command:  The command to be traced.
         """
         return f"{self.trace_args} -- {command}"
 
