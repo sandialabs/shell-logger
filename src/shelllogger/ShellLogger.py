@@ -14,16 +14,16 @@ from distutils import dir_util
 import json
 import os
 from pathlib import Path
-try:
-    import psutil
-except ModuleNotFoundError:
-    psutil = None
 import random
 import shutil
 import string
 import tempfile
 import time
 from types import SimpleNamespace
+try:
+    import psutil
+except ModuleNotFoundError:
+    psutil = None
 
 
 class ShellLoggerEncoder(json.JSONEncoder):
@@ -748,7 +748,7 @@ class Strace(Trace):
 
     def __init__(self, **kwargs) -> None:
         """
-        Todo:  Insert docstring.
+        Initialize the :class:`Strace` instance.
         """
         super().__init__(**kwargs)
         self.summary = True if kwargs.get("summary") else False
@@ -770,13 +770,14 @@ class Strace(Trace):
 @Trace.subclass
 class Ltrace(Trace):
     """
-    Todo:  Insert docstring.
+    An interface between :class:`ShellLogger` and the ``ltrace``
+    command.
     """
     trace_name = "ltrace"
 
     def __init__(self, **kwargs):
         """
-        Todo:  Insert docstring.
+        Initialize the :class:`Ltrace` instance.
         """
         super().__init__(**kwargs)
         self.summary = True if kwargs.get("summary") else False
@@ -785,7 +786,7 @@ class Ltrace(Trace):
     @property
     def trace_args(self):
         """
-        Todo:  Insert docstring.
+        Wraps a command in a ``ltrace`` command.
         """
         args = f"ltrace -C -f -o {self.output_path}"
         if self.summary:
@@ -799,101 +800,142 @@ if psutil is not None:
     @StatsCollector.subclass
     class DiskStatsCollector(StatsCollector):
         """
-        Todo:  Insert docstring.
+        A means of running commands while collecting disk usage
+        statistics.
         """
         stat_name = "disk"
 
         def __init__(self, interval: float, manager: object) -> None:
             """
-            Todo:  Insert docstring.
+            Initialize the :class:`DiskStatsCollector` object.
 
-            Args:
-                interval:
+            Parameters:
+                interval:  How many seconds to sleep between polling.
                 manager:
+
+            Todo:
+              * Figure out what `manager` is.
             """
             super().__init__(interval, manager)
             self.stats = manager.dict()
-            self.mountpoints = [
+            self.mount_points = [
                 p.mountpoint for p in psutil.disk_partitions()
             ]
             for location in ["/tmp",
                              "/dev/shm",
                              f"/var/run/user/{os.getuid()}"]:
-                if (location not in self.mountpoints
+                if (location not in self.mount_points
                         and Path(location).exists()):
-                    self.mountpoints.append(location)
-            for m in self.mountpoints:
+                    self.mount_points.append(location)
+            for m in self.mount_points:
                 self.stats[m] = manager.list()
 
         def collect(self) -> None:
             """
-            Poll the disks to determine how much free space you have.
+            Poll the disks to determine how much free space they have.
             """
-            timestamp = round(time.time() * 1000)
-            for m in self.mountpoints:
+            milliseconds_per_second = 10**3
+            timestamp = round(time.time() * milliseconds_per_second)
+            for m in self.mount_points:
                 self.stats[m].append((timestamp, psutil.disk_usage(m).percent))
 
         def unproxied_stats(self) -> dict:
             """
-            Todo:  FOO
+            Translate the statistics from the ``manager`` 's data
+            structure to a ``dict``.
 
             Returns:
                 A mapping from the disk mount points to tuples of
                 timestamps and percent of disk space free.
+
+            Todo:
+              * What's a `manager`?
             """
             return {k: list(v) for k, v in self.stats.items()}
 
     @StatsCollector.subclass
     class CPUStatsCollector(StatsCollector):
         """
-        Todo:  Insert docstring.
+        A means of running commands while collecting CPU usage
+        statistics.
         """
         stat_name = "cpu"
 
-        def __init__(self, interval, manager):
+        def __init__(self, interval: float, manager: object) -> None:
             """
-            Todo:  Insert docstring.
+            Initialize the :class:`CPUStatsCollector` object.
+
+            Parameters:
+                interval:  How many seconds to sleep between polling.
+                manager:
+
+            Todo:
+              * Figure out what `manager` is.
             """
             super().__init__(interval, manager)
             self.stats = manager.list()
 
-        def collect(self):
+        def collect(self) -> None:
             """
-            Todo:  Insert docstring.
+            Determine how heavily utilized the CPU is at the moment.
             """
-            timestamp = round(time.time() * 1000)
+            milliseconds_per_second = 10**3
+            timestamp = round(time.time() * milliseconds_per_second)
             self.stats.append((timestamp, psutil.cpu_percent(interval=None)))
 
-        def unproxied_stats(self):
+        def unproxied_stats(self) -> List[object]:
             """
-            Todo:  Insert docstring.
+            Translate the statistics from the ``manager`` 's data
+            structure to a ``list``.
+
+            Returns:
+                A list of SOMETHING.
+
+            Todo:
+              * Determine return type.
             """
             return list(self.stats)
 
     @StatsCollector.subclass
     class MemoryStatsCollector(StatsCollector):
         """
-        Todo:  Insert docstring.
+        A means of running commands while collecting memory usage
+        statistics.
         """
         stat_name = "memory"
 
-        def __init__(self, interval, manager):
+        def __init__(self, interval: float, manager: object) -> None:
             """
-            Todo:  Insert docstring.
+            Initialize the :class:`MemoryStatsCollector` object.
+
+            Parameters:
+                interval:  How many seconds to sleep between polling.
+                manager:
+
+            Todo:
+              * Figure out what `manager` is.
             """
             super().__init__(interval, manager)
             self.stats = manager.list()
 
-        def collect(self):
+        def collect(self) -> None:
             """
-            Todo:  Insert docstring.
+            Determine how much memory is currently being used.
             """
-            timestamp = round(time.time() * 1000)
+            milliseconds_per_second = 10**3
+            timestamp = round(time.time() * milliseconds_per_second)
             self.stats.append((timestamp, psutil.virtual_memory().percent))
 
-        def unproxied_stats(self):
+        def unproxied_stats(self) -> List[object]:
             """
-            Todo:  Insert docstring.
+            Translate the statistics from the ``manager`` 's data
+            structure to a ``list``.
+
+            Returns:
+                A list of SOMETHING.
+
+            Todo:
+              * Determine return type.
             """
             return list(self.stats)
 
@@ -902,74 +944,107 @@ else:
     @StatsCollector.subclass
     class DiskStatsCollector(StatsCollector):
         """
-        Todo:  Insert docstring.
+        A phony :class:`DiskStatsCollector` used when ``psutil`` is
+        unavailable.  This collects no disk statistics.
         """
         stat_name = "disk"
 
-        def __init__(self, interval, manager):
+        def __init__(self, interval: float, manager: object) -> None:
             """
-            Todo:  Insert docstring.
+            Initialize the object via the parent's constructor.
+
+            Parameters:
+                interval:  How many seconds to sleep between polling.
+                manager:
+
+            Todo:
+              * Figure out what `manager` is.
             """
             super().__init__(interval, manager)
 
-        def collect(self):
+        def collect(self) -> None:
             """
-            Todo:  Insert docstring.
+            Don't collect any disk statistics.
             """
             pass
 
-        def unproxied_stats(self):
+        def unproxied_stats(self) -> None:
             """
-            Todo:  Insert docstring.
+            If asked for the disk statistics, don't provide any.
+
+            Returns:
+                None
             """
             return None
 
     @StatsCollector.subclass
     class CPUStatsCollector(StatsCollector):
         """
-        Todo:  Insert docstring.
+        A phony :class:`CPUStatsCollector` used when ``psutil`` is
+        unavailable.  This collects no CPU statistics.
         """
         stat_name = "cpu"
 
-        def __init__(self, interval, manager):
+        def __init__(self, interval: float, manager: object) -> None:
             """
-            Todo:  Insert docstring.
+            Initialize the object via the parent's constructor.
+
+            Parameters:
+                interval:  How many seconds to sleep between polling.
+                manager:
+
+            Todo:
+              * Figure out what `manager` is.
             """
             super().__init__(interval, manager)
 
-        def collect(self):
+        def collect(self) -> None:
             """
-            Todo:  Insert docstring.
+            Don't collect any CPU statistics.
             """
             pass
 
-        def unproxied_stats(self):
+        def unproxied_stats(self) -> None:
             """
-            Todo:  Insert docstring.
+            If asked for CPU statistics, don't provide any.
+
+            Returns:
+                None
             """
             return None
 
     @StatsCollector.subclass
     class MemoryStatsCollector(StatsCollector):
         """
-        Todo:  Insert docstring.
+        A phony :class:`MemoryStatsCollector` used when ``psutil`` is
+        unavailable.  This collects no memory statistics.
         """
         stat_name = "memory"
 
-        def __init__(self, interval, manager):
+        def __init__(self, interval: float, manager: object) -> None:
             """
-            Todo:  Insert docstring.
+            Initialize the object via the parent's constructor.
+
+            Parameters:
+                interval:  How many seconds to sleep between polling.
+                manager:
+
+            Todo:
+              * Figure out what `manager` is.
             """
             super().__init__(interval, manager)
 
-        def collect(self):
+        def collect(self) -> None:
             """
-            Todo:  Insert docstring.
+            Don't collect any memory statistics.
             """
             pass
 
-        def unproxied_stats(self):
+        def unproxied_stats(self) -> None:
             """
-            Todo:  Insert docstring.
+            If asked for memory statistics, don't provide any.
+
+            Returns:
+                None
             """
             return None
