@@ -14,20 +14,20 @@ import _thread
 from threading import Thread
 from time import sleep, time
 from types import SimpleNamespace
-from typing import List, Optional, TextIO, Tuple
+from typing import IO, List, Optional, TextIO, Tuple
 
 
-def trace_collector(**kwargs) -> object:
+def trace_collector(**kwargs) -> Trace:
     """
-    Todo:  Insert docstring.  Factory.  Returns any subclass of Trace
-        that has the @Trace.subclass annotation.
+    A factory method that returns any subclass of :class:`Trace` that
+    has the ``@Trace.subclass`` decorator applied to it.
 
     Parameters:
         **kwargs:  Any supported arguments of the :class:`Trace`
             subclass.
 
     Returns:
-        Todo:  Figure this out.  Single Trace subclass instance.
+        A single instance of a :class:`Trace` subclass.
     """
     trace_name = kwargs["trace"]
     collectors = [c for c in Trace.subclasses if c.trace_name == trace_name]
@@ -40,15 +40,18 @@ def trace_collector(**kwargs) -> object:
         raise RuntimeError(f"Multiple trace types match '{trace_name}'.")
 
 
-def stats_collectors(**kwargs) -> List[object]:
+def stats_collectors(**kwargs) -> List[StatsCollector]:
     """
-    Todo:  Insert docstring.  See above.
+    A factory method that returns a list of any subclasses of
+    :class:`StatsCollector` that have the ``@StatsCollector.subclass``
+    decorator applied to them.
 
     Parameters:
-        **kwargs:
+        **kwargs:  Any supported arguments of the
+            :class:`StatsCollector` subclasses.
 
     Returns:
-        Todo:  Figure this out.  List[StatsCollector subclasses]
+        A collection of instances of :class:`StatsCollector` subclasses.
     """
     collectors = []
     if "measure" in kwargs:
@@ -166,7 +169,8 @@ class Shell:
             **kwargs:  Any additional arguments to pass to :func:`tee`.
 
         Returns:
-            Todo:  Figure this out.
+            The command run, along with its return code, stdout, stderr,
+            start/stop time, and duration.
         """
         milliseconds_per_second = 10**3
         start = round(time() * milliseconds_per_second)
@@ -224,8 +228,8 @@ class Shell:
 
     @staticmethod
     def tee(
-            stdout: TextIO,
-            stderr: TextIO,
+            stdout: Optional[IO[bytes]],
+            stderr: Optional[IO[bytes]],
             **kwargs
     ) -> SimpleNamespace:
         """
@@ -236,12 +240,11 @@ class Shell:
             stderr:  The stderr file object to be split.
             **kwargs:  Additional arguments.
 
-        Todo:
-          * Figure out the types of the inputs.
-          * Replace **kwargs with function arguments.
-
         Returns:
             The stdout and stderr as strings.
+
+        Todo:
+          * Replace **kwargs with function arguments.
         """
         sys_stdout = None if kwargs.get("quiet_stdout") else sys.stdout
         sys_stderr = None if kwargs.get("quiet_stderr") else sys.stderr
@@ -419,22 +422,35 @@ class Trace:
 
 class StatsCollector:
     """
-    Todo:  Insert docstring.
+    Provides an interface for the :class:`ShellLogger` to run commands
+    while collecting various system statistics.
     """
-    stat_name = "undefined"
+    stat_name = "undefined"  # Should be defined by subclasses.
     subclasses = []
 
-    def subclass(statscollectorsubclass: type):
+    @staticmethod
+    def subclass(stats_collector_subclass: type):
         """
-        Todo:  Insert docstring.
+        This is a class decorator that adds to a list of supported
+        :class:`StatsCollector` classes for the :func:`stats_collectors`
+        factory method.
         """
-        if issubclass(statscollectorsubclass, StatsCollector):
-            StatsCollector.subclasses.append(statscollectorsubclass)
-        return statscollectorsubclass
+        if issubclass(stats_collector_subclass, StatsCollector):
+            StatsCollector.subclasses.append(stats_collector_subclass)
+        return stats_collector_subclass
 
     def __init__(self, interval, manager):
         """
-        Todo:  Insert docstring.
+        Initialize the :class:`StatsCollector` object, setting the
+        poling interval, and creating the process for collecting the
+        statistics.
+
+        Parameters:
+            interval:  How long to sleep between collecting statistics.
+            manager:
+
+        Todo:
+          * Figure out what `manager` is.
         """
         self.interval = interval
         self.process = Process(target=self.loop, args=())
@@ -448,7 +464,7 @@ class StatsCollector:
 
     def loop(self):
         """
-        Infinitely loop, collecting stats, until the subprocess is
+        Infinitely loop, collecting statistics, until the subprocess is
         terminated.
         """
         while True:
@@ -458,35 +474,47 @@ class StatsCollector:
     @abstractmethod
     def collect(self):
         """
-        Meant to be overridden.  Called at an interval.  Instantaneous
-        collection of a stat.
+        Instantaneously collect a statistic.  This is meant to be called
+        repeatedly after some time interval.
+
+        Raises:
+            AbstractMethod:  This must be overridden by subclasses.
         """
         raise AbstractMethod()
 
     @abstractmethod
     def unproxied_stats(self):
         """
-        Convert from Python's Manager's datastrcutrues to base Python
-        datastructures.
+        Convert from Python's Manager's data structures to base Python
+        data structures.
+
+        Raises:
+            AbstractMethod:  This must be overridden by subclasses.
         """
         raise AbstractMethod()
 
     def finish(self):
         """
-        Terminate the infinite loop that's collecting the stats, and
-        then return the unproxied stats.
+        Terminate the infinite loop that's collecting the statistics,
+        and then return the unproxied statistics.
         """
         self.process.terminate()
         return self.unproxied_stats()
 
 
 class AbstractMethod(NotImplementedError):
+    """
+    An ``Exception`` denoting an abstract method that is meant to be
+    overridden by a subclass.
+    """
+
     def __init__(self):
         """
-        Todo:  Insert docstring.
+        Raise a `NotImplementedError`, indicating which method must be
+        implemented for the class to be concrete.
         """
         class_name = (
             inspect.stack()[1].frame.f_locals['self'].__class__.__name__
         )
         method_name = inspect.stack()[1].function
-        super().__init__(f"{class_name} must implement {method_name}()")
+        super().__init__(f"`{class_name}` must implement `{method_name}()`.")
