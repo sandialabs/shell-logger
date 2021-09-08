@@ -220,7 +220,10 @@ def child_logger_card_html(
     yield footer
 
 
-def command_card_html(log: dict, *args: object) -> Iterator[str]:
+def command_card_html(
+        log: dict,
+        *args: Iterator[Union[str, Iterable]]
+) -> Iterator[str]:
     """
     Generate the HTML for a card corresponding to a command that was
     run.  The HTML elements are yielded one at a time to avoid loading
@@ -229,7 +232,8 @@ def command_card_html(log: dict, *args: object) -> Iterator[str]:
     Parameters:
         log:  An entry from the :class:`ShellLogger` 's log book
             corresponding to a command that was run.
-        *args:  Todo
+        *args:  A generator that will yield all the elements to be
+            included in the command card one at a time.
 
     Yields:
         The header, followed by all the contents of the command card,
@@ -361,7 +365,9 @@ def command_detail(
 
 def command_card(log: dict, stream_dir: Path) -> Iterator[str]:
     """
-    Todo:  Figure this out.
+    Create a card in the HTML log file containing the output of a
+    command, along with all its corresponding data (environment
+    information, trace output, memory/CPU/disk statistics, etc.).
 
     Parameters:
         log:  An entry from the :class:`ShellLogger` 's log book
@@ -378,6 +384,7 @@ def command_card(log: dict, stream_dir: Path) -> Iterator[str]:
     stderr_path = stream_dir / f"{log['timestamp']}_{cmd_id}_stderr"
     trace_path = stream_dir / f"{log['timestamp']}_{cmd_id}_trace"
 
+    # Collect all the details associated with the command that was run.
     info = [
         command_detail_list(
             cmd_id,
@@ -395,6 +402,7 @@ def command_card(log: dict, stream_dir: Path) -> Iterator[str]:
         output_block_card("stderr", stderr_path, cmd_id, collapsed=False),
     ]
 
+    # Compile the additional diagnostic information.
     diagnostics = [
         output_block_card("Environment", log["environment"], cmd_id),
         output_block_card("ulimit", log["ulimit"], cmd_id),
@@ -402,57 +410,71 @@ def command_card(log: dict, stream_dir: Path) -> Iterator[str]:
     if trace_path.exists():
         diagnostics.append(output_block_card("trace", trace_path, cmd_id))
 
+    # Add in any available statistics (from `StatsCollector`s).
     if log.get("stats"):
         stats = [("memory", "Memory Usage"), ("cpu", "CPU Usage")]
         for stat, stat_title in stats:
             if log["stats"].get(stat):
                 data = log["stats"][stat]
-                diagnostics.append(timeseries_plot(cmd_id, data, stat_title))
+                diagnostics.append(time_series_plot(cmd_id, data, stat_title))
         if log["stats"].get("disk"):
             uninteresting_disks = ["/var", "/var/log", "/var/log/audit",
                                    "/boot", "/boot/efi"]
             disk_stats = {x: y for x, y in log["stats"]["disk"].items()
                           if x not in uninteresting_disks}
+
             # We sort because JSON deserialization may change
             # the ordering of the map.
             for disk, data in sorted(disk_stats.items()):
-                diagnostics.append(disk_timeseries_plot(cmd_id, data, disk))
+                diagnostics.append(disk_time_series_plot(cmd_id, data, disk))
     info.append(diagnostics_card(cmd_id, *diagnostics))
-
     return command_card_html(log, *info)
 
 
-def timeseries_plot(cmd_id: object, data_tuples: object, series_title: object) -> object:
+def time_series_plot(
+        cmd_id: str,
+        data_tuples: List[Tuple[float, float]],
+        series_title: str
+) -> str:
     """
-    Todo:  Figure this out.
+    Create the HTML for a plot of time series data.
 
     Parameters:
         cmd_id:  The unique identifier associated with the command that
             was run.
-        data_tuples:
-        series_title:
+        data_tuples:  A list of :math:`x` and :math:`y` locations.
+        series_title:  The title of the plot.
 
     Returns:
-
+        A HTML snippet for a plot of the given data.
     """
     labels = [get_human_time(x) for x, _ in data_tuples]
     values = [y for _, y in data_tuples]
-    id = f"{cmd_id}-{series_title.lower().replace(' ', '-')}-chart"
-    return stat_chart_card(labels, values, series_title, id)
+    identifier = f"{cmd_id}-{series_title.lower().replace(' ', '-')}-chart"
+    return stat_chart_card(labels, values, series_title, identifier)
 
 
-def disk_timeseries_plot(cmd_id: object, data_tuples: object, volume_name: object) -> object:
+def disk_time_series_plot(
+        cmd_id: str,
+        data_tuples: Tuple[float, float],
+        volume_name: str
+) -> str:
     """
-    Todo:  Figure this out.
+    Create the HTML for a plot of the disk usage time series data for a
+    particular volume.
 
     Parameters:
         cmd_id:  The unique identifier associated with the command that
             was run.
-        data_tuples:
-        volume_name:
+        data_tuples:  A list of :math:`x` and :math:`y` locations.
+        volume_name:  The name of the disk volume who's data is being
+            plotted.
 
     Returns:
+        A HTML snippet for a plot of the given data.
 
+    Todo:
+      * Combine with the above?
     """
     labels = [get_human_time(x) for x, _ in data_tuples]
     values = [y for _, y in data_tuples]
@@ -461,20 +483,28 @@ def disk_timeseries_plot(cmd_id: object, data_tuples: object, volume_name: objec
     return stat_chart_card(labels, values, stat_title, id)
 
 
-def stat_chart_card(labels: object, data: object, title: object, id: object) -> object:
+def stat_chart_card(
+        labels: List[str],
+        data: List[float],
+        title: str,
+        identifier: str
+) -> str:
     """
-    Todo:  Figure this out.
+    Create the HTML for a two-dimensional plot.
 
     Parameters:
-        labels:
-        data:
-        title:
-        id:
+        labels:  The :math:`x` values.
+        data:  The :math:`y` values.
+        title:  The title for the plot.
+        identifier:  A unique identifier for the chart.
+
+    Returns:
+        A HTML snippet for the chart with all the details filled in.
     """
-    yield stat_chart_template.format(labels=labels,
-                                     data=data,
-                                     title=title,
-                                     id=id)
+    return stat_chart_template.format(labels=labels,
+                                      data=data,
+                                      title=title,
+                                      id=identifier)
 
 
 def output_block_card(
