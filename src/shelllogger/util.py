@@ -4,9 +4,10 @@ from datetime import datetime
 import pkgutil
 from pathlib import Path
 import re
+from src.shelllogger import ShellLogger
 import textwrap
 from types import SimpleNamespace
-from typing import TextIO, Tuple
+from typing import Iterator, List, TextIO, Tuple, Union
 
 
 def nested_simplenamespace_to_dict(namespace: object) -> object:
@@ -14,10 +15,10 @@ def nested_simplenamespace_to_dict(namespace: object) -> object:
     Todo:  Figure this out.
 
     Parameters:
-        namespace:
+        namespace:  Todo
 
     Returns:
-
+        Todo
     """
     if "_asdict" in dir(namespace):
         return nested_simplenamespace_to_dict(namespace._asdict())
@@ -77,16 +78,17 @@ def append_html(*args: object, output: Path) -> None:
     Todo:  Figure this out.
 
     Parameters:
-        *args: 
+        *args:  Todo
         output:  The HTML file to append to.
     """
+
     def _append_html(f: TextIO, *inner_args: object) -> None:
         """
         Todo:  Figure this out.
 
         Parameters:
             f:  The HTML file to write to.
-            *inner_args:
+            *inner_args:  Todo
         """
         for arg in inner_args:
             if isinstance(arg, str):
@@ -116,12 +118,15 @@ def fixed_width(text: str) -> str:
     return f"<code>{html_encode(text)}</code>"
 
 
-def flatten(element: object) -> object:
+def flatten(element: Union[str, bytes, Iterable]) -> str:
     """
-    Takes a tree of lists and turns it into a flat iterables.  Ish.
+    Takes a tree of lists and turns it into a flat iterable of strings.
 
     Parameters:
-        element:  Todo:  Figure this out.
+        element:  An element of a tree.
+
+    Yields:
+        The string representation of the given element.
     """
     if isinstance(element, str):
         yield element
@@ -134,13 +139,21 @@ def flatten(element: object) -> object:
         yield element
 
 
-def parent_logger_card_html(name: object, *args: object) -> object:
+def parent_logger_card_html(name: str, *args: Iterator[str]) -> str:
     """
-    Todo:  Figure this out.
+    Generate the HTML for the card corresponding to the parent
+    :class:`ShellLogger`.  The HTML elements are yielded one at a time
+    to avoid loading *all* the data from the :class:`ShellLogger` into
+    memory at once.
 
     Parameters:
-        name:
-        *args:
+        name:  The name of the :class:`ShellLogger`.
+        *args:  A list of generators to lazily yield string HTML
+            elements for the contents of the parent card.
+
+    Yields:
+        The header, followed by all the contents of the
+        :class:`ShellLogger`, and then the footer.
     """
     header, indent, footer = split_template(parent_logger_template,
                                             "parent_body",
@@ -151,28 +164,47 @@ def parent_logger_card_html(name: object, *args: object) -> object:
     yield footer
 
 
-def child_logger_card(log: object) -> object:
+def child_logger_card(log: ShellLogger) -> Iterator[str]:
     """
-    Todo:  Figure this out.
+    Create a card to go in the HTML log file containing everything
+    pertaining to a child :class:`ShellLogger`.
 
     Parameters:
-        log:
+        log:  The child :class:`ShellLogger` for which to generate the
+            card.
 
     Returns:
-
+        A generator that will lazily yield the elements of the HTML for
+        the card one at a time.
     """
     child_html = log.to_html()
     return child_logger_card_html(log.name, log.duration, *child_html)
 
 
-def child_logger_card_html(name: object, duration: object, *args: object) -> object:
+def child_logger_card_html(
+        name: str,
+        duration: str,
+        *args: Union[Iterator[str], List[Iterator[str]]]
+) -> str:
     """
-    Todo:  Figure this out.
+    Generate the HTML for a card corresponding to the child
+    :class:`ShellLogger`.  The HTML elements are yielded one at a time
+    to avoid loading *all* the data from the :class:`ShellLogger` into
+    memory at once.
 
     Parameters:
-        name:
-        duration:
-        *args:
+        name:  The name of the child :class:`ShellLogger`.
+        duration:  The duration of the child :class:`ShellLogger`.
+        *args:  A generator (or list of generators) to lazily yield
+            string HTML elements for the contents of the child card.
+
+    Yields:
+        The header, followed by all the contents of the child
+        :class:`ShellLogger`, and then the footer.
+
+    Todo:
+      * Should we replace the ``for`` loop with the one found in
+        :func:`parent_logger_card_html`?
     """
     header, indent, footer = split_template(child_logger_template,
                                             "child_body",
@@ -188,13 +220,20 @@ def child_logger_card_html(name: object, duration: object, *args: object) -> obj
     yield footer
 
 
-def command_card_html(log: object, *args: object) -> object:
+def command_card_html(log: dict, *args: object) -> str:
     """
-    Todo:  Figure this out.
+    Generate the HTML for a card corresponding to a command that was
+    run.  The HTML elements are yielded one at a time to avoid loading
+    *all* the data into memory at once.
 
     Parameters:
-        log:
-        *args:
+        log:  An entry from the :class:`ShellLogger` 's log book
+            corresponding to a command that was run.
+        *args:  Todo
+
+    Yields:
+        The header, followed by all the contents of the command card,
+        and then the footer.
     """
     header, indent, footer = split_template(command_template,
                                             "more_info",
@@ -213,18 +252,27 @@ def command_card_html(log: object, *args: object) -> object:
     yield footer
 
 
-def html_message_card(log: object) -> object:
+def html_message_card(log: dict) -> str:
     """
-    Todo:  Figure this out.
+    Generate the HTML for a card corresponding to a message to only be
+    included in the HTML log file (e.g., not printed to ``stdout`` as
+    well).
 
     Parameters:
-        log:
+        log:  An entry from the :class:`ShellLogger` 's log book
+            corresponding to a message.
+
+    Yields:
+        The header, followed by the contents of the message card, and
+        then the footer.
     """
-    timestamp = log["timestamp"]
-    timestamp = timestamp.replace(' ', '_')
-    timestamp = timestamp.replace(':', '-')
-    timestamp = timestamp.replace('/', '_')
-    timestamp = timestamp.replace('.', '-')
+    timestamp = (
+        log["timestamp"]
+        .replace(' ', '_')
+        .replace(':', '-')
+        .replace('/', '_')
+        .replace('.', '-')
+    )
     header, indent, footer = split_template(html_message_template,
                                             "message",
                                             title=log["msg_title"],
@@ -236,12 +284,18 @@ def html_message_card(log: object) -> object:
     yield footer
 
 
-def message_card(log: object) -> object:
+def message_card(log: dict) -> str:
     """
-    Todo:  Figure this out.
+    Generate the HTML for a card corresponding to a message to be both
+    printed to ``stdout`` and included in the HTML log file.
 
     Parameters:
-        log:
+        log:  An entry from the :class:`ShellLogger` 's log book
+            corresponding to a message.
+
+    Yields:
+        The header, followed by the contents of the message card, and
+        then the footer.
     """
     header, indent, footer = split_template(message_template, "message")
     text = html_encode(log["msg"])
@@ -251,13 +305,20 @@ def message_card(log: object) -> object:
     yield footer
 
 
-def command_detail_list(cmd_id: object, *args: object) -> object:
+def command_detail_list(cmd_id: str, *args: Iterable[str]) -> str:
     """
-    Todo:  Figure this out.
+    Generate the HTML for a list of details associated with a command
+    that was run.
 
     Parameters:
-        cmd_id:
-        *args:
+        cmd_id:  The unique identifier associated with the command that
+            was run.
+        *args:  All of the details associated with a command that was
+            run.
+
+    Yields:
+        The header, followed by each of the details associated with the
+        command that was run, and then the footer.
     """
     header, indent, footer = split_template(command_detail_list_template,
                                             "details",
@@ -269,18 +330,26 @@ def command_detail_list(cmd_id: object, *args: object) -> object:
     yield footer
 
 
-def command_detail(cmd_id: object, name: object, value: object, hidden: object = False) -> object:
+def command_detail(
+        cmd_id: str,
+        name: str,
+        value: str,
+        hidden: bool = False
+) -> str:
     """
-    Todo:  Figure this out.
+    Create the HTML snippet for a detail associated with a command that
+    was run.
 
     Parameters:
-        cmd_id:
-        name:
-        value:
-        hidden:
+        cmd_id:  The unique identifier associated with the command that
+            was run.
+        name:  The name of the detail being recorded.
+        value:  The value of the detail being recorded.
+        hidden:  Whether or not this detail should be hidden (collapsed)
+            in the HTML by default.
 
     Returns:
-
+        The HTML snippet for this command detail.
     """
     if hidden:
         return hidden_command_detail_template.format(cmd_id=cmd_id,
@@ -494,19 +563,42 @@ def output_block_html(lines: object, name: object, cmd_id: object) -> object:
 def split_template(
         template: str,
         split_at: str,
-        **kwargs: object
+        **kwargs
 ) -> Tuple[str, str, str]:
     """
-    Todo:  Figure this out.
+    Take a templated HTML snippet and split it into a header and footer,
+    meaning everything that comes before and after the line containing
+    ``split_at``.  Also determine the indentation for the content that
+    will be inserted between the header and footer.
+
+    Example:
+        If the following snippet is ``template`` and ``split_at`` is
+        ``child_body``, then the header is lines 1-6, the footer is
+        lines 8-9, and the indent is eight spaces.
+
+        .. code-block:: html
+           :linenos:
+           :emphasize-lines: 7
+
+           <details class="child-logger">
+               <summary>
+                   <h6 class="child-logger-heading">{name}</h6>
+                   <span class="duration"> (Duration: {duration})</span>
+               </summary>
+               <div class="child-logger-body">
+                   {child_body}
+               </div>
+           </details>
 
     Parameters:
         template:  A templated HTML snippet.
         split_at:  A substring used to split the ``template`` into
             before and after chunks.
-        **kwargs:
+        **kwargs:  Additional keyword arguments used to replace keywords
+            in the ``template``.
 
     Returns:
-
+        The header, indent, and footer.
     """
     fmt = {k: v for k, v in kwargs.items() if k != split_at}
     pattern = re.compile(f"(.*\\n)(\\s*)\\{{{split_at}\\}}\\n(.*)",

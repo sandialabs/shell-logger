@@ -65,8 +65,8 @@ def stats_collectors(**kwargs) -> List[StatsCollector]:
 
 class Shell:
     """
-    Spawns a shell subprocess that inherits five unnamed pipes (stdout,
-    stderr, stdin, aux_stdout, aux_stderr).
+    Spawns a shell subprocess that inherits five unnamed pipes
+    (``stdout``, ``stderr``, ``stdin``, ``aux_stdout``, ``aux_stderr``).
     """
 
     def __init__(self, pwd: Path = Path.cwd()) -> None:
@@ -169,8 +169,8 @@ class Shell:
             **kwargs:  Any additional arguments to pass to :func:`tee`.
 
         Returns:
-            The command run, along with its return code, stdout, stderr,
-            start/stop time, and duration.
+            The command run, along with its return code, ``stdout``,
+            ``stderr``, start/stop time, and duration.
         """
         milliseconds_per_second = 10**3
         start = round(time() * milliseconds_per_second)
@@ -194,7 +194,7 @@ class Shell:
         os.write(self.aux_stdin_wfd, f"printf '\\4' 1>&2\n".encode())
 
         # Tee the output to multiple sinks (files, strings,
-        # stdout/stderr).
+        # `stdout`/`stderr`).
         try:
             output = self.tee(self.shell.stdout, self.shell.stderr, **kwargs)
 
@@ -233,15 +233,16 @@ class Shell:
             **kwargs
     ) -> SimpleNamespace:
         """
-        Split stdout and stderr file objects to write to multiple files.
+        Split ``stdout`` and ``stderr`` file objects to write to
+        multiple files.
 
         Parameters:
-            stdout:  The stdout file object to be split.
-            stderr:  The stderr file object to be split.
+            stdout:  The ``stdout`` file object to be split.
+            stderr:  The ``stderr`` file object to be split.
             **kwargs:  Additional arguments.
 
         Returns:
-            The stdout and stderr as strings.
+            The ``stdout`` and ``stderr`` as strings.
 
         Todo:
           * Replace **kwargs with function arguments.
@@ -287,7 +288,7 @@ class Shell:
                 if output_file is not None:
                     output_file.write(chunk.decode(errors="ignore"))
 
-        # Spawn threads to write to stdout and stderr.
+        # Spawn threads to write to `stdout` and `stderr`.
         threads = [
             Thread(target=write, args=(stdout, stdout_tee)),
             Thread(target=write, args=(stderr, stderr_tee)),
@@ -300,7 +301,8 @@ class Shell:
         stdout_str = stdout_io.getvalue() if stdout_io is not None else None
         stderr_str = stderr_io.getvalue() if stderr_io is not None else None
 
-        # Close any open file descriptors and return the stdout and stderr.
+        # Close any open file descriptors and return the `stdout` and
+        # `stderr`.
         for file in (stdout_tee + stderr_tee):
             if (file not in [None, sys.stdout, sys.stderr, sys.stdin]
                     and not file.closed):
@@ -321,9 +323,9 @@ class Shell:
             **kwargs:  Additional arguments.
 
         Note:  This is effectively the same as :func:`run`, but:
-            1. The stdout and stderr get redirected to the auxiliary
-               file descriptors.
-            2. You don't tee the stdout or stderr.
+            1. The ``stdout`` and ``stderr`` get redirected to the
+               auxiliary file descriptors.
+            2. You don't tee the ``stdout`` or ``stderr``.
 
         Todo:
           * Rip out Windows support.
@@ -331,7 +333,7 @@ class Shell:
           * Replace **kwargs with function arguments.
 
         Returns:
-            The stdout and stderr of the command run.
+            The ``stdout`` and ``stderr`` of the command run.
         """
         stdout, stderr = None, None
         out = self.aux_stdout_wfd
