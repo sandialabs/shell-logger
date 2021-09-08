@@ -118,7 +118,7 @@ def fixed_width(text: str) -> str:
     return f"<code>{html_encode(text)}</code>"
 
 
-def flatten(element: Union[str, bytes, Iterable]) -> str:
+def flatten(element: Union[str, bytes, Iterable]) -> Iterator[str]:
     """
     Takes a tree of lists and turns it into a flat iterable of strings.
 
@@ -139,7 +139,7 @@ def flatten(element: Union[str, bytes, Iterable]) -> str:
         yield element
 
 
-def parent_logger_card_html(name: str, *args: Iterator[str]) -> str:
+def parent_logger_card_html(name: str, *args: Iterator[str]) -> Iterator[str]:
     """
     Generate the HTML for the card corresponding to the parent
     :class:`ShellLogger`.  The HTML elements are yielded one at a time
@@ -185,7 +185,7 @@ def child_logger_card_html(
         name: str,
         duration: str,
         *args: Union[Iterator[str], List[Iterator[str]]]
-) -> str:
+) -> Iterator[str]:
     """
     Generate the HTML for a card corresponding to the child
     :class:`ShellLogger`.  The HTML elements are yielded one at a time
@@ -220,7 +220,7 @@ def child_logger_card_html(
     yield footer
 
 
-def command_card_html(log: dict, *args: object) -> str:
+def command_card_html(log: dict, *args: object) -> Iterator[str]:
     """
     Generate the HTML for a card corresponding to a command that was
     run.  The HTML elements are yielded one at a time to avoid loading
@@ -252,7 +252,7 @@ def command_card_html(log: dict, *args: object) -> str:
     yield footer
 
 
-def html_message_card(log: dict) -> str:
+def html_message_card(log: dict) -> Iterator[str]:
     """
     Generate the HTML for a card corresponding to a message to only be
     included in the HTML log file (e.g., not printed to ``stdout`` as
@@ -284,7 +284,7 @@ def html_message_card(log: dict) -> str:
     yield footer
 
 
-def message_card(log: dict) -> str:
+def message_card(log: dict) -> Iterator[str]:
     """
     Generate the HTML for a card corresponding to a message to be both
     printed to ``stdout`` and included in the HTML log file.
@@ -305,7 +305,7 @@ def message_card(log: dict) -> str:
     yield footer
 
 
-def command_detail_list(cmd_id: str, *args: Iterable[str]) -> str:
+def command_detail_list(cmd_id: str, *args: Iterable[str]) -> Iterator[str]:
     """
     Generate the HTML for a list of details associated with a command
     that was run.
@@ -359,21 +359,24 @@ def command_detail(
         return command_detail_template.format(name=name, value=value)
 
 
-def command_card(log: object, strm_dir: object) -> object:
+def command_card(log: dict, stream_dir: Path) -> Iterator[str]:
     """
     Todo:  Figure this out.
 
     Parameters:
-        log:
-        strm_dir:
+        log:  An entry from the :class:`ShellLogger` 's log book
+            corresponding to a command that was run.
+        stream_dir:  The stream directory containing the ``stdout``,
+            ``stderr``, and ``trace`` output from the command.
 
     Returns:
-
+        A generator to lazily yield the elements of the command card one
+        at a time.
     """
     cmd_id = log["cmd_id"]
-    stdout_path = strm_dir / f"{log['timestamp']}_{cmd_id}_stdout"
-    stderr_path = strm_dir / f"{log['timestamp']}_{cmd_id}_stderr"
-    trace_path = strm_dir / f"{log['timestamp']}_{cmd_id}_trace"
+    stdout_path = stream_dir / f"{log['timestamp']}_{cmd_id}_stdout"
+    stderr_path = stream_dir / f"{log['timestamp']}_{cmd_id}_stderr"
+    trace_path = stream_dir / f"{log['timestamp']}_{cmd_id}_trace"
 
     info = [
         command_detail_list(
@@ -424,7 +427,8 @@ def timeseries_plot(cmd_id: object, data_tuples: object, series_title: object) -
     Todo:  Figure this out.
 
     Parameters:
-        cmd_id:
+        cmd_id:  The unique identifier associated with the command that
+            was run.
         data_tuples:
         series_title:
 
@@ -442,7 +446,8 @@ def disk_timeseries_plot(cmd_id: object, data_tuples: object, volume_name: objec
     Todo:  Figure this out.
 
     Parameters:
-        cmd_id:
+        cmd_id:  The unique identifier associated with the command that
+            was run.
         data_tuples:
         volume_name:
 
@@ -472,56 +477,76 @@ def stat_chart_card(labels: object, data: object, title: object, id: object) -> 
                                      id=id)
 
 
-def output_block_card(title: object, string: object, cmd_id: object, collapsed: object = True) -> object:
+def output_block_card(
+        title: str,
+        output: Union[Path, str],
+        cmd_id: str,
+        collapsed: bool = True
+) -> Iterator[str]:
     """
-    Todo:  Figure this out.
+    Given the output from a command, generate a corresponding HTML card
+    for inclusion in the log file.
 
     Parameters:
-        title:
-        string:
-        cmd_id:
-        collapsed:
+        title:  The title for the output block.
+        output:  The output from a command.
+        cmd_id:  The unique identifier associated with the command that
+            was run.
+        collapsed:  Whether or not the output block should be collapsed
+            by default in the HTML log file.
+
+    Yields:
+        The header, followed by each line of the output, and then the
+        footer.
     """
     name = title.replace(' ', '_').lower()
-    if collapsed:
-        template = output_card_collapsed_template
-    else:
-        template = output_card_template
+    template = (output_card_collapsed_template if collapsed else
+                output_card_template)
     header, indent, footer = split_template(template,
                                             "output_block",
                                             name=name,
                                             title=title,
                                             cmd_id=cmd_id)
     yield header
-    for line in output_block(string, name, cmd_id):
+    for line in output_block(output, name, cmd_id):
         yield textwrap.indent(line, indent)
     yield footer
 
 
-def output_block(input_file_or_str: object, name: object, cmd_id: object) -> object:
+def output_block(
+        output: Union[Path, str],
+        name: str,
+        cmd_id: str
+) -> Iterator[str]:
     """
-    Todo:  Figure this out.
+    Given the output from a command, generate the HTML equivalent for
+    inclusion in the log file.
 
     Parameters:
-        input_file_or_str:
-        name:
-        cmd_id:
+        output:  The output from a command.
+        name:  The name (title) of the output block.
+        cmd_id:  The unique identifier associated with the command that
+            was run.
+
+    Yields:
+        The HTML equivalent of each line of the output in turn.
     """
-    if isinstance(input_file_or_str, Path):
-        with open(input_file_or_str) as f:
+    if isinstance(output, Path):
+        with open(output) as f:
             for string in output_block_html(f, name, cmd_id):
                 yield string
-    if isinstance(input_file_or_str, str):
-        for string in output_block_html(input_file_or_str, name, cmd_id):
+    if isinstance(output, str):
+        for string in output_block_html(output, name, cmd_id):
             yield string
 
 
-def diagnostics_card(cmd_id: object, *args: object) -> object:
+def diagnostics_card(cmd_id: object, *args: object) -> Iterator[str]:
     """
     Todo:  Figure this out.
 
     Parameters:
-        cmd_id:
+        cmd_id:  The unique identifier associated with the command that
+            was run.
         *args:
     """
     header, indent, footer = split_template(diagnostics_template,
@@ -537,14 +562,24 @@ def diagnostics_card(cmd_id: object, *args: object) -> object:
     yield footer
 
 
-def output_block_html(lines: object, name: object, cmd_id: object) -> object:
+def output_block_html(
+        lines: Union[TextIO, str],
+        name: str,
+        cmd_id: str
+) -> Iterator[str]:
     """
-    Todo:  Figure this out.
+    Given the output of a command, generate its HTML equivalent for
+    inclusion in the log file.
 
     Parameters:
-        lines:
-        name:
-        cmd_id:
+        lines:  The lines of output.
+        name:  The name (title) for this output block.
+        cmd_id:  The unique identifier associated with the command that
+            was run.
+
+    Yields:
+        The header, followed by the HTML corresponding to each line of
+        output, and then the footer.
     """
     if isinstance(lines, str):
         lines = lines.split('\n')
@@ -553,10 +588,10 @@ def output_block_html(lines: object, name: object, cmd_id: object) -> object:
                                             name=name,
                                             cmd_id=cmd_id)
     yield header
-    lineno = 0
+    line_no = 0
     for line in lines:
-        lineno += 1
-        yield textwrap.indent(output_line_html(line, lineno), indent)
+        line_no += 1
+        yield textwrap.indent(output_line_html(line, line_no), indent)
     yield footer
 
 
@@ -607,19 +642,21 @@ def split_template(
     return before.format(**fmt), indent, after.format(**fmt)
 
 
-def output_line_html(line: object, lineno: object) -> object:
+def output_line_html(line: str, line_no: int) -> str:
     """
-    Todo:  Figure this out.
+    Given a line of output from a command, along with the corresponding
+    line number, create the HTML equivalent to be included in the log
+    file.
 
     Parameters:
-        line:
-        lineno:
+        line:  A line of output.
+        line_no:  The corresponding line number.
 
     Returns:
-
+        The corresponding HTML snippet.
     """
     encoded_line = html_encode(line).rstrip()
-    return output_line_template.format(line=encoded_line, lineno=lineno)
+    return output_line_template.format(line=encoded_line, line_no=line_no)
 
 
 def html_encode(text: str) -> str:
@@ -812,7 +849,8 @@ def embed_style(resource: str) -> str:
     Returns:
         A string containing the ``<style>...</style>`` block.
 
-    Todo:  Combine this with the two below?
+    Todo:
+      * Combine this with the two below?
     """
     return ("<style>\n"
             + pkgutil.get_data(__name__, f"resources/{resource}").decode()
@@ -846,7 +884,8 @@ def embed_html(resource: str) -> str:
     Returns:
         The contents of the file.
 
-    Todo:  Why do we use ``pkgutil.get_data()`` instead of a simple
+    Todo:
+      * Why do we use ``pkgutil.get_data()`` instead of a simple
         ``read()``.
     """
     return pkgutil.get_data(__name__, f"resources/{resource}").decode()
@@ -862,7 +901,8 @@ def load_template(template: str) -> str:
     Returns:
         A string containing the contents of the file.
 
-    Todo:  Combine with the one above?
+    Todo:
+      * Combine with the one above?
     """
     template_file = f"resources/templates/{template}"
     return pkgutil.get_data(__name__, template_file).decode()
