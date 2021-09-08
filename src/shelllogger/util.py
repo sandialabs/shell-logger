@@ -10,17 +10,24 @@ from types import SimpleNamespace
 from typing import Iterator, List, TextIO, Tuple, Union
 
 
-def nested_simplenamespace_to_dict(namespace: object) -> object:
+def nested_simplenamespace_to_dict(
+        namespace: Union[str, bytes, tuple, Mapping, Iterable, SimpleNamespace]
+) -> Union[str, bytes, tuple, dict, list]:
     """
-    Todo:  Figure this out.
+    Convert a ``SimpleNamespace``, which may include nested namespaces,
+    iterables, and mappings, to a ``dict`` containing the equivalent
+    items.
 
     Parameters:
-        namespace:  Todo
+        namespace:  The given namespace to convert, or some nested
+            element therein.
 
     Returns:
-        Todo
+        Recursively returns a base Python type equivalent of whatever
+        was given.
     """
     if "_asdict" in dir(namespace):
+        # noinspection PyProtectedMember
         return nested_simplenamespace_to_dict(namespace._asdict())
     elif isinstance(namespace, (str, bytes, tuple)):
         return namespace
@@ -73,22 +80,25 @@ def closing_html_text() -> str:
     return "</html>"
 
 
-def append_html(*args: object, output: Path) -> None:
+def append_html(*args: Union[str, Iterator[str]], output: Path) -> None:
     """
-    Todo:  Figure this out.
+    Append whatever is given to the ``output`` HTML file.
 
     Parameters:
-        *args:  Todo
+        *args:  The argument(s) to write.
         output:  The HTML file to append to.
     """
 
-    def _append_html(f: TextIO, *inner_args: object) -> None:
+    def _append_html(
+            f: TextIO,
+            *inner_args: Union[str, bytes, Iterable]
+    ) -> None:
         """
-        Todo:  Figure this out.
+        Write some text to the given HTML log file.
 
         Parameters:
             f:  The HTML file to write to.
-            *inner_args:  Todo
+            *inner_args:  The argument(s) to write.
         """
         for arg in inner_args:
             if isinstance(arg, str):
@@ -435,7 +445,7 @@ def time_series_plot(
         cmd_id: str,
         data_tuples: List[Tuple[float, float]],
         series_title: str
-) -> str:
+) -> Iterator[str]:
     """
     Create the HTML for a plot of time series data.
 
@@ -458,7 +468,7 @@ def disk_time_series_plot(
         cmd_id: str,
         data_tuples: Tuple[float, float],
         volume_name: str
-) -> str:
+) -> Iterator[str]:
     """
     Create the HTML for a plot of the disk usage time series data for a
     particular volume.
@@ -478,9 +488,9 @@ def disk_time_series_plot(
     """
     labels = [get_human_time(x) for x, _ in data_tuples]
     values = [y for _, y in data_tuples]
-    id = f"{cmd_id}-volume{volume_name.replace('/', '_')}-usage"
+    identifier = f"{cmd_id}-volume{volume_name.replace('/', '_')}-usage"
     stat_title = f"Used Space on {volume_name}"
-    return stat_chart_card(labels, values, stat_title, id)
+    return stat_chart_card(labels, values, stat_title, identifier)
 
 
 def stat_chart_card(
@@ -488,7 +498,7 @@ def stat_chart_card(
         data: List[float],
         title: str,
         identifier: str
-) -> str:
+) -> Iterator[str]:
     """
     Create the HTML for a two-dimensional plot.
 
@@ -498,13 +508,13 @@ def stat_chart_card(
         title:  The title for the plot.
         identifier:  A unique identifier for the chart.
 
-    Returns:
+    Yields:
         A HTML snippet for the chart with all the details filled in.
     """
-    return stat_chart_template.format(labels=labels,
-                                      data=data,
-                                      title=title,
-                                      id=identifier)
+    yield stat_chart_template.format(labels=labels,
+                                     data=data,
+                                     title=title,
+                                     id=identifier)
 
 
 def output_block_card(
@@ -570,14 +580,20 @@ def output_block(
             yield string
 
 
-def diagnostics_card(cmd_id: object, *args: object) -> Iterator[str]:
+def diagnostics_card(cmd_id: str, *args: Iterator[str]) -> Iterator[str]:
     """
-    Todo:  Figure this out.
+    Generate a card containing system diagnostic information associated
+    with a command that was run.
 
     Parameters:
         cmd_id:  The unique identifier associated with the command that
             was run.
-        *args:
+        *args:  A generator to lazily yield all the diagnostic
+            information, one piece at a time.
+
+    Yields:
+        The header, followed by each piece of diagnostic information,
+        and then the footer.
     """
     header, indent, footer = split_template(diagnostics_template,
                                             "diagnostics",
@@ -699,23 +715,25 @@ def html_encode(text: str) -> str:
     Returns:
         The encoded text.
     """
-    text = text.replace('&', "&amp;")
-    text = text.replace('<', "&lt;")
-    text = text.replace('>', "&gt;")
-    text = text.replace('-', "-&#8288;")  # Non-breaking dashes.
-    text = sgr_to_html(text)
-    return text
+    return sgr_to_html(
+        text
+        .replace('&', "&amp;")
+        .replace('<', "&lt;")
+        .replace('>', "&gt;")
+        .replace('-', "-&#8288;")  # Non-breaking dashes.
+    )
 
 
-def sgr_to_html(text: object) -> object:
+def sgr_to_html(text: str) -> str:
     """
-    Todo:  Figure this out.
+    Translate Select Graphic Rendition (SGR, a.k.a. ANSI escape codes)
+    to valid HTML/CSS.
 
     Parameters:
-        text:
+        text:  The input text.
 
     Returns:
-
+        The same text, with the escape codes translated to HTML/CSS.
     """
     span_count = 0
     while text.find("\x1b[") >= 0:
@@ -748,15 +766,15 @@ def sgr_to_html(text: object) -> object:
     return text
 
 
-def sgr_4bit_color_and_style_to_html(sgr: object) -> object:
+def sgr_4bit_color_and_style_to_html(sgr: str) -> str:
     """
-    Todo:  Figure this out.
+    Convert from Select Graphic Rendition (SGR) codes to CSS styles.
 
     Parameters:
-        sgr:
+        sgr:  The SGR code specified.
 
     Returns:
-
+        A HTML ``span`` with the corresponding CSS style definition.
     """
     sgr_to_css = {
         "1": "font-weight: bold;",
@@ -785,19 +803,20 @@ def sgr_4bit_color_and_style_to_html(sgr: object) -> object:
     return f'<span style="{sgr_to_css.get(sgr) or str()}">'
 
 
-def sgr_8bit_color_to_html(sgr_params: object) -> object:
+def sgr_8bit_color_to_html(sgr_params: List[str]) -> str:
     """
-    Todo:  Figure this out.
+    Convert an 8-bit Select Graphic Rendition (SGR) code to valid
+    HTML/CSS.
 
     Parameters:
-        sgr_params:
+        sgr_params:  The SGR codes to convert.
 
     Returns:
-
+        A HTML ``span`` with the appropriate CSS style.
     """
     sgr_256 = int(sgr_params[2]) if len(sgr_params) > 2 else 0
     if sgr_256 < 0 or sgr_256 > 255 or not sgr_params:
-        '<span>'
+        return '<span>'
     if 15 < sgr_256 < 232:
         red_6cube = (sgr_256 - 16) // 36
         green_6cube = (sgr_256 - (16 + red_6cube * 36)) // 6
@@ -821,15 +840,16 @@ def sgr_8bit_color_to_html(sgr_params: object) -> object:
             return sgr_4bit_color_and_style_to_html(str(92+sgr_256))
 
 
-def sgr_24bit_color_to_html(sgr_params: object) -> object:
+def sgr_24bit_color_to_html(sgr_params: List[str]) -> str:
     """
-    Todo:  Figure this out.
+    Convert a 24-bit Select Graphic Rendition (SGR) code to valid
+    HTML/CSS.
 
     Parameters:
-        sgr_params:
+        sgr_params:  The SGR codes to convert.
 
     Returns:
-
+        A HTML ``span`` with the appropriate CSS style.
     """
     r, g, b = sgr_params[2:5] if len(sgr_params) == 5 else ("0", "0", "0")
     if len(sgr_params) > 1 and sgr_params[:2] == ["38", "2"]:
