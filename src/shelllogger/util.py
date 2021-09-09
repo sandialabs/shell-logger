@@ -322,7 +322,7 @@ def message_card(log: dict) -> Iterator[str]:
     yield footer
 
 
-def command_detail_list(cmd_id: str, *args: Iterable[str]) -> Iterator[str]:
+def command_detail_list(cmd_id: str, *args: Iterator[str]) -> Iterator[str]:
     """
     Generate the HTML for a list of details associated with a command
     that was run.
