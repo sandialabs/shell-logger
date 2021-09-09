@@ -1,80 +1,173 @@
 #!/usr/bin/env python3
 from collections.abc import Iterable, Mapping
-import datetime
+from datetime import datetime
 import pkgutil
-import os
 from pathlib import Path
 import re
+from src.shelllogger import ShellLogger
 import textwrap
-from types import SimpleNamespace, GeneratorType
+from types import SimpleNamespace
+from typing import Iterator, List, TextIO, Tuple, Union
 
-def nested_SimpleNamespace_to_dict(object):
-    if "_asdict" in dir(object):
-        return nested_SimpleNamespace_to_dict(object._asdict())
-    elif isinstance(object, (str, bytes, tuple)):
-        return object
-    elif isinstance(object, Mapping):
-        return {k:nested_SimpleNamespace_to_dict(v) for k,v in object.items()}
-    elif isinstance(object, Iterable):
-        return [nested_SimpleNamespace_to_dict(x) for x in object]
-    elif isinstance(object, SimpleNamespace):
-        return nested_SimpleNamespace_to_dict(object.__dict__)
+
+def nested_simplenamespace_to_dict(
+        namespace: Union[str, bytes, tuple, Mapping, Iterable, SimpleNamespace]
+) -> Union[str, bytes, tuple, dict, list]:
+    """
+    Convert a ``SimpleNamespace``, which may include nested namespaces,
+    iterables, and mappings, to a ``dict`` containing the equivalent
+    items.
+
+    Parameters:
+        namespace:  The given namespace to convert, or some nested
+            element therein.
+
+    Returns:
+        Recursively returns a base Python type equivalent of whatever
+        was given.
+    """
+    if "_asdict" in dir(namespace):
+        # noinspection PyProtectedMember
+        return nested_simplenamespace_to_dict(namespace._asdict())
+    elif isinstance(namespace, (str, bytes, tuple)):
+        return namespace
+    elif isinstance(namespace, Mapping):
+        return {k: nested_simplenamespace_to_dict(v) for k, v in
+                namespace.items()}
+    elif isinstance(namespace, Iterable):
+        return [nested_simplenamespace_to_dict(x) for x in namespace]
+    elif isinstance(namespace, SimpleNamespace):
+        return nested_simplenamespace_to_dict(namespace.__dict__)
     else:
-        return object
+        return namespace
 
-def filter_junk_from_env(env, junk_list):
-    filtered_env = ""
-    for line in env.split('\n'):
-        is_junk = any([line[:len(junk)+1] == f"{junk}=" for junk in junk_list])
-        if not is_junk:
-            filtered_env += line + '\n'
-    return filtered_env
 
-def miliseconds_to_datetime(miliseconds):
-    return datetime.datetime.fromtimestamp(miliseconds / 1000.0)
+def get_human_time(milliseconds: float) -> str:
+    """
+    Get a human-readable date/time.
 
-def miliseconds_to_human_time(miliseconds):
-    return miliseconds_to_datetime(miliseconds).strftime('%Y-%m-%d %H:%M:%S.%f')
+    Parameters:
+        milliseconds:  The number of milliseconds since epoch.
 
-def opening_html_text():
-    return (
-        "<!DOCTYPE html>" +
-        "<html>" +
-        html_header()
+    Returns:
+        A string representation of the date and time.
+    """
+    return datetime.fromtimestamp(milliseconds / 1000.0).strftime(
+        '%Y-%m-%d %H:%M:%S.%f'
     )
 
-def closing_html_text():
+
+def opening_html_text() -> str:
+    """
+    Get the opening HTML text.
+
+    Returns:
+        A string containing the first line of the HTML document through
+        ``</head>``.
+    """
+    return ("<!DOCTYPE html>"
+            + "<html>"
+            + html_header())
+
+
+def closing_html_text() -> str:
+    """
+    Get the closing HTML tag.
+
+    Returns:
+        A string with the closing HTML tag in it.
+    """
     return "</html>"
 
-def append_html(*args, output=None):
-    def _append_html(file, *args):
-        for arg in args:
+
+def append_html(*args: Union[str, Iterator[str]], output: Path) -> None:
+    """
+    Append whatever is given to the ``output`` HTML file.
+
+    Parameters:
+        *args:  The argument(s) to write.
+        output:  The HTML file to append to.
+    """
+
+    def _append_html(
+            f: TextIO,
+            *inner_args: Union[str, bytes, Iterable]
+    ) -> None:
+        """
+        Write some text to the given HTML log file.
+
+        Parameters:
+            f:  The HTML file to write to.
+            *inner_args:  The argument(s) to write.
+        """
+        for arg in inner_args:
             if isinstance(arg, str):
-                file.write(arg)
+                f.write(arg)
             elif isinstance(arg, bytes):
-                file.write(arg.decode())
+                f.write(arg.decode())
             elif isinstance(arg, Iterable):
-                _append_html(file, *element)
+                _append_html(f, *arg)
             else:
                 raise RuntimeError(f"Unsupported type: {type(arg)}")
-    with open(output, "a") as file:
-        _append_html(file, *args)
 
-def fixed_width(text):
+    with open(output, "a") as output_file:
+        _append_html(output_file, *args)
+
+
+def fixed_width(text: str) -> str:
+    """
+    Wrap the given ``text`` in a ``<code>...</code>`` block such that it
+    displays in a fixed-width font.
+
+    Parameters:
+        text:  The text to wrap.
+
+    Returns:
+        The ``<code>...</code>`` block.
+    """
     return f"<code>{html_encode(text)}</code>"
 
-def flatten(element):
+
+def flatten(element: Union[str, bytes, Iterable]) -> Iterator[str]:
+    """
+    Takes a tree of lists and turns it into a flat iterable of strings.
+
+    Parameters:
+        element:  An element of a tree.
+
+    Yields:
+        The string representation of the given element.
+    """
     if isinstance(element, str):
         yield element
     elif isinstance(element, bytes):
-        file.write(element.decode())
+        yield element.decode()
     elif isinstance(element, Iterable):
         for _element in element:
             yield from flatten(_element)
     else:
         yield element
 
-def parent_logger_card_html(name, *args):
+
+def parent_logger_card_html(
+        name: str,
+        *args: List[Iterator[str]]
+) -> Iterator[str]:
+    """
+    Generate the HTML for the card corresponding to the parent
+    :class:`ShellLogger`.  The HTML elements are yielded one at a time
+    to avoid loading *all* the data from the :class:`ShellLogger` into
+    memory at once.
+
+    Parameters:
+        name:  The name of the :class:`ShellLogger`.
+        *args:  A list of generators to lazily yield string HTML
+            elements for the contents of the parent card.
+
+    Yields:
+        The header, followed by all the contents of the
+        :class:`ShellLogger`, and then the footer.
+    """
     header, indent, footer = split_template(parent_logger_template,
                                             "parent_body",
                                             name=name)
@@ -83,11 +176,49 @@ def parent_logger_card_html(name, *args):
         yield textwrap.indent(arg, indent)
     yield footer
 
-def child_logger_card(log):
+
+def child_logger_card(log: ShellLogger) -> Iterator[str]:
+    """
+    Create a card to go in the HTML log file containing everything
+    pertaining to a child :class:`ShellLogger`.
+
+    Parameters:
+        log:  The child :class:`ShellLogger` for which to generate the
+            card.
+
+    Returns:
+        A generator that will lazily yield the elements of the HTML for
+        the card one at a time.
+    """
     child_html = log.to_html()
     return child_logger_card_html(log.name, log.duration, *child_html)
 
-def child_logger_card_html(name, duration, *args):
+
+def child_logger_card_html(
+        name: str,
+        duration: str,
+        *args: Union[Iterator[str], List[Iterator[str]]]
+) -> Iterator[str]:
+    """
+    Generate the HTML for a card corresponding to the child
+    :class:`ShellLogger`.  The HTML elements are yielded one at a time
+    to avoid loading *all* the data from the :class:`ShellLogger` into
+    memory at once.
+
+    Parameters:
+        name:  The name of the child :class:`ShellLogger`.
+        duration:  The duration of the child :class:`ShellLogger`.
+        *args:  A generator (or list of generators) to lazily yield
+            string HTML elements for the contents of the child card.
+
+    Yields:
+        The header, followed by all the contents of the child
+        :class:`ShellLogger`, and then the footer.
+
+    Todo:
+      * Should we replace the ``for`` loop with the one found in
+        :func:`parent_logger_card_html`?
+    """
     header, indent, footer = split_template(child_logger_template,
                                             "child_body",
                                             name=name,
@@ -101,7 +232,26 @@ def child_logger_card_html(name, duration, *args):
                 yield textwrap.indent(_arg, indent)
     yield footer
 
-def command_card_html(log, *args):
+
+def command_card_html(
+        log: dict,
+        *args: Iterator[Union[str, Iterable]]
+) -> Iterator[str]:
+    """
+    Generate the HTML for a card corresponding to a command that was
+    run.  The HTML elements are yielded one at a time to avoid loading
+    *all* the data into memory at once.
+
+    Parameters:
+        log:  An entry from the :class:`ShellLogger` 's log book
+            corresponding to a command that was run.
+        *args:  A generator that will yield all the elements to be
+            included in the command card one at a time.
+
+    Yields:
+        The header, followed by all the contents of the command card,
+        and then the footer.
+    """
     header, indent, footer = split_template(command_template,
                                             "more_info",
                                             cmd_id=log["cmd_id"],
@@ -118,12 +268,28 @@ def command_card_html(log, *args):
                 yield textwrap.indent(_arg, indent)
     yield footer
 
-def html_message_card(log):
-    timestamp = log["timestamp"]
-    timestamp = timestamp.replace(' ', '_')
-    timestamp = timestamp.replace(':', '-')
-    timestamp = timestamp.replace('/', '_')
-    timestamp = timestamp.replace('.', '-')
+
+def html_message_card(log: dict) -> Iterator[str]:
+    """
+    Generate the HTML for a card corresponding to a message to only be
+    included in the HTML log file (e.g., not printed to ``stdout`` as
+    well).
+
+    Parameters:
+        log:  An entry from the :class:`ShellLogger` 's log book
+            corresponding to a message.
+
+    Yields:
+        The header, followed by the contents of the message card, and
+        then the footer.
+    """
+    timestamp = (
+        log["timestamp"]
+        .replace(' ', '_')
+        .replace(':', '-')
+        .replace('/', '_')
+        .replace('.', '-')
+    )
     header, indent, footer = split_template(html_message_template,
                                             "message",
                                             title=log["msg_title"],
@@ -134,7 +300,20 @@ def html_message_card(log):
     yield textwrap.indent(text, indent) + '\n'
     yield footer
 
-def message_card(log):
+
+def message_card(log: dict) -> Iterator[str]:
+    """
+    Generate the HTML for a card corresponding to a message to be both
+    printed to ``stdout`` and included in the HTML log file.
+
+    Parameters:
+        log:  An entry from the :class:`ShellLogger` 's log book
+            corresponding to a message.
+
+    Yields:
+        The header, followed by the contents of the message card, and
+        then the footer.
+    """
     header, indent, footer = split_template(message_template, "message")
     text = html_encode(log["msg"])
     text = "<pre>" + text.replace('\n', "<br>") + "</pre>"
@@ -142,7 +321,22 @@ def message_card(log):
     yield textwrap.indent(text, indent) + '\n'
     yield footer
 
-def command_detail_list(cmd_id, *args):
+
+def command_detail_list(cmd_id: str, *args: Iterator[str]) -> Iterator[str]:
+    """
+    Generate the HTML for a list of details associated with a command
+    that was run.
+
+    Parameters:
+        cmd_id:  The unique identifier associated with the command that
+            was run.
+        *args:  All of the details associated with a command that was
+            run.
+
+    Yields:
+        The header, followed by each of the details associated with the
+        command that was run, and then the footer.
+    """
     header, indent, footer = split_template(command_detail_list_template,
                                             "details",
                                             cmd_id=cmd_id)
@@ -152,7 +346,28 @@ def command_detail_list(cmd_id, *args):
             yield textwrap.indent(arg, indent)
     yield footer
 
-def command_detail(cmd_id, name, value, hidden=False):
+
+def command_detail(
+        cmd_id: str,
+        name: str,
+        value: str,
+        hidden: bool = False
+) -> str:
+    """
+    Create the HTML snippet for a detail associated with a command that
+    was run.
+
+    Parameters:
+        cmd_id:  The unique identifier associated with the command that
+            was run.
+        name:  The name of the detail being recorded.
+        value:  The value of the detail being recorded.
+        hidden:  Whether or not this detail should be hidden (collapsed)
+            in the HTML by default.
+
+    Returns:
+        The HTML snippet for this command detail.
+    """
     if hidden:
         return hidden_command_detail_template.format(cmd_id=cmd_id,
                                                      name=name,
@@ -160,12 +375,29 @@ def command_detail(cmd_id, name, value, hidden=False):
     else:
         return command_detail_template.format(name=name, value=value)
 
-def command_card(log, strm_dir):
-    cmd_id = log["cmd_id"]
-    stdout_path = strm_dir / f"{log['timestamp']}_{cmd_id}_stdout"
-    stderr_path = strm_dir / f"{log['timestamp']}_{cmd_id}_stderr"
-    trace_path = strm_dir / f"{log['timestamp']}_{cmd_id}_trace"
 
+def command_card(log: dict, stream_dir: Path) -> Iterator[str]:
+    """
+    Create a card in the HTML log file containing the output of a
+    command, along with all its corresponding data (environment
+    information, trace output, memory/CPU/disk statistics, etc.).
+
+    Parameters:
+        log:  An entry from the :class:`ShellLogger` 's log book
+            corresponding to a command that was run.
+        stream_dir:  The stream directory containing the ``stdout``,
+            ``stderr``, and ``trace`` output from the command.
+
+    Returns:
+        A generator to lazily yield the elements of the command card one
+        at a time.
+    """
+    cmd_id = log["cmd_id"]
+    stdout_path = stream_dir / f"{log['timestamp']}_{cmd_id}_stdout"
+    stderr_path = stream_dir / f"{log['timestamp']}_{cmd_id}_stderr"
+    trace_path = stream_dir / f"{log['timestamp']}_{cmd_id}_trace"
+
+    # Collect all the details associated with the command that was run.
     info = [
         command_detail_list(
             cmd_id,
@@ -183,6 +415,7 @@ def command_card(log, strm_dir):
         output_block_card("stderr", stderr_path, cmd_id, collapsed=False),
     ]
 
+    # Compile the additional diagnostic information.
     diagnostics = [
         output_block_card("Environment", log["environment"], cmd_id),
         output_block_card("ulimit", log["ulimit"], cmd_id),
@@ -190,70 +423,181 @@ def command_card(log, strm_dir):
     if trace_path.exists():
         diagnostics.append(output_block_card("trace", trace_path, cmd_id))
 
+    # Add in any available statistics (from `StatsCollector`s).
     if log.get("stats"):
         stats = [("memory", "Memory Usage"), ("cpu", "CPU Usage")]
         for stat, stat_title in stats:
             if log["stats"].get(stat):
                 data = log["stats"][stat]
-                diagnostics.append(timeseries_plot(cmd_id, data, stat_title))
+                diagnostics.append(time_series_plot(cmd_id, data, stat_title))
         if log["stats"].get("disk"):
             uninteresting_disks = ["/var", "/var/log", "/var/log/audit",
                                    "/boot", "/boot/efi"]
-            disk_stats = { x:y for x, y in log["stats"]["disk"].items()
-                           if x not in uninteresting_disks }
+            disk_stats = {x: y for x, y in log["stats"]["disk"].items()
+                          if x not in uninteresting_disks}
+
             # We sort because JSON deserialization may change
             # the ordering of the map.
             for disk, data in sorted(disk_stats.items()):
-                diagnostics.append(disk_timeseries_plot(cmd_id, data, disk))
+                diagnostics.append(disk_time_series_plot(cmd_id, data, disk))
     info.append(diagnostics_card(cmd_id, *diagnostics))
-
     return command_card_html(log, *info)
 
-def timeseries_plot(cmd_id, data_tuples, series_title):
-    labels = [miliseconds_to_human_time(x) for x, _ in data_tuples]
-    values = [y for _, y in data_tuples]
-    id = f"{cmd_id}-{series_title.lower().replace(' ', '-')}-chart"
-    return stat_chart_card(labels, values, series_title, id)
 
-def disk_timeseries_plot(cmd_id, data_tuples, volume_name):
-    labels = [miliseconds_to_human_time(x) for x, _ in data_tuples]
+def time_series_plot(
+        cmd_id: str,
+        data_tuples: List[Tuple[float, float]],
+        series_title: str
+) -> Iterator[str]:
+    """
+    Create the HTML for a plot of time series data.
+
+    Parameters:
+        cmd_id:  The unique identifier associated with the command that
+            was run.
+        data_tuples:  A list of :math:`x` and :math:`y` locations.
+        series_title:  The title of the plot.
+
+    Returns:
+        A HTML snippet for a plot of the given data.
+    """
+    labels = [get_human_time(x) for x, _ in data_tuples]
     values = [y for _, y in data_tuples]
-    id = f"{cmd_id}-volume{volume_name.replace('/', '_')}-usage"
+    identifier = f"{cmd_id}-{series_title.lower().replace(' ', '-')}-chart"
+    return stat_chart_card(labels, values, series_title, identifier)
+
+
+def disk_time_series_plot(
+        cmd_id: str,
+        data_tuples: Tuple[float, float],
+        volume_name: str
+) -> Iterator[str]:
+    """
+    Create the HTML for a plot of the disk usage time series data for a
+    particular volume.
+
+    Parameters:
+        cmd_id:  The unique identifier associated with the command that
+            was run.
+        data_tuples:  A list of :math:`x` and :math:`y` locations.
+        volume_name:  The name of the disk volume who's data is being
+            plotted.
+
+    Returns:
+        A HTML snippet for a plot of the given data.
+
+    Todo:
+      * Combine with the above?
+    """
+    labels = [get_human_time(x) for x, _ in data_tuples]
+    values = [y for _, y in data_tuples]
+    identifier = f"{cmd_id}-volume{volume_name.replace('/', '_')}-usage"
     stat_title = f"Used Space on {volume_name}"
-    return stat_chart_card(labels, values, stat_title, id)
+    return stat_chart_card(labels, values, stat_title, identifier)
 
-def stat_chart_card(labels, data, title, id):
+
+def stat_chart_card(
+        labels: List[str],
+        data: List[float],
+        title: str,
+        identifier: str
+) -> Iterator[str]:
+    """
+    Create the HTML for a two-dimensional plot.
+
+    Parameters:
+        labels:  The :math:`x` values.
+        data:  The :math:`y` values.
+        title:  The title for the plot.
+        identifier:  A unique identifier for the chart.
+
+    Yields:
+        A HTML snippet for the chart with all the details filled in.
+    """
     yield stat_chart_template.format(labels=labels,
                                      data=data,
                                      title=title,
-                                     id=id)
+                                     id=identifier)
 
-def output_block_card(title, string, cmd_id, collapsed=True):
+
+def output_block_card(
+        title: str,
+        output: Union[Path, str],
+        cmd_id: str,
+        collapsed: bool = True
+) -> Iterator[str]:
+    """
+    Given the output from a command, generate a corresponding HTML card
+    for inclusion in the log file.
+
+    Parameters:
+        title:  The title for the output block.
+        output:  The output from a command.
+        cmd_id:  The unique identifier associated with the command that
+            was run.
+        collapsed:  Whether or not the output block should be collapsed
+            by default in the HTML log file.
+
+    Yields:
+        The header, followed by each line of the output, and then the
+        footer.
+    """
     name = title.replace(' ', '_').lower()
-    if collapsed:
-        template = output_card_collapsed_template
-    else:
-        template = output_card_template
+    template = (output_card_collapsed_template if collapsed else
+                output_card_template)
     header, indent, footer = split_template(template,
                                             "output_block",
                                             name=name,
                                             title=title,
                                             cmd_id=cmd_id)
     yield header
-    for line in output_block(string, name, cmd_id):
+    for line in output_block(output, name, cmd_id):
         yield textwrap.indent(line, indent)
     yield footer
 
-def output_block(input, name, cmd_id):
-    if isinstance(input, Path):
-        with open(input) as f:
+
+def output_block(
+        output: Union[Path, str],
+        name: str,
+        cmd_id: str
+) -> Iterator[str]:
+    """
+    Given the output from a command, generate the HTML equivalent for
+    inclusion in the log file.
+
+    Parameters:
+        output:  The output from a command.
+        name:  The name (title) of the output block.
+        cmd_id:  The unique identifier associated with the command that
+            was run.
+
+    Yields:
+        The HTML equivalent of each line of the output in turn.
+    """
+    if isinstance(output, Path):
+        with open(output) as f:
             for string in output_block_html(f, name, cmd_id):
                 yield string
-    if isinstance(input, str):
-        for string in output_block_html(input, name, cmd_id):
+    if isinstance(output, str):
+        for string in output_block_html(output, name, cmd_id):
             yield string
 
-def diagnostics_card(cmd_id, *args):
+
+def diagnostics_card(cmd_id: str, *args: Iterator[str]) -> Iterator[str]:
+    """
+    Generate a card containing system diagnostic information associated
+    with a command that was run.
+
+    Parameters:
+        cmd_id:  The unique identifier associated with the command that
+            was run.
+        *args:  A generator to lazily yield all the diagnostic
+            information, one piece at a time.
+
+    Yields:
+        The header, followed by each piece of diagnostic information,
+        and then the footer.
+    """
     header, indent, footer = split_template(diagnostics_template,
                                             "diagnostics",
                                             cmd_id=cmd_id)
@@ -266,7 +610,26 @@ def diagnostics_card(cmd_id, *args):
                 yield textwrap.indent(_arg, indent)
     yield footer
 
-def output_block_html(lines, name, cmd_id):
+
+def output_block_html(
+        lines: Union[TextIO, str],
+        name: str,
+        cmd_id: str
+) -> Iterator[str]:
+    """
+    Given the output of a command, generate its HTML equivalent for
+    inclusion in the log file.
+
+    Parameters:
+        lines:  The lines of output.
+        name:  The name (title) for this output block.
+        cmd_id:  The unique identifier associated with the command that
+            was run.
+
+    Yields:
+        The header, followed by the HTML corresponding to each line of
+        output, and then the footer.
+    """
     if isinstance(lines, str):
         lines = lines.split('\n')
     header, indent, footer = split_template(output_block_template,
@@ -274,32 +637,107 @@ def output_block_html(lines, name, cmd_id):
                                             name=name,
                                             cmd_id=cmd_id)
     yield header
-    lineno = 0
+    line_no = 0
     for line in lines:
-        lineno += 1
-        yield textwrap.indent(output_line_html(line, lineno), indent)
+        line_no += 1
+        yield textwrap.indent(output_line_html(line, line_no), indent)
     yield footer
 
-def split_template(template, split_at, **kwargs):
-    format = { k:v for k, v in kwargs.items() if k != split_at }
+
+def split_template(
+        template: str,
+        split_at: str,
+        **kwargs
+) -> Tuple[str, str, str]:
+    """
+    Take a templated HTML snippet and split it into a header and footer,
+    meaning everything that comes before and after the line containing
+    ``split_at``.  Also determine the indentation for the content that
+    will be inserted between the header and footer.
+
+    Example:
+        If the following snippet is ``template`` and ``split_at`` is
+        ``child_body``, then the header is lines 1-6, the footer is
+        lines 8-9, and the indent is eight spaces.
+
+        .. code-block:: html
+           :linenos:
+           :emphasize-lines: 7
+
+           <details class="child-logger">
+               <summary>
+                   <h6 class="child-logger-heading">{name}</h6>
+                   <span class="duration"> (Duration: {duration})</span>
+               </summary>
+               <div class="child-logger-body">
+                   {child_body}
+               </div>
+           </details>
+
+    Parameters:
+        template:  A templated HTML snippet.
+        split_at:  A substring used to split the ``template`` into
+            before and after chunks.
+        **kwargs:  Additional keyword arguments used to replace keywords
+            in the ``template``.
+
+    Returns:
+        The header, indent, and footer.
+    """
+    fmt = {k: v for k, v in kwargs.items() if k != split_at}
     pattern = re.compile(f"(.*\\n)(\\s*)\\{{{split_at}\\}}\\n(.*)",
                          flags=re.DOTALL)
     before, indent, after = pattern.search(template).groups()
-    return before.format(**format), indent, after.format(**format)
+    return before.format(**fmt), indent, after.format(**fmt)
 
-def output_line_html(line, lineno):
+
+def output_line_html(line: str, line_no: int) -> str:
+    """
+    Given a line of output from a command, along with the corresponding
+    line number, create the HTML equivalent to be included in the log
+    file.
+
+    Parameters:
+        line:  A line of output.
+        line_no:  The corresponding line number.
+
+    Returns:
+        The corresponding HTML snippet.
+    """
     encoded_line = html_encode(line).rstrip()
-    return output_line_template.format(line=encoded_line, lineno=lineno)
+    return output_line_template.format(line=encoded_line, line_no=line_no)
 
-def html_encode(text):
-    text = text.replace('&', "&amp;")
-    text = text.replace('<', "&lt;")
-    text = text.replace('>', "&gt;")
-    text = text.replace('-', "-&#8288;") # non breaking dashes
-    text = sgr_to_html(text)
-    return text
 
-def sgr_to_html(text):
+def html_encode(text: str) -> str:
+    """
+    Replace special characters with their HTML encodings.
+
+    Parameters:
+        text:  The text to encode.
+
+    Returns:
+        The encoded text.
+    """
+    return sgr_to_html(
+        text
+        .replace('&', "&amp;")
+        .replace('<', "&lt;")
+        .replace('>', "&gt;")
+        .replace('-', "-&#8288;")  # Non-breaking dashes.
+    )
+
+
+def sgr_to_html(text: str) -> str:
+    """
+    Translate Select Graphic Rendition (SGR, a.k.a. ANSI escape codes)
+    to valid HTML/CSS.
+
+    Parameters:
+        text:  The input text.
+
+    Returns:
+        The same text, with the escape codes translated to HTML/CSS.
+    """
     span_count = 0
     while text.find("\x1b[") >= 0:
         start = text.find("\x1b[")
@@ -330,7 +768,17 @@ def sgr_to_html(text):
         text = text[:start] + span_string + text[finish+1:]
     return text
 
-def sgr_4bit_color_and_style_to_html(sgr):
+
+def sgr_4bit_color_and_style_to_html(sgr: str) -> str:
+    """
+    Convert from Select Graphic Rendition (SGR) codes to CSS styles.
+
+    Parameters:
+        sgr:  The SGR code specified.
+
+    Returns:
+        A HTML ``span`` with the corresponding CSS style definition.
+    """
     sgr_to_css = {
         "1": "font-weight: bold;",
         "2": "font-weight: lighter;",
@@ -357,11 +805,22 @@ def sgr_4bit_color_and_style_to_html(sgr):
     }
     return f'<span style="{sgr_to_css.get(sgr) or str()}">'
 
-def sgr_8bit_color_to_html(sgr_params):
+
+def sgr_8bit_color_to_html(sgr_params: List[str]) -> str:
+    """
+    Convert an 8-bit Select Graphic Rendition (SGR) code to valid
+    HTML/CSS.
+
+    Parameters:
+        sgr_params:  The SGR codes to convert.
+
+    Returns:
+        A HTML ``span`` with the appropriate CSS style.
+    """
     sgr_256 = int(sgr_params[2]) if len(sgr_params) > 2 else 0
     if sgr_256 < 0 or sgr_256 > 255 or not sgr_params:
-        '<span>'
-    if sgr_256 > 15 and sgr_256 < 232:
+        return '<span>'
+    if 15 < sgr_256 < 232:
         red_6cube = (sgr_256 - 16) // 36
         green_6cube = (sgr_256 - (16 + red_6cube * 36)) // 6
         blue_6cube = (sgr_256 - 16) % 6
@@ -369,7 +828,7 @@ def sgr_8bit_color_to_html(sgr_params):
         green = str(51 * green_6cube)
         blue = str(51 * blue_6cube)
         return sgr_24bit_color_to_html([sgr_params[0], "2", red, green, blue])
-    elif sgr_256 < 256 and sgr_256 > 231:
+    elif 231 < sgr_256 < 256:
         gray = str(8 + (sgr_256 - 232) * 10)
         return sgr_24bit_color_to_html([sgr_params[0], "2", gray, gray, gray])
     elif sgr_params[0] == "38":
@@ -383,71 +842,136 @@ def sgr_8bit_color_to_html(sgr_params):
         elif sgr_256 < 16:
             return sgr_4bit_color_and_style_to_html(str(92+sgr_256))
 
-def sgr_24bit_color_to_html(sgr_params):
+
+def sgr_24bit_color_to_html(sgr_params: List[str]) -> str:
+    """
+    Convert a 24-bit Select Graphic Rendition (SGR) code to valid
+    HTML/CSS.
+
+    Parameters:
+        sgr_params:  The SGR codes to convert.
+
+    Returns:
+        A HTML ``span`` with the appropriate CSS style.
+    """
     r, g, b = sgr_params[2:5] if len(sgr_params) == 5 else ("0", "0", "0")
-    if len(sgr_params) > 1 and sgr_params[:2] == ["38","2"]:
+    if len(sgr_params) > 1 and sgr_params[:2] == ["38", "2"]:
         return f'<span style="color: rgb({r}, {g}, {b})">'
-    elif len(sgr_params) > 1 and sgr_params[:2] == ["48","2"]:
+    elif len(sgr_params) > 1 and sgr_params[:2] == ["48", "2"]:
         return f'<span style="background-color: rgb({r}, {g}, {b})">'
     else:
         return '<span>'
 
-def html_header():
-    return (
-        "<head>" +
-        embed_style("bootstrap.min.css") +
-        embed_style("Chart.min.css") +
-        embed_style("top_level_style_adjustments.css") +
-        embed_style("parent_logger_style.css") +
-        embed_style("child_logger_style.css") +
-        embed_style("command_style.css") +
-        embed_style("message_style.css") +
-        embed_style("detail_list_style.css") +
-        embed_style("code_block_style.css") +
-        embed_style("output_style.css") +
-        embed_style("diagnostics_style.css") +
-        embed_style("search_controls.css") +
-        embed_script("jquery.slim.min.js") +
-        embed_script("bootstrap.bundle.min.js") +
-        embed_script("Chart.bundle.min.js") +
-        embed_script("search_output.js") +
-        embed_html("search_icon.svg") +
-        "</head>"
-    )
 
-def embed_style(resource):
-    return (
-        "<style>\n" +
-        pkgutil.get_data(__name__, f"resources/{resource}").decode() +
-        "\n</style>\n"
-    )
+def html_header() -> str:
+    """
+    Get the HTML header, complete with embedded styles and scripts.
 
-def embed_script(resource):
-    return (
-        "<script>\n" +
-        pkgutil.get_data(__name__, f"resources/{resource}").decode() +
-        "\n</script>\n"
-    )
+    Returns:
+        A string with the ``<head>...</head>`` contents.
+    """
+    return ("<head>"
+            + embed_style("bootstrap.min.css")
+            + embed_style("Chart.min.css")
+            + embed_style("top_level_style_adjustments.css")
+            + embed_style("parent_logger_style.css")
+            + embed_style("child_logger_style.css")
+            + embed_style("command_style.css")
+            + embed_style("message_style.css")
+            + embed_style("detail_list_style.css")
+            + embed_style("code_block_style.css")
+            + embed_style("output_style.css")
+            + embed_style("diagnostics_style.css")
+            + embed_style("search_controls.css")
+            + embed_script("jquery.slim.min.js")
+            + embed_script("bootstrap.bundle.min.js")
+            + embed_script("Chart.bundle.min.js")
+            + embed_script("search_output.js")
+            + embed_html("search_icon.svg")
+            + "</head>")
 
-def embed_html(resource):
+
+def embed_style(resource: str) -> str:
+    """
+    Wrap the given ``resource`` in an appropriate ``<style>...</style>``
+    block for embedding in the HTML header.
+
+    Parameters:
+        resource:  The name of a style file to embed.
+
+    Returns:
+        A string containing the ``<style>...</style>`` block.
+
+    Todo:
+      * Combine this with the two below?
+    """
+    return ("<style>\n"
+            + pkgutil.get_data(__name__, f"resources/{resource}").decode()
+            + "\n</style>\n")
+
+
+def embed_script(resource: str) -> str:
+    """
+    Wrap the given ``resource`` in an appropriate
+    ``<script>...</script>`` block for embedding in the HTML header.
+
+    Parameters:
+        resource:  The name of a script file to embed.
+
+    Returns:
+        A string containing the ``<script>...</script>`` block.
+    """
+    return ("<script>\n"
+            + pkgutil.get_data(__name__, f"resources/{resource}").decode()
+            + "\n</script>\n")
+
+
+def embed_html(resource: str) -> str:
+    """
+    Get a HTML ``resource`` froma file for the sake of embedding it into
+    the HTML header.
+
+    Parameters:
+        resource:  The name of a HTML file to embed.
+
+    Returns:
+        The contents of the file.
+
+    Todo:
+      * Why do we use ``pkgutil.get_data()`` instead of a simple
+        ``read()``.
+    """
     return pkgutil.get_data(__name__, f"resources/{resource}").decode()
 
-def load_template(template):
+
+def load_template(template: str) -> str:
+    """
+    Load a template HTML file.
+
+    Parameters:
+        template:  The file name to load.
+
+    Returns:
+        A string containing the contents of the file.
+
+    Todo:
+      * Combine with the one above?
+    """
     template_file = f"resources/templates/{template}"
     return pkgutil.get_data(__name__, template_file).decode()
 
-command_detail_list_template   = load_template("command_detail_list.html")
-command_detail_template        = load_template("command_detail.html")
-hidden_command_detail_template = load_template("hidden_command_detail.html")
-stat_chart_template            = load_template("stat_chart.html")
-diagnostics_template           = load_template("diagnostics.html")
-output_card_template           = load_template("output_card.html")
-output_card_collapsed_template = load_template("output_card_collapsed.html")
-output_block_template          = load_template("output_block.html")
-output_line_template           = load_template("output_line.html")
-message_template               = load_template("message.html")
-html_message_template          = load_template("html_message.html")
-command_template               = load_template("command.html")
-child_logger_template          = load_template("child_logger.html")
-parent_logger_template         = load_template("parent_logger.html")
 
+command_detail_list_template = load_template("command_detail_list.html")
+command_detail_template = load_template("command_detail.html")
+hidden_command_detail_template = load_template("hidden_command_detail.html")
+stat_chart_template = load_template("stat_chart.html")
+diagnostics_template = load_template("diagnostics.html")
+output_card_template = load_template("output_card.html")
+output_card_collapsed_template = load_template("output_card_collapsed.html")
+output_block_template = load_template("output_block.html")
+output_line_template = load_template("output_line.html")
+message_template = load_template("message.html")
+html_message_template = load_template("html_message.html")
+command_template = load_template("command.html")
+child_logger_template = load_template("child_logger.html")
+parent_logger_template = load_template("parent_logger.html")
