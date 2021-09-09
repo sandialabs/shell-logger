@@ -9,9 +9,10 @@ from .util import (nested_simplenamespace_to_dict, opening_html_text,
                    parent_logger_card_html)
 from collections.abc import Iterable, Mapping
 from datetime import datetime, timedelta
-from typing import Iterator, List, Optional, Union
+from typing import Iterator, List, Optional, Tuple, Union
 from distutils import dir_util
 import json
+from multiprocessing.managers import SyncManager
 import os
 from pathlib import Path
 import random
@@ -645,13 +646,15 @@ class ShellLogger:
 
         Parameters:
             command:  The command to execute.
-            **kwargs:
+            **kwargs:  Additional arguments to be passed on to the
+                :class:`StatsCollector` s, :class:`Trace` s,
+                :func:`shell.run`, etc.
 
         Returns:
+            The command run, along with its output, and various metadata
+            and diagnostic information captured while it ran.
 
         Todo:
-            * Finish commenting this function.  Figure out how it works
-              first.
             * Replace `**kwargs` with actual parameters.
         """
         completed_process, trace_output = None, None
@@ -660,7 +663,7 @@ class ShellLogger:
                 kwargs[key] = True
 
         # Change to the directory in which to execute the command.
-        old_pwd = os.getcwd()
+        old_pwd = Path(os.getcwd())
         if kwargs.get("pwd"):
             self.shell.cd(kwargs.get("pwd"))
         aux_info = self.auxiliary_information()
@@ -688,7 +691,7 @@ class ShellLogger:
             del os.environ["TMPDIR"]
         if "trace" in kwargs:
             trace = trace_collector(**kwargs)
-            command = trace.command(command, **kwargs)
+            command = trace.command(command)
             trace_output = trace.output_path
 
         # Run the command, and stop any collectors that were started.
@@ -808,16 +811,14 @@ if psutil is not None:
         """
         stat_name = "disk"
 
-        def __init__(self, interval: float, manager: object) -> None:
+        def __init__(self, interval: float, manager: SyncManager) -> None:
             """
             Initialize the :class:`DiskStatsCollector` object.
 
             Parameters:
                 interval:  How many seconds to sleep between polling.
-                manager:
-
-            Todo:
-              * Figure out what `manager` is.
+                manager:  The multiprocessing manager used to control
+                    the process used to collect the statistics.
             """
             super().__init__(interval, manager)
             self.stats = manager.dict()
@@ -844,15 +845,12 @@ if psutil is not None:
 
         def unproxied_stats(self) -> dict:
             """
-            Translate the statistics from the ``manager`` 's data
-            structure to a ``dict``.
+            Translate the statistics from the multiprocessing
+            ``SyncManager`` 's data structure to a ``dict``.
 
             Returns:
                 A mapping from the disk mount points to tuples of
                 timestamps and percent of disk space free.
-
-            Todo:
-              * What's a `manager`?
             """
             return {k: list(v) for k, v in self.stats.items()}
 
@@ -864,16 +862,14 @@ if psutil is not None:
         """
         stat_name = "cpu"
 
-        def __init__(self, interval: float, manager: object) -> None:
+        def __init__(self, interval: float, manager: SyncManager) -> None:
             """
             Initialize the :class:`CPUStatsCollector` object.
 
             Parameters:
                 interval:  How many seconds to sleep between polling.
-                manager:
-
-            Todo:
-              * Figure out what `manager` is.
+                manager:  The multiprocessing manager used to control
+                    the process used to collect the statistics.
             """
             super().__init__(interval, manager)
             self.stats = manager.list()
@@ -886,16 +882,13 @@ if psutil is not None:
             timestamp = round(time.time() * milliseconds_per_second)
             self.stats.append((timestamp, psutil.cpu_percent(interval=None)))
 
-        def unproxied_stats(self) -> List[object]:
+        def unproxied_stats(self) -> List[Tuple[float, float]]:
             """
-            Translate the statistics from the ``manager`` 's data
-            structure to a ``list``.
+            Translate the statistics from the multiprocessing
+            ``SyncManager`` 's data structure to a ``list``.
 
             Returns:
-                A list of SOMETHING.
-
-            Todo:
-              * Determine return type.
+                A list of (timestamp, % CPU used) data points.
             """
             return list(self.stats)
 
@@ -907,16 +900,14 @@ if psutil is not None:
         """
         stat_name = "memory"
 
-        def __init__(self, interval: float, manager: object) -> None:
+        def __init__(self, interval: float, manager: SyncManager) -> None:
             """
             Initialize the :class:`MemoryStatsCollector` object.
 
             Parameters:
                 interval:  How many seconds to sleep between polling.
-                manager:
-
-            Todo:
-              * Figure out what `manager` is.
+                manager:  The multiprocessing manager used to control
+                    the process used to collect the statistics.
             """
             super().__init__(interval, manager)
             self.stats = manager.list()
@@ -929,16 +920,13 @@ if psutil is not None:
             timestamp = round(time.time() * milliseconds_per_second)
             self.stats.append((timestamp, psutil.virtual_memory().percent))
 
-        def unproxied_stats(self) -> List[object]:
+        def unproxied_stats(self) -> List[Tuple[float, float]]:
             """
-            Translate the statistics from the ``manager`` 's data
-            structure to a ``list``.
+            Translate the statistics from the multiprocessing
+            ``SyncManager`` 's data structure to a ``list``.
 
             Returns:
-                A list of SOMETHING.
-
-            Todo:
-              * Determine return type.
+                A list of (timestamp, % memory used) data points.
             """
             return list(self.stats)
 
@@ -952,16 +940,14 @@ else:
         """
         stat_name = "disk"
 
-        def __init__(self, interval: float, manager: object) -> None:
+        def __init__(self, interval: float, manager: SyncManager) -> None:
             """
             Initialize the object via the parent's constructor.
 
             Parameters:
                 interval:  How many seconds to sleep between polling.
-                manager:
-
-            Todo:
-              * Figure out what `manager` is.
+                manager:  The multiprocessing manager used to control
+                    the process used to collect the statistics.
             """
             super().__init__(interval, manager)
 
@@ -988,16 +974,14 @@ else:
         """
         stat_name = "cpu"
 
-        def __init__(self, interval: float, manager: object) -> None:
+        def __init__(self, interval: float, manager: SyncManager) -> None:
             """
             Initialize the object via the parent's constructor.
 
             Parameters:
                 interval:  How many seconds to sleep between polling.
-                manager:
-
-            Todo:
-              * Figure out what `manager` is.
+                manager:  The multiprocessing manager used to control
+                    the process used to collect the statistics.
             """
             super().__init__(interval, manager)
 
@@ -1024,16 +1008,14 @@ else:
         """
         stat_name = "memory"
 
-        def __init__(self, interval: float, manager: object) -> None:
+        def __init__(self, interval: float, manager: SyncManager) -> None:
             """
             Initialize the object via the parent's constructor.
 
             Parameters:
                 interval:  How many seconds to sleep between polling.
-                manager:
-
-            Todo:
-              * Figure out what `manager` is.
+                manager:  The multiprocessing manager used to control
+                    the process used to collect the statistics.
             """
             super().__init__(interval, manager)
 

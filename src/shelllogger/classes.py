@@ -7,6 +7,7 @@ from io import StringIO
 import inspect
 from multiprocessing import Process, Manager
 import os
+from multiprocessing.managers import SyncManager
 from pathlib import Path
 import subprocess
 import sys
@@ -441,7 +442,7 @@ class StatsCollector:
             StatsCollector.subclasses.append(stats_collector_subclass)
         return stats_collector_subclass
 
-    def __init__(self, interval, manager):
+    def __init__(self, interval: float, _: SyncManager):
         """
         Initialize the :class:`StatsCollector` object, setting the
         poling interval, and creating the process for collecting the
@@ -449,10 +450,10 @@ class StatsCollector:
 
         Parameters:
             interval:  How long to sleep between collecting statistics.
-            manager:
 
-        Todo:
-          * Figure out what `manager` is.
+        Note:
+            A ``SyncManager`` will be supplied at the second argument
+            for any subclasses.
         """
         self.interval = interval
         self.process = Process(target=self.loop, args=())

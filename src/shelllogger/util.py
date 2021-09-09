@@ -149,7 +149,10 @@ def flatten(element: Union[str, bytes, Iterable]) -> Iterator[str]:
         yield element
 
 
-def parent_logger_card_html(name: str, *args: Iterator[str]) -> Iterator[str]:
+def parent_logger_card_html(
+        name: str,
+        *args: List[Iterator[str]]
+) -> Iterator[str]:
     """
     Generate the HTML for the card corresponding to the parent
     :class:`ShellLogger`.  The HTML elements are yielded one at a time
