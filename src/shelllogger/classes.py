@@ -187,12 +187,12 @@ class Shell:
 
         # Set the `RET_CODE` environment variable, such that we can
         # access it later.
-        os.write(self.aux_stdin_wfd, f"RET_CODE=$?\n".encode())
+        os.write(self.aux_stdin_wfd, "RET_CODE=$?\n".encode())
 
         # Because these writes are non-blocking, tell the shell that the
         # writes are complete.
-        os.write(self.aux_stdin_wfd, f"printf '\\4'\n".encode())
-        os.write(self.aux_stdin_wfd, f"printf '\\4' 1>&2\n".encode())
+        os.write(self.aux_stdin_wfd, "printf '\\4'\n".encode())
+        os.write(self.aux_stdin_wfd, "printf '\\4' 1>&2\n".encode())
 
         # Tee the output to multiple sinks (files, strings,
         # `stdout`/`stderr`).
