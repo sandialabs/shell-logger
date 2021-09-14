@@ -31,7 +31,7 @@ classifiers = [
     "Topic :: System :: Logging",
     "Topic :: System :: Shells",
     "Topic :: System :: System Shells",
-    # "Typing :: Typed"  UNCOMMENT AFTER ADDING TYPE HINTS
+    "Typing :: Typed"
 ]
 packages = [
     { include = "shelllogger", from = "src" },

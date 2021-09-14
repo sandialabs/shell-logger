@@ -1,0 +1,5 @@
+# Requirements for building the `ShellLogger` documentation.
+
+sphinx
+sphinx-argparse
+sphinx-rtd-theme
