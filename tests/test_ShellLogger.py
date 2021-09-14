@@ -157,7 +157,7 @@ def test_log_method_return_info_works_correctly(return_info: bool) -> None:
 @pytest.mark.parametrize('live_stdout', [True, False])
 @pytest.mark.parametrize('live_stderr', [True, False])
 def test_log_method_live_stdout_stderr_works_correctly(
-        capsys: CaptureFixture[str],
+        capsys: CaptureFixture,
         live_stdout: bool,
         live_stderr: bool
 ) -> None:
@@ -781,7 +781,7 @@ def test_sgr_gets_converted_to_html() -> None:
     assert "background-color: rgb(240, 140, 10)" in html_text
 
 
-def test_html_print(capsys: CaptureFixture[str]) -> None:
+def test_html_print(capsys: CaptureFixture) -> None:
     """
     Ensure the :func:`print` method prints to both the HTML log and the
     console, but the :func:`html_print` method only prints to the log
