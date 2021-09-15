@@ -246,7 +246,7 @@ class Shell:
             The ``stdout`` and ``stderr`` as strings.
 
         Todo:
-          * Replace **kwargs with function arguments.
+          * Replace ``**kwargs`` with function arguments.
         """
         sys_stdout = None if kwargs.get("quiet_stdout") else sys.stdout
         sys_stderr = None if kwargs.get("quiet_stderr") else sys.stderr
@@ -331,7 +331,7 @@ class Shell:
         Todo:
           * Rip out Windows support.
           * Maybe combine this with :func:`run` with extra flags.
-          * Replace **kwargs with function arguments.
+          * Replace ``**kwargs`` with function arguments.
 
         Returns:
             The ``stdout`` and ``stderr`` of the command run.

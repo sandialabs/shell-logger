@@ -1,0 +1,8 @@
+Utilities
+=========
+
+The following are a number of utility functions used to generate the HTML log
+file produced by :class:`ShellLogger`.
+
+.. automodule:: shelllogger.util
+   :noindex:

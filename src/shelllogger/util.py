@@ -4,7 +4,6 @@ from datetime import datetime
 import pkgutil
 from pathlib import Path
 import re
-from src.shelllogger import ShellLogger
 import textwrap
 from types import SimpleNamespace
 from typing import Iterator, List, TextIO, Tuple, Union
@@ -177,18 +176,25 @@ def parent_logger_card_html(
     yield footer
 
 
-def child_logger_card(log: ShellLogger) -> Iterator[str]:
+def child_logger_card(log) -> Iterator[str]:
     """
     Create a card to go in the HTML log file containing everything
     pertaining to a child :class:`ShellLogger`.
 
     Parameters:
-        log:  The child :class:`ShellLogger` for which to generate the
-            card.
+        log (ShellLogger):  The child :class:`ShellLogger` for which to
+            generate the card.
 
     Returns:
         A generator that will lazily yield the elements of the HTML for
         the card one at a time.
+
+    Todo:
+        * The type hinting for ``log`` is done in the docstring instead
+          of the function signature, because to put it in the signature
+          would create a circular dependency between ``ShellLogger.py``
+          and ``util.py``.  This function needs to be reworked such that
+          there's no longer a dependency on ``ShellLogger``.
     """
     child_html = log.to_html()
     return child_logger_card_html(log.name, log.duration, *child_html)
@@ -487,7 +493,7 @@ def disk_time_series_plot(
         A HTML snippet for a plot of the given data.
 
     Todo:
-      * Combine with the above?
+      * Should we combine this with :func:`time_series_plot`?
     """
     labels = [get_human_time(x) for x, _ in data_tuples]
     values = [y for _, y in data_tuples]
@@ -903,7 +909,8 @@ def embed_style(resource: str) -> str:
         A string containing the ``<style>...</style>`` block.
 
     Todo:
-      * Combine this with the two below?
+      * Should we combine this with :func:`embed_script` and
+        :func:`embed_html`?
     """
     return ("<style>\n"
             + pkgutil.get_data(__name__, f"resources/{resource}").decode()
@@ -955,7 +962,7 @@ def load_template(template: str) -> str:
         A string containing the contents of the file.
 
     Todo:
-      * Combine with the one above?
+      * Should we combine this with :func:`embed_html`?
     """
     template_file = f"resources/templates/{template}"
     return pkgutil.get_data(__name__, template_file).decode()
