@@ -1,5 +1,6 @@
 # Requirements for testing `ShellLogger`.
 
+flake8
 mock >= 4
 psutil
 pytest >= 6.2

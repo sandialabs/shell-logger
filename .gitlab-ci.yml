@@ -105,6 +105,18 @@ pytest:
       junit: tests/coverage.xml
 
 
+# Ensure we adhere to PEP8.
+flake8:
+  stage: test
+  needs: ["Install Requirements"]
+  timeout: 5m
+  cache:
+    <<: *global_cache
+  script:
+    - python3 -m flake8
+      --exclude=venv-clean-python
+
+
 # Test building a distribution.
 Build Distribution:
   stage: deploy
