@@ -1,0 +1,31 @@
+[run]
+omit =
+    */tests/*
+    */venv*
+branch = True
+dynamic_context = test_function
+
+[paths]
+source = shelllogger
+
+[report]
+skip_covered = False
+fail_under = 85
+show_missing = True
+exclude_lines =
+    pragma: no cover
+    if 0:
+    if False:
+
+[html]
+directory = tests/htmlcov
+title = ShellLogger Coverage Report
+show_contexts = True
+
+[xml]
+output = tests/coverage.xml
+
+[json]
+output = tests/coverage.json
+pretty_print = True
+show_contexts = True

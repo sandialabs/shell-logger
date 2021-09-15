@@ -1,0 +1,161 @@
+# This file controls the GitLab CI pipeline for the `ShellLogger`
+# project.  See here for the keyword reference:
+# https://docs.gitlab.com/ee/ci/yaml/.
+
+
+#image: alpine:latest
+
+
+#variables:
+  #HTTP_PROXY: http://wwwproxy.sandia.gov:80
+  #HTTPS_PROXY: http://wwwproxy.sandia.gov:80
+  #NO_PROXY: 127.0.0.1,localhost,.sandia.gov,/var/run/docker.sock
+
+
+# Set up a global cache to pass information across stages.
+cache: &global_cache
+  key: "${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHORT_SHA}"
+  paths:
+    - tests/htmlcov/
+    - venv-clean-python/
+  policy: pull-push
+
+
+# Set up the pipeline stages.
+stages:
+  - prepare
+  - test
+  - deploy
+  - examples
+  - documentation
+  - publish
+  - finish
+
+
+# Run this before every job.
+before_script:
+  - |-
+    export LSB_RELEASE=$(which lsb_release)
+    if [ -x ${LSB_RELEASE} ]; then
+        ${LSB_RELEASE} -a
+    fi
+  - |-
+    if [ -d "venv-clean-python" ]; then
+        source venv-clean-python/bin/activate
+    else
+        echo "Virtual Environment 'venv-clean-python' was not found"
+        exit 1
+    fi
+    echo "-----"
+    echo "VIRTUAL_ENV = ${VIRTUAL_ENV:?}"
+    echo "-----"
+
+
+# Run this after every job.
+after_script:
+  - |-
+    if [ ! -z ${VIRTUAL_ENV} ]; then
+        deactivate
+    fi
+
+
+# Create the virtual environment, install the requirements, and save the
+# environment to the cache.
+Install Requirements:
+  stage: prepare
+  timeout: 10m
+  before_script:
+    - python3 -m venv venv-clean-python
+  cache:
+    <<: *global_cache
+    when: on_success
+  script:
+    - source venv-clean-python/bin/activate
+
+    # Remove shelllogger if it's been installed.
+    - python3 -m pip uninstall -y shelllogger
+
+    # Install required packages.
+    - python3 -m pip install wheel
+      -r requirements.txt
+      -r tests/requirements.txt
+      -r doc/requirements.txt
+
+
+# Execute the unit tests.
+pytest:
+  stage: test
+  needs: ["Install Requirements"]
+  timeout: 5m
+  cache:
+    <<: *global_cache
+  script:
+    - python3 -m pytest
+      --cov=src.shelllogger
+      --cov-config=.coveragerc
+      --cov-report=html
+      --cov-report=term
+      --cov-report=xml
+      --full-trace
+      tests/
+  coverage: '/TOTAL\s*[0-9]*\s*[0-9]*\s*[0-9]*\s*[0-9]*\s*(\d+%)/'
+  artifacts:
+    reports:
+      cobertura: tests/coverage.xml
+      junit: tests/coverage.xml
+
+
+# Test building a distribution.
+Build Distribution:
+  stage: deploy
+  needs: ["Install Requirements"]
+  timeout: 5m
+  cache:
+    <<: *global_cache
+    policy: pull
+  script:
+    - python3 -m pip wheel --no-deps -w dist .
+  artifacts:
+    name: "shelllogger-dist"
+    paths:
+      - dist/shelllogger*.whl
+    expire_in: 6 weeks
+
+
+# Test installation of the package.
+Install Package:
+  stage: deploy
+  needs: ["Install Requirements"]
+  timeout: 5m
+  cache:
+    <<: *global_cache
+  script:
+    - python3 -m pip install .
+
+
+# Publish coverage data (if on the main branch).
+Pages:
+  stage: publish
+  needs: ["pytest"]
+  timeout: 5m
+  cache:
+    <<: *global_cache
+    policy: pull
+  rules:
+    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
+  script:
+    - mkdir -p public
+    - mv tests/htmlcov public/.
+  artifacts:
+    paths:
+      - public
+
+
+# Test that uninstalling from a virtual environment works.
+Uninstall Package:
+  stage: finish
+  timeout: 5m
+  cache:
+    <<: *global_cache
+  script:
+    - python3 -m pip uninstall -y shelllogger

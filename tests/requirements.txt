@@ -1,0 +1,7 @@
+# Requirements for testing `ShellLogger`.
+
+mock >= 4
+psutil
+pytest >= 6.2
+pytest-cov >= 2.12
+pytest-mock >= 3.6

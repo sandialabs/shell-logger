@@ -4,10 +4,13 @@ from inspect import stack
 import json
 import os
 from pathlib import Path
-import psutil
 import pytest
 import re
 from src.shelllogger import ShellLogger, ShellLoggerDecoder
+try:
+    import psutil
+except ModuleNotFoundError:
+    psutil = None
 
 
 @pytest.fixture(autouse=True)
@@ -412,6 +415,7 @@ def test_syntax_error() -> None:
     assert "There was a problem running the command" in excinfo.value.args[0]
 
 
+@pytest.mark.skipif(psutil is None, reason="`psutil` is unavailable")
 def test_logger_does_not_store_stdout_string_by_default() -> None:
     """
     Ensure we don't hold a commands ``stdout`` in memory by default.
@@ -640,12 +644,12 @@ def test_trace_and_stats() -> None:
                              expression="setlocale", summary=True)
         assert "setlocale" in result.trace
         assert "sleep" not in result.trace
-        assert len(result.stats["memory"]) > 8
-        assert len(result.stats["memory"]) < 30
-        assert len(result.stats["cpu"]) > 8
-        assert len(result.stats["cpu"]) < 30
-        assert len(result.stats["disk"]["/"]) > 8
-        assert len(result.stats["disk"]["/"]) < 30
+        assert len(result.stats["memory"]) > 5
+        assert len(result.stats["memory"]) < 50
+        assert len(result.stats["cpu"]) > 5
+        assert len(result.stats["cpu"]) < 50
+        assert len(result.stats["disk"]["/"]) > 5
+        assert len(result.stats["disk"]["/"]) < 50
     else:
         print(f"Warning: uname is not 'Linux': {os.uname()}; ltrace not "
               "tested.")
@@ -697,12 +701,12 @@ def test_log_book_trace_and_stats() -> None:
                    trace="ltrace", expression="setlocale", summary=True)
         assert "setlocale" in logger.log_book[0]["trace"]
         assert "sleep" not in logger.log_book[0]["trace"]
-        assert len(logger.log_book[0]["stats"]["memory"]) > 8
-        assert len(logger.log_book[0]["stats"]["memory"]) < 30
-        assert len(logger.log_book[0]["stats"]["cpu"]) > 8
-        assert len(logger.log_book[0]["stats"]["cpu"]) < 30
-        assert len(logger.log_book[0]["stats"]["disk"]["/"]) > 8
-        assert len(logger.log_book[0]["stats"]["disk"]["/"]) < 30
+        assert len(logger.log_book[0]["stats"]["memory"]) > 5
+        assert len(logger.log_book[0]["stats"]["memory"]) < 50
+        assert len(logger.log_book[0]["stats"]["cpu"]) > 5
+        assert len(logger.log_book[0]["stats"]["cpu"]) < 50
+        assert len(logger.log_book[0]["stats"]["disk"]["/"]) > 5
+        assert len(logger.log_book[0]["stats"]["disk"]["/"]) < 50
     else:
         print(f"Warning: uname is not 'Linux': {os.uname()}; ltrace not "
               "tested.")
