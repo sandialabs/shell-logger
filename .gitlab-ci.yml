@@ -114,6 +114,7 @@ flake8:
     <<: *global_cache
   script:
     - python3 -m flake8
+      --exclude=venv-clean-python
 
 
 # Test building a distribution.
