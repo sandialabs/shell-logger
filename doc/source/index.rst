@@ -76,11 +76,107 @@ These data are collected in a "log book".  When you call
 :func:`ShellLogger.finalize`, the contents of the log book are written to a
 HTML log file.
 
-Example
-^^^^^^^
+Example 1:  The Basics
+^^^^^^^^^^^^^^^^^^^^^^
 
-.. todo::
+This first example demonstrates the bare-bones basics of ``shelllogger``, in
+which we're logging commands only to the HTML log file.
 
-   Insert simplest example here, and link to other examples in the repo.
+.. literalinclude:: ../../examples/hello_world_html.py
+   :language: python
+   :linenos:
+   :caption: ``examples/hello_world_html.py``
+
+Running the script yields
+
+.. code-block::
+
+   This example demonstrates logging information solely to the HTML log file.
+   Open /Users/jmgate/workspace/ShellLogger/examples/log_hello_world_html/2021-09-22_14.56.42.558599_szt68acx/Hello_ShellLogger.html to view the log.
+
+When you open the HTML log file, you'll see something like
+
+.. image:: images/html_log.png
+   :alt: HTML log file
+   :align: center
+
+When you first open the log file, most of the content will be collapsed.  You
+can click on any of the commands to expand it.
+
+.. image:: images/expand_command_card.png
+   :alt: Expanding the command card
+   :align: center
+
+Here you can see some details, along with ``stdout`` and ``stderr``.  Clicking
+on **Details** yields even more information:
+
+.. image:: images/expand_details.png
+   :alt: Expanding the Details section
+   :align: center
+
+Similarly, clicking **Diagnostics** gives you even more information:
+
+.. image:: images/expand_diagnostics.png
+   :alt: Expanding the Diagnostics section
+   :align: center
+
+Note that some of the cards allow you to search the output via a regular
+expression, which can be really helpful when debugging.
+
+If you look inside the log directory that's created by :class:`ShellLogger`,
+you'll see the following:
+
+.. image:: images/log_dir_tree.png
+   :alt: Log directory structure
+   :align: center
+
+First you'll see a timestamped log directory.  Any future runs of the script
+will create additional timestamped log directories as siblings.  This is to
+ensure you never accidentally overwrite a prior log.  Within the timestamped
+log directory, you'll notice a number of files that contain the ``stdout`` and
+``stderr`` streams from the commands that were executed.  Then there's the
+HTML log file itself, which you can open in a browser, and finally a JSON log
+file that's used to construct the HTML log file, mapping the commands to their
+output streams.  The last item is a symbolic link to the latest HTML log file.
+If the script is run multiple times, this link is updated to always point to
+the latest log.
+
+Example 2:  Simultaneous Logging to the Console
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+This next example demonstrates logging commands both to the HTML log file and
+the console.  The primary differences between this and **Example 1** are the
+highlighted lines below.
+
+.. literalinclude:: ../../examples/hello_world_html_and_console.py
+   :language: python
+   :linenos:
+   :emphasize-lines: 11, 13
+   :caption: ``examples/hello_world_html_and_console.py``
+
+Example 3:  Collecting Statistics
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+In this example, we demonstrate how easy it is to capture various statistics
+while running your commands in the shell.  The primary differences between this
+and **Example 1** are the highlighted lines below.
+
+.. literalinclude:: ../../examples/hello_world_html_with_stats.py
+   :language: python
+   :linenos:
+   :emphasize-lines: 12, 14
+   :caption: ``examples/hello_world_html_with_stats.py``
+
+Example 4:  Building a Code
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+In this final example, we use ``shelllogger`` to do some "real work"---cloning,
+configuring, and building `flex <https://github.com/westes/flex.git>`_, a fast
+lexical analyzer generator.
+
+.. literalinclude:: ../../examples/build_flex.py
+   :language: python
+   :linenos:
+   :caption: ``examples/build_flex.py``
 
 For more detailed usage information, see the :doc:`ShellLogger`.
