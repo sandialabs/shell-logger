@@ -549,7 +549,7 @@ class ShellLogger:
         Execute a command, and log the corresponding information.
 
         Parameters:
-            msg:  A message to be recorded with the command. This could
+            msg:  A message to be recorded with the command.  This could
                 be documentation of what your command is doing and why.
             cmd:  The shell command to be executed.
             cwd:  Where to execute the command.

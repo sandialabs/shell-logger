@@ -3,19 +3,11 @@
 # https://docs.gitlab.com/ee/ci/yaml/.
 
 
-#image: alpine:latest
-
-
-#variables:
-  #HTTP_PROXY: http://wwwproxy.sandia.gov:80
-  #HTTPS_PROXY: http://wwwproxy.sandia.gov:80
-  #NO_PROXY: 127.0.0.1,localhost,.sandia.gov,/var/run/docker.sock
-
-
 # Set up a global cache to pass information across stages.
 cache: &global_cache
   key: "${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHORT_SHA}"
   paths:
+    - doc/html/
     - tests/htmlcov/
     - venv-clean-python/
   policy: pull-push
@@ -70,9 +62,14 @@ Install Requirements:
     <<: *global_cache
     when: on_success
   script:
+
+    # Activate the virtual environment.
     - source venv-clean-python/bin/activate
 
-    # Remove shelllogger if it's been installed.
+    # Ensure `pip` is up-to-date.
+    - python3 -m pip install --upgrade pip
+
+    # Remove `shelllogger` if it's been installed.
     - python3 -m pip uninstall -y shelllogger
 
     # Install required packages.
@@ -100,6 +97,8 @@ pytest:
       tests/
   coverage: '/TOTAL\s*[0-9]*\s*[0-9]*\s*[0-9]*\s*[0-9]*\s*(\d+%)/'
   artifacts:
+    paths:
+      - tests/htmlcov
     reports:
       cobertura: tests/coverage.xml
       junit: tests/coverage.xml
@@ -145,10 +144,25 @@ Install Package:
     - python3 -m pip install .
 
 
-# Publish coverage data (if on the main branch).
+# Generate the documentation.
+Sphinx:
+  stage: documentation
+  needs: ["Install Requirements", "Install Package"]
+  timeout: 5m
+  cache:
+    <<: *global_cache
+  script:
+    - cd doc
+    - bash make_html_docs.sh
+  artifacts:
+    paths:
+      - doc/html
+
+
+# Publish coverage data and documentation (if on the main branch).
 Pages:
   stage: publish
-  needs: ["pytest"]
+  needs: ["pytest", "Sphinx"]
   timeout: 5m
   cache:
     <<: *global_cache
@@ -158,6 +172,7 @@ Pages:
   script:
     - mkdir -p public
     - mv tests/htmlcov public/.
+    - mv doc/html/* public/.
   artifacts:
     paths:
       - public
