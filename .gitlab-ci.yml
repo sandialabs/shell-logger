@@ -17,10 +17,10 @@ cache: &global_cache
 stages:
   - prepare
   - test
-  - deploy
+  - install
   - examples
   - documentation
-  - publish
+  - deploy
   - finish
 
 
@@ -118,7 +118,7 @@ flake8:
 
 # Test building a distribution.
 build distribution:
-  stage: deploy
+  stage: install
   needs: ["install requirements"]
   timeout: 5m
   cache:
@@ -135,7 +135,7 @@ build distribution:
 
 # Test installation of the package.
 install package:
-  stage: deploy
+  stage: install
   needs: ["install requirements"]
   timeout: 5m
   cache:
@@ -161,7 +161,7 @@ sphinx:
 
 # Publish coverage data and documentation (if on the main branch).
 pages:
-  stage: publish
+  stage: deploy
   needs: ["pytest", "sphinx"]
   timeout: 5m
   cache:
