@@ -16,9 +16,8 @@ cache: &global_cache
 # Set up the pipeline stages.
 stages:
   - prepare
-  - test
   - install
-  - examples
+  - test
   - documentation
   - deploy
   - finish
@@ -51,6 +50,11 @@ after_script:
     fi
 
 
+#-----------------------------------------------------------------------
+# Stage:  Prepare
+#-----------------------------------------------------------------------
+
+
 # Create the virtual environment, install the requirements, and save the
 # environment to the cache.
 install requirements:
@@ -77,6 +81,44 @@ install requirements:
       -r requirements.txt
       -r tests/requirements.txt
       -r doc/requirements.txt
+
+
+#-----------------------------------------------------------------------
+# Stage:  Install
+#-----------------------------------------------------------------------
+
+
+# Test building a distribution.
+build distribution:
+  stage: install
+  needs: ["install requirements"]
+  timeout: 5m
+  cache:
+    <<: *global_cache
+    policy: pull
+  script:
+    - python3 -m pip wheel --no-deps -w dist .
+  artifacts:
+    name: "shelllogger-dist"
+    paths:
+      - dist/shelllogger*.whl
+    expire_in: 6 weeks
+
+
+# Test installation of the package.
+install package:
+  stage: install
+  needs: ["install requirements"]
+  timeout: 5m
+  cache:
+    <<: *global_cache
+  script:
+    - python3 -m pip install .
+
+
+#-----------------------------------------------------------------------
+# Stage:  Test
+#-----------------------------------------------------------------------
 
 
 # Execute the unit tests.
@@ -116,32 +158,29 @@ flake8:
       --exclude=venv-clean-python
 
 
-# Test building a distribution.
-build distribution:
-  stage: install
-  needs: ["install requirements"]
+# Ensure the examples run without problems.
+examples:
+  stage: test
+  needs: ["install requirements", "install package"]
   timeout: 5m
   cache:
     <<: *global_cache
     policy: pull
   script:
-    - python3 -m pip wheel --no-deps -w dist .
+    - cd examples
+    - python3 -m pip list
+    - python3 ./hello_world_html.py
+    - python3 ./hello_world_html_and_console.py
+    - python3 ./hello_world_html_with_stats.py
+    - python3 ./build_flex.py
   artifacts:
-    name: "shelllogger-dist"
     paths:
-      - dist/shelllogger*.whl
-    expire_in: 6 weeks
+      - examples/log*
 
 
-# Test installation of the package.
-install package:
-  stage: install
-  needs: ["install requirements"]
-  timeout: 5m
-  cache:
-    <<: *global_cache
-  script:
-    - python3 -m pip install .
+#-----------------------------------------------------------------------
+# Stage:  Documentation
+#-----------------------------------------------------------------------
 
 
 # Generate the documentation.
@@ -157,6 +196,11 @@ sphinx:
   artifacts:
     paths:
       - doc/html
+
+
+#-----------------------------------------------------------------------
+# Stage:  Deploy
+#-----------------------------------------------------------------------
 
 
 # Publish coverage data and documentation (if on the main branch).
@@ -176,6 +220,11 @@ pages:
   artifacts:
     paths:
       - public
+
+
+#-----------------------------------------------------------------------
+# Stage:  Finish
+#-----------------------------------------------------------------------
 
 
 # Test that uninstalling from a virtual environment works.
