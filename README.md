@@ -1,6 +1,6 @@
 [![pipeline status](https://internal.gitlab.server/ShellLogger/ShellLogger/badges/master/pipeline.svg)](https://internal.gitlab.server/ShellLogger/ShellLogger/pipelines)
-[![coverage report](https://internal.gitlab.server/ShellLogger/ShellLogger/badges/master/coverage.svg)](http://shelllogger-ci.internal.gitlab.pages/ShellLogger/htmlcov)
-[![documentation](https://img.shields.io/badge/docs-latest-green.svg)](http://shelllogger-ci.internal.gitlab.pages/ShellLogger)
+[![coverage report](https://internal.gitlab.server/ShellLogger/ShellLogger/badges/master/coverage.svg)](http://shelllogger.internal.gitlab.pages/ShellLogger/htmlcov)
+[![documentation](https://img.shields.io/badge/docs-latest-green.svg)](http://shelllogger.internal.gitlab.pages/ShellLogger)
 
 # ShellLogger
 
