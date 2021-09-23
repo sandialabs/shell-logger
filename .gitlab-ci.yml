@@ -160,7 +160,7 @@ flake8:
     <<: *global_cache
   script:
     - python3 -m flake8
-      --exclude=shelllogger-venv
+      --exclude=shelllogger-env
 
 
 # Ensure the examples run without problems.
