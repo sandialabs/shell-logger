@@ -9,7 +9,7 @@ cache: &global_cache
   paths:
     - doc/html/
     - tests/htmlcov/
-    - venv-clean-python/
+    - shelllogger-venv/
   policy: pull-push
 
 
@@ -31,10 +31,10 @@ before_script:
         ${LSB_RELEASE} -a
     fi
   - |-
-    if [ -d "venv-clean-python" ]; then
-        source venv-clean-python/bin/activate
+    if [ -d "shelllogger-venv" ]; then
+        source shelllogger-venv/bin/activate
     else
-        echo "Virtual Environment 'venv-clean-python' was not found"
+        echo "Virtual Environment 'shelllogger-venv' was not found"
         exit 1
     fi
     echo "-----"
@@ -63,14 +63,14 @@ requirements:
   stage: prepare
   timeout: 10m
   before_script:
-    - python3 -m venv venv-clean-python
+    - python3 -m venv shelllogger-venv
   cache:
     <<: *global_cache
     when: on_success
   script:
 
     # Activate the virtual environment.
-    - source venv-clean-python/bin/activate
+    - source shelllogger-venv/bin/activate
 
     # Show the contents of the virtual environment.
     - python3 -m pip list
@@ -168,7 +168,7 @@ flake8:
     <<: *global_cache
   script:
     - python3 -m flake8
-      --exclude=venv-clean-python
+      --exclude=shelllogger-venv
 
 
 # Ensure the examples run without problems.
