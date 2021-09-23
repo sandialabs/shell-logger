@@ -78,9 +78,6 @@ requirements:
     # Ensure `pip` is up-to-date.
     - python3 -m pip install --upgrade pip
 
-    # Remove `shelllogger` if it's been installed.
-    - python3 -m pip uninstall -y shelllogger
-
     # Install required packages.
     - python3 -m pip install wheel
       -r requirements.txt
