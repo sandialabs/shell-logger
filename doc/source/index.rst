@@ -79,8 +79,17 @@ HTML log file.
 Example 1:  The Basics
 ^^^^^^^^^^^^^^^^^^^^^^
 
-This first example demonstrates the bare-bones basics of ``shelllogger``, in
-which we're logging commands only to the HTML log file.
+For this initial example, let's first consider a simple "Hello World" script
+written in bash:
+
+.. literalinclude:: ../../examples/hello_world.sh
+   :language: bash
+   :linenos:
+   :caption: ``examples/hello_world.sh``
+
+The equivalent Python script written with ``shelllogger``, demonstrating its
+basic functionality where it's logging commands only to the HTML log file, is
+the following:
 
 .. literalinclude:: ../../examples/hello_world_html.py
    :language: python
@@ -130,16 +139,18 @@ you'll see the following:
    :alt: Log directory structure
    :align: center
 
-First you'll see a timestamped log directory.  Any future runs of the script
-will create additional timestamped log directories as siblings.  This is to
-ensure you never accidentally overwrite a prior log.  Within the timestamped
-log directory, you'll notice a number of files that contain the ``stdout`` and
-``stderr`` streams from the commands that were executed.  Then there's the
-HTML log file itself, which you can open in a browser, and finally a JSON log
-file that's used to construct the HTML log file, mapping the commands to their
-output streams.  The last item is a symbolic link to the latest HTML log file.
-If the script is run multiple times, this link is updated to always point to
-the latest log.
+* The timestamped log directory is created with each run of the script.  Any
+  future runs of the script will create additional timestamped log directories
+  as siblings.  This is to ensure you never accidentally overwrite a prior log.
+* Within the timestamped log directory, you'll notice a number of files that
+  contain the ``stdout`` and ``stderr`` streams from the commands that were
+  executed.
+* Then there's the HTML log file itself, which you can open in a browser.
+* Alongside it is a JSON log file that's used to construct the HTML log file,
+  mapping the commands to their output streams.
+* The last item is a symbolic link to the latest HTML log file.  If the script
+  is run multiple times, this link is updated to always point to the latest
+  log.
 
 Example 2:  Simultaneous Logging to the Console
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -172,7 +183,15 @@ Example 4:  Building a Code
 
 In this final example, we use ``shelllogger`` to do some "real work"---cloning,
 configuring, and building `flex <https://github.com/westes/flex.git>`_, a fast
-lexical analyzer generator.
+lexical analyzer generator.  Before we do that, let's take a look at what the
+bash script would look like:
+
+.. literalinclude:: ../../examples/build_flex.sh
+   :language: bash
+   :linenos:
+   :caption: ``examples/build_flex.sh``
+
+The equivalent Python script using ``shelllogger`` is the following:
 
 .. literalinclude:: ../../examples/build_flex.py
    :language: python
