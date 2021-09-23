@@ -11,15 +11,15 @@ sl.log("Clone the Flex repository.",
        "git clone --depth 1 --branch flex-2.5.39 "
        "https://github.com/westes/flex.git flex-2.5.39", live_stdout=True,
        live_stderr=True)
-sl.log("Run Autogen", "./autogen.sh", cwd=Path.cwd()/"flex-2.5.39",
+sl.log("Run `autogen`.", "./autogen.sh", cwd=Path.cwd()/"flex-2.5.39",
        live_stdout=True, live_stderr=True)
-sl.log("Configure Flex", "./configure --prefix=$(dirname $(pwd))/flex",
+sl.log("Configure flex.", "./configure --prefix=$(dirname $(pwd))/flex",
        cwd=Path.cwd()/"flex-2.5.39", live_stdout=True, live_stderr=True,
        measure=["cpu", "memory", "disk"])
-sl.log("Build libcompat.la", "make libcompat.la",
+sl.log("Build `libcompat.la`.", "make libcompat.la",
        cwd=Path.cwd()/"flex-2.5.39/lib", live_stdout=True, live_stderr=True,
        measure=["cpu", "memory", "disk"])
-sl.log("Build & Install Flex", "make install-exec",
+sl.log("Build & install flex.", "make install-exec",
        cwd=Path.cwd()/"flex-2.5.39", live_stdout=True, live_stderr=True,
        measure=["cpu", "memory", "disk"])
 sl.finalize()
