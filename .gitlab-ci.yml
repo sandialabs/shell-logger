@@ -9,7 +9,7 @@ cache: &global_cache
   paths:
     - doc/html/
     - tests/htmlcov/
-    - shelllogger-venv/
+    - shelllogger-env/
   policy: pull-push
 
 
@@ -31,24 +31,22 @@ before_script:
         ${LSB_RELEASE} -a
     fi
   - |-
-    if [ -d "shelllogger-venv" ]; then
-        source shelllogger-venv/bin/activate
+    if [ -d "shelllogger-env" ]; then
+        conda activate $(pwd)/shelllogger-env
     else
-        echo "Virtual Environment 'shelllogger-venv' was not found"
+        echo "Conda environment 'shelllogger-env' was not found."
         exit 1
     fi
     echo "-----"
-    echo "VIRTUAL_ENV = ${VIRTUAL_ENV:?}"
-    echo "-----"
-    python3 -m pip list
+    conda list
     echo "-----"
 
 
 # Run this after every job.
 after_script:
   - |-
-    if [ ! -z ${VIRTUAL_ENV} ]; then
-        deactivate
+    if [[ "${CONDA_PREFIX}" == "$(pwd)/shelllogger-env" ]]; then
+        conda deactivate
     fi
 
 
@@ -63,29 +61,26 @@ requirements:
   stage: prepare
   timeout: 10m
   before_script:
-    - python3 -m venv shelllogger-venv
+    - conda create --prefix ./shelllogger-env --yes pip
   cache:
     <<: *global_cache
     when: on_success
   script:
 
     # Activate the virtual environment.
-    - source shelllogger-venv/bin/activate
+    - conda activate $(pwd)/shelllogger-env
 
     # Show the contents of the virtual environment.
-    - python3 -m pip list
-
-    # Ensure `pip` is up-to-date.
-    - python3 -m pip install --upgrade pip
+    - conda list
 
     # Install required packages.
-    - python3 -m pip install wheel
+    - pip install
       -r requirements.txt
       -r tests/requirements.txt
       -r doc/requirements.txt
 
     # Show the contents of the virtual environment.
-    - python3 -m pip list
+    - conda list
 
 
 #-----------------------------------------------------------------------
@@ -102,7 +97,7 @@ wheel:
     <<: *global_cache
     policy: pull
   script:
-    - python3 -m pip wheel --no-deps -w dist .
+    - pip wheel --no-deps -w dist .
   artifacts:
     name: "shelllogger-dist"
     paths:
@@ -120,10 +115,10 @@ install:
   script:
 
     # Install the package.
-    - python3 -m pip install .
+    - pip install .
 
     # Show the contents of the virtual environment to ensure it's there.
-    - python3 -m pip list
+    - conda list
 
 
 #-----------------------------------------------------------------------
@@ -243,4 +238,4 @@ uninstall:
   cache:
     <<: *global_cache
   script:
-    - python3 -m pip uninstall -y shelllogger
+    - pip uninstall -y shelllogger
