@@ -3,6 +3,16 @@
 # https://docs.gitlab.com/ee/ci/yaml/.
 
 
+# Set up a global cache to pass information across stages.
+cache: &global_cache
+  key: "${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHORT_SHA}"
+  paths:
+    - doc/html/
+    - tests/htmlcov/
+    - venv-clean-python/
+  policy: pull-push
+
+
 # Set up the pipeline stages.
 stages:
   - prepare
@@ -21,10 +31,10 @@ before_script:
         ${LSB_RELEASE} -a
     fi
   - |-
-    if [ -d "shelllogger-venv" ]; then
-        source shelllogger-venv/bin/activate
+    if [ -d "venv-clean-python" ]; then
+        source venv-clean-python/bin/activate
     else
-        echo "Virtual Environment 'shelllogger-venv' was not found"
+        echo "Virtual Environment 'venv-clean-python' was not found"
         exit 1
     fi
     echo "-----"
@@ -45,16 +55,20 @@ after_script:
 #-----------------------------------------------------------------------
 
 
-# Create the virtual environment and install the requirements.
+# Create the virtual environment, install the requirements, and save the
+# environment to the cache.
 install requirements:
   stage: prepare
   timeout: 10m
   before_script:
-    - python3 -m venv shelllogger-venv
+    - python3 -m venv venv-clean-python
+  cache:
+    <<: *global_cache
+    when: on_success
   script:
 
     # Activate the virtual environment.
-    - source shelllogger-venv/bin/activate
+    - source venv-clean-python/bin/activate
 
     # Ensure `pip` is up-to-date.
     - python3 -m pip install --upgrade pip
@@ -67,9 +81,6 @@ install requirements:
       -r requirements.txt
       -r tests/requirements.txt
       -r doc/requirements.txt
-  artifacts:
-    paths:
-      - shelllogger-venv
 
 
 #-----------------------------------------------------------------------
@@ -82,9 +93,13 @@ build distribution:
   stage: install
   needs: ["install requirements"]
   timeout: 5m
+  cache:
+    <<: *global_cache
+    policy: pull
   script:
     - python3 -m pip wheel --no-deps -w dist .
   artifacts:
+    name: "shelllogger-dist"
     paths:
       - dist/shelllogger*.whl
     expire_in: 6 weeks
@@ -95,11 +110,10 @@ install package:
   stage: install
   needs: ["install requirements"]
   timeout: 5m
+  cache:
+    <<: *global_cache
   script:
     - python3 -m pip install .
-  artifacts:
-    paths:
-      - shelllogger-venv
 
 
 #-----------------------------------------------------------------------
@@ -112,6 +126,8 @@ pytest:
   stage: test
   needs: ["install requirements"]
   timeout: 5m
+  cache:
+    <<: *global_cache
   script:
     - python3 -m pytest
       --cov=src.shelllogger
@@ -135,9 +151,11 @@ flake8:
   stage: test
   needs: ["install requirements"]
   timeout: 5m
+  cache:
+    <<: *global_cache
   script:
     - python3 -m flake8
-      --exclude=shelllogger-venv
+      --exclude=venv-clean-python
 
 
 # Ensure the examples run without problems.
@@ -145,6 +163,9 @@ examples:
   stage: test
   needs: ["install requirements", "install package"]
   timeout: 5m
+  cache:
+    <<: *global_cache
+    policy: pull
   script:
     - cd examples
     - python3 -m pip list
@@ -167,6 +188,8 @@ sphinx:
   stage: documentation
   needs: ["install requirements", "install package"]
   timeout: 5m
+  cache:
+    <<: *global_cache
   script:
     - cd doc
     - bash make_html_docs.sh
@@ -185,6 +208,9 @@ pages:
   stage: deploy
   needs: ["pytest", "sphinx"]
   timeout: 5m
+  cache:
+    <<: *global_cache
+    policy: pull
   rules:
     - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
   script:
@@ -205,5 +231,7 @@ pages:
 uninstall package:
   stage: finish
   timeout: 5m
+  cache:
+    <<: *global_cache
   script:
     - python3 -m pip uninstall -y shelllogger
