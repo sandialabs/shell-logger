@@ -239,3 +239,6 @@ uninstall:
     <<: *global_cache
   script:
     - pip uninstall -y shelllogger
+
+    # Show the contents of the virtual environment.
+    - conda list
