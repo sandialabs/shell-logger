@@ -59,7 +59,7 @@ after_script:
 
 # Create the virtual environment, install the requirements, and save the
 # environment to the cache.
-install requirements:
+requirements:
   stage: prepare
   timeout: 10m
   before_script:
@@ -97,9 +97,9 @@ install requirements:
 
 
 # Test building a distribution.
-build distribution:
+wheel:
   stage: install
-  needs: ["install requirements"]
+  needs: ["requirements"]
   timeout: 5m
   cache:
     <<: *global_cache
@@ -114,9 +114,9 @@ build distribution:
 
 
 # Test installation of the package.
-install package:
+install:
   stage: install
-  needs: ["install requirements"]
+  needs: ["requirements"]
   timeout: 5m
   cache:
     <<: *global_cache
@@ -137,7 +137,7 @@ install package:
 # Execute the unit tests.
 pytest:
   stage: test
-  needs: ["install requirements"]
+  needs: ["requirements"]
   timeout: 5m
   cache:
     <<: *global_cache
@@ -162,7 +162,7 @@ pytest:
 # Ensure we adhere to PEP8.
 flake8:
   stage: test
-  needs: ["install requirements"]
+  needs: ["requirements"]
   timeout: 5m
   cache:
     <<: *global_cache
@@ -174,7 +174,7 @@ flake8:
 # Ensure the examples run without problems.
 examples:
   stage: test
-  needs: ["install requirements", "install package"]
+  needs: ["requirements", "install"]
   timeout: 5m
   cache:
     <<: *global_cache
@@ -198,7 +198,7 @@ examples:
 # Generate the documentation.
 sphinx:
   stage: documentation
-  needs: ["install requirements", "install package"]
+  needs: ["requirements", "install"]
   timeout: 5m
   cache:
     <<: *global_cache
@@ -240,7 +240,7 @@ pages:
 
 
 # Test that uninstalling from a virtual environment works.
-uninstall package:
+uninstall:
   stage: finish
   timeout: 5m
   cache:
