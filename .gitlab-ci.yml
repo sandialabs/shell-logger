@@ -40,6 +40,8 @@ before_script:
     echo "-----"
     echo "VIRTUAL_ENV = ${VIRTUAL_ENV:?}"
     echo "-----"
+    python3 -m pip list
+    echo "-----"
 
 
 # Run this after every job.
@@ -70,6 +72,9 @@ install requirements:
     # Activate the virtual environment.
     - source venv-clean-python/bin/activate
 
+    # Show the contents of the virtual environment.
+    - python3 -m pip list
+
     # Ensure `pip` is up-to-date.
     - python3 -m pip install --upgrade pip
 
@@ -81,6 +86,9 @@ install requirements:
       -r requirements.txt
       -r tests/requirements.txt
       -r doc/requirements.txt
+
+    # Show the contents of the virtual environment.
+    - python3 -m pip list
 
 
 #-----------------------------------------------------------------------
@@ -113,7 +121,12 @@ install package:
   cache:
     <<: *global_cache
   script:
+
+    # Install the package.
     - python3 -m pip install .
+
+    # Show the contents of the virtual environment to ensure it's there.
+    - python3 -m pip list
 
 
 #-----------------------------------------------------------------------
@@ -168,7 +181,6 @@ examples:
     policy: pull
   script:
     - cd examples
-    - python3 -m pip list
     - python3 ./hello_world_html.py
     - python3 ./hello_world_html_and_console.py
     - python3 ./hello_world_html_with_stats.py
