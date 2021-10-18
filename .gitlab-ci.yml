@@ -91,7 +91,6 @@ requirements:
 # Test building a distribution.
 wheel:
   stage: install
-  needs: ["requirements"]
   timeout: 5m
   cache:
     <<: *global_cache
@@ -108,7 +107,6 @@ wheel:
 # Test installation of the package.
 install:
   stage: install
-  needs: ["requirements"]
   timeout: 5m
   cache:
     <<: *global_cache
@@ -129,7 +127,6 @@ install:
 # Execute the unit tests.
 pytest:
   stage: test
-  needs: ["requirements"]
   timeout: 5m
   cache:
     <<: *global_cache
@@ -154,7 +151,6 @@ pytest:
 # Ensure we adhere to PEP8.
 flake8:
   stage: test
-  needs: ["requirements"]
   timeout: 5m
   cache:
     <<: *global_cache
@@ -166,7 +162,6 @@ flake8:
 # Ensure the examples run without problems.
 examples:
   stage: test
-  needs: ["requirements", "install"]
   timeout: 5m
   cache:
     <<: *global_cache
@@ -190,7 +185,6 @@ examples:
 # Generate the documentation.
 sphinx:
   stage: documentation
-  needs: ["requirements", "install"]
   timeout: 5m
   cache:
     <<: *global_cache
@@ -210,7 +204,6 @@ sphinx:
 # Publish coverage data and documentation (if on the main branch).
 pages:
   stage: deploy
-  needs: ["pytest", "sphinx"]
   timeout: 5m
   cache:
     <<: *global_cache
