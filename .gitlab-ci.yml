@@ -7,8 +7,6 @@
 cache: &global_cache
   key: "${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHORT_SHA}"
   paths:
-    - doc/html/
-    - tests/htmlcov/
     - shelllogger-env/
   policy: pull-push
 
@@ -169,12 +167,18 @@ examples:
   script:
     - cd examples
     - python3 ./hello_world_html.py
+    - cp -L log_hello_world_html/Hello_World_HTML.html .
     - python3 ./hello_world_html_and_console.py
+    - cp -L log_hello_world_html_and_console/Hello_World_HTML_and_Console.html
+      .
     - python3 ./hello_world_html_with_stats.py
+    - cp -L log_hello_world_html_with_stats/Hello_World_HTML_with_Stats.html .
     - python3 ./build_flex.py
+    - cp -L log_build_flex/Build_Flex.html .
   artifacts:
     paths:
       - examples/log*
+      - examples/*.html
 
 
 #-----------------------------------------------------------------------
@@ -211,9 +215,10 @@ pages:
   rules:
     - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
   script:
-    - mkdir -p public
+    - mkdir -p public/examples
     - mv tests/htmlcov public/.
     - mv doc/html/* public/.
+    - mv examples/*.html public/examples/.
   artifacts:
     paths:
       - public

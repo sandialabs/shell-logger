@@ -3,7 +3,7 @@
 from pathlib import Path
 from shelllogger import ShellLogger
 
-sl = ShellLogger("Hello ShellLogger",
+sl = ShellLogger("Hello World HTML with Stats",
                  Path.cwd() / f"log_{Path(__file__).stem}")
 sl.print("This example demonstrates logging information solely to the HTML "
          "log file, while collecting CPU, memory, and disk statistics at the "

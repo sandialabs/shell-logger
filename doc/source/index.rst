@@ -103,7 +103,9 @@ Running the script yields
    This example demonstrates logging information solely to the HTML log file.
    Open /Users/jmgate/workspace/ShellLogger/examples/log_hello_world_html/2021-09-22_14.56.42.558599_szt68acx/Hello_ShellLogger.html to view the log.
 
-When you open the HTML log file, you'll see something like
+You can view the generated HTML log file `here
+<http://shelllogger.internal.gitlab.pages/ShellLogger/examples/Hello_World_HTML.html>`__.
+When you open that file, you'll see something like
 
 .. image:: images/html_log.png
    :alt: HTML log file
@@ -165,6 +167,9 @@ highlighted lines below.
    :emphasize-lines: 11, 13
    :caption: ``examples/hello_world_html_and_console.py``
 
+You can view the generated HTML log file `here
+<http://shelllogger.internal.gitlab.pages/ShellLogger/examples/Hello_World_HTML_and_Console.html>`__.
+
 Example 3:  Collecting Statistics
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -177,6 +182,9 @@ and **Example 1** are the highlighted lines below.
    :linenos:
    :emphasize-lines: 12, 14
    :caption: ``examples/hello_world_html_with_stats.py``
+
+You can view the generated HTML log file `here
+<http://shelllogger.internal.gitlab.pages/ShellLogger/examples/Hello_World_HTML_with_Stats.html>`__.
 
 Example 4:  Building a Code
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -197,5 +205,11 @@ The equivalent Python script using ``shelllogger`` is the following:
    :language: python
    :linenos:
    :caption: ``examples/build_flex.py``
+
+You can view the generated HTML log file `here
+<http://shelllogger.internal.gitlab.pages/ShellLogger/examples/Build_Flex.html>`__.
+
+More Details
+------------
 
 For more detailed usage information, see the :doc:`ShellLogger`.
