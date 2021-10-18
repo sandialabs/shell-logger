@@ -3,6 +3,16 @@
 # https://docs.gitlab.com/ee/ci/yaml/.
 
 
+# Set up a global cache to pass information across stages.
+cache: &global_cache
+  key: "${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHORT_SHA}"
+  paths:
+    - doc/html/
+    - tests/htmlcov/
+    - shelllogger-env/
+  policy: pull-push
+
+
 # Set up the pipeline stages.
 stages:
   - prepare
@@ -21,22 +31,22 @@ before_script:
         ${LSB_RELEASE} -a
     fi
   - |-
-    if [ -d "shelllogger-venv" ]; then
-        source shelllogger-venv/bin/activate
+    if [ -d "shelllogger-env" ]; then
+        conda activate $(pwd)/shelllogger-env
     else
-        echo "Virtual Environment 'shelllogger-venv' was not found"
+        echo "Conda environment 'shelllogger-env' was not found."
         exit 1
     fi
     echo "-----"
-    echo "VIRTUAL_ENV = ${VIRTUAL_ENV:?}"
+    conda list
     echo "-----"
 
 
 # Run this after every job.
 after_script:
   - |-
-    if [ ! -z ${VIRTUAL_ENV} ]; then
-        deactivate
+    if [[ "${CONDA_PREFIX}" == "$(pwd)/shelllogger-env" ]]; then
+        conda deactivate
     fi
 
 
@@ -45,31 +55,32 @@ after_script:
 #-----------------------------------------------------------------------
 
 
-# Create the virtual environment and install the requirements.
-install requirements:
+# Create the virtual environment, install the requirements, and save the
+# environment to the cache.
+requirements:
   stage: prepare
   timeout: 10m
   before_script:
-    - python3 -m venv shelllogger-venv
+    - conda create --prefix ./shelllogger-env --yes python=3.8 pip
+  cache:
+    <<: *global_cache
+    when: on_success
   script:
 
     # Activate the virtual environment.
-    - source shelllogger-venv/bin/activate
+    - conda activate $(pwd)/shelllogger-env
 
-    # Ensure `pip` is up-to-date.
-    - python3 -m pip install --upgrade pip
-
-    # Remove `shelllogger` if it's been installed.
-    - python3 -m pip uninstall -y shelllogger
+    # Show the contents of the virtual environment.
+    - conda list
 
     # Install required packages.
-    - python3 -m pip install wheel
+    - pip install
       -r requirements.txt
       -r tests/requirements.txt
       -r doc/requirements.txt
-  artifacts:
-    paths:
-      - shelllogger-venv
+
+    # Show the contents of the virtual environment.
+    - conda list
 
 
 #-----------------------------------------------------------------------
@@ -78,28 +89,34 @@ install requirements:
 
 
 # Test building a distribution.
-build distribution:
+wheel:
   stage: install
-  needs: ["install requirements"]
   timeout: 5m
+  cache:
+    <<: *global_cache
+    policy: pull
   script:
-    - python3 -m pip wheel --no-deps -w dist .
+    - pip wheel --no-deps -w dist .
   artifacts:
+    name: "shelllogger-dist"
     paths:
       - dist/shelllogger*.whl
     expire_in: 6 weeks
 
 
 # Test installation of the package.
-install package:
+install:
   stage: install
-  needs: ["install requirements"]
   timeout: 5m
+  cache:
+    <<: *global_cache
   script:
-    - python3 -m pip install .
-  artifacts:
-    paths:
-      - shelllogger-venv
+
+    # Install the package.
+    - pip install .
+
+    # Show the contents of the virtual environment to ensure it's there.
+    - conda list
 
 
 #-----------------------------------------------------------------------
@@ -110,8 +127,9 @@ install package:
 # Execute the unit tests.
 pytest:
   stage: test
-  needs: ["install requirements"]
   timeout: 5m
+  cache:
+    <<: *global_cache
   script:
     - python3 -m pytest
       --cov=src.shelllogger
@@ -133,21 +151,23 @@ pytest:
 # Ensure we adhere to PEP8.
 flake8:
   stage: test
-  needs: ["install requirements"]
   timeout: 5m
+  cache:
+    <<: *global_cache
   script:
     - python3 -m flake8
-      --exclude=shelllogger-venv
+      --exclude=shelllogger-env
 
 
 # Ensure the examples run without problems.
 examples:
   stage: test
-  needs: ["install requirements", "install package"]
   timeout: 5m
+  cache:
+    <<: *global_cache
+    policy: pull
   script:
     - cd examples
-    - python3 -m pip list
     - python3 ./hello_world_html.py
     - python3 ./hello_world_html_and_console.py
     - python3 ./hello_world_html_with_stats.py
@@ -165,8 +185,9 @@ examples:
 # Generate the documentation.
 sphinx:
   stage: documentation
-  needs: ["install requirements", "install package"]
   timeout: 5m
+  cache:
+    <<: *global_cache
   script:
     - cd doc
     - bash make_html_docs.sh
@@ -183,8 +204,10 @@ sphinx:
 # Publish coverage data and documentation (if on the main branch).
 pages:
   stage: deploy
-  needs: ["pytest", "sphinx"]
   timeout: 5m
+  cache:
+    <<: *global_cache
+    policy: pull
   rules:
     - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
   script:
@@ -202,8 +225,13 @@ pages:
 
 
 # Test that uninstalling from a virtual environment works.
-uninstall package:
+uninstall:
   stage: finish
   timeout: 5m
+  cache:
+    <<: *global_cache
   script:
-    - python3 -m pip uninstall -y shelllogger
+    - pip uninstall -y shelllogger
+
+    # Show the contents of the virtual environment.
+    - conda list
