@@ -11,12 +11,19 @@ shelllogger
    util
    todo
 
-The ``shelllogger`` module allows you to interact with the shell, while logging
-various metadata, statistics, and trace information.  Any time you're tempted
-to write your own wrapper around things like :class:`subprocess.Popen` or
-:func:`subprocess.run`, consider using :func:`ShellLogger.log` instead.  The
-following talk from the `US-RSE Virtual Workshop 2021
-<https://us-rse.org/virtual-workshop-2021/>`_ illustrates ``shelllogger`` 's
+The ``shelllogger`` Python module allows you to interact with the shell, while
+logging various metadata, statistics, and trace information.  Any time you're
+tempted to write your own wrapper around things like :class:`subprocess.Popen`
+or :func:`subprocess.run`, consider using :func:`ShellLogger.log` instead.  If
+you're familiar with `the Unix script command
+<https://man7.org/linux/man-pages/man1/script.1.html>`_, this is similar in
+principle, but with substantially more functionality.  If you're familiar with
+`Python's logging module <https://docs.python.org/3/library/logging.html>`_,
+the motivation is similar, but this intends to capture what's happening *in the
+shell* rather than in Python itself.
+
+The following talk from the `US-RSE Virtual Workshop 2021
+<https://us-rse.org/virtual-workshop-2021/>`_ illustrates the module's
 functionality.
 
 .. raw:: html
