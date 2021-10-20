@@ -24,7 +24,7 @@ classifiers = [
     "Operating System :: UNIX",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3 :: Only",
-    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.7",
     "Topic :: Software Development",
     "Topic :: Software Development :: Debuggers",
     "Topic :: Software Development :: Documentation",
@@ -45,7 +45,7 @@ Issues = "https://internal.gitlab.server/ShellLogger/ShellLogger/-/issues"
 
 
 [tool.poetry.dependencies]
-python = "^3.8"
+python = "^3.7"
 
 
 [tool.poetry.dev-dependencies]
