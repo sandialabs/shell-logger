@@ -59,7 +59,7 @@ requirements:
   stage: prepare
   timeout: 10m
   before_script:
-    - conda create --prefix ./shelllogger-env --yes python=3.8 pip
+    - conda create --prefix ./shelllogger-env --yes python=3.7 pip
   cache:
     <<: *global_cache
     when: on_success
