@@ -72,8 +72,9 @@ class ShellLoggerEncoder(json.JSONEncoder):
         elif obj is None:
             return None
         elif isinstance(obj, Shell):
-            return {'__type__': 'Shell',
-                    'pwd': obj.pwd()}
+            return {"__type__": "Shell",
+                    "pwd": obj.pwd(),
+                    "login_shell": obj.login_shell}
         else:
             return json.JSONEncoder.default(self, obj)
 
@@ -112,11 +113,11 @@ class ShellLoggerDecoder(json.JSONDecoder):
         if '__type__' not in obj:
             return obj
         elif obj['__type__'] == 'ShellLogger':
-            logger = ShellLogger(obj['name'], obj['log_dir'],
-                                 obj['stream_dir'], obj['html_file'],
-                                 obj['indent'], obj['log_book'],
-                                 obj['init_time'], obj['done_time'],
-                                 obj['duration'])
+            logger = ShellLogger(obj["name"], obj["log_dir"],
+                                 obj["stream_dir"], obj["html_file"],
+                                 obj["indent"], obj["login_shell"],
+                                 obj["log_book"], obj["init_time"],
+                                 obj["done_time"], obj["duration"])
             return logger
         elif obj['__type__'] == 'datetime':
             return datetime.strptime(obj['value'], obj['format'])
@@ -125,7 +126,7 @@ class ShellLoggerDecoder(json.JSONDecoder):
         elif obj['__type__'] == 'tuple':
             return tuple(obj['items'])
         elif obj['__type__'] == 'Shell':
-            return Shell(Path(obj['pwd']))
+            return Shell(Path(obj['pwd']), obj["login_shell"])
 
 
 class ShellLogger:
@@ -171,6 +172,8 @@ class ShellLogger:
         indent (int):  The indentation level of this
             :class:`ShellLogger` object.  The parent has a level 0.
             Each successive child's indent is increased by 1.
+        login_shell (bool):  Whether or not the :class:`Shell` spawned
+            should be a login shell.
         log_book (list):  A list containing log entries and child
             :class:`ShellLogger` objects in the order they were created.
         init_time (datetime):  The time this :class:`ShellLogger` object
@@ -223,6 +226,7 @@ class ShellLogger:
             stream_dir: Optional[Path] = None,
             html_file: Optional[Path] = None,
             indent: int = 0,
+            login_shell: bool = False,
             log: Optional[List[object]] = None,
             init_time: Optional[datetime] = None,
             done_time: Optional[datetime] = None,
@@ -245,6 +249,8 @@ class ShellLogger:
             indent:  The indentation level of this :class:`ShellLogger`
                 object.  The parent has a level 0.  Each successive
                 child's indent is increased by 1.
+            login_shell:  Whether or not the :class:`Shell` spawned
+                should be a login shell.
             log:  Optionally provide an existing log list to the
                 :class:`ShellLogger` object.
             init_time:  Optionally specify when this
@@ -268,7 +274,8 @@ class ShellLogger:
         self.done_time = datetime.now() if done_time is None else done_time
         self.duration = duration
         self.indent = indent
-        self.shell = Shell(Path.cwd())
+        self.login_shell = login_shell
+        self.shell = Shell(Path.cwd(), self.login_shell)
 
         # Create the log directory, if needed.
         self.log_dir = log_dir.resolve()
@@ -389,7 +396,7 @@ class ShellLogger:
 
         # Create the child object and add it to the list of children.
         child = ShellLogger(child_name, self.log_dir, self.stream_dir,
-                            self.html_file, self.indent + 1)
+                            self.html_file, self.indent + 1, self.login_shell)
         self.log_book.append(child)
         return child
 
