@@ -68,16 +68,25 @@ class Shell:
     """
     Spawns a shell subprocess that inherits five unnamed pipes
     (``stdout``, ``stderr``, ``stdin``, ``aux_stdout``, ``aux_stderr``).
+
+    Todo:  Add list of attributes.
     """
 
-    def __init__(self, pwd: Path = Path.cwd()) -> None:
+    def __init__(
+            self,
+            pwd: Path = Path.cwd(),
+            login_shell: bool = False
+    ) -> None:
         """
         Initialize a :class:`Shell` object.
 
         Parameters:
             pwd:  The directory to change to when starting the
                 :class:`Shell`.
+            login_shell:  Whether or not the spawned shell should be a
+                login shell.
         """
+        self.login_shell = login_shell
 
         # Corresponds to the 0, 1, and 2 file descriptors of the shell
         # we're going to spawn.
@@ -103,7 +112,10 @@ class Shell:
         # subprocess.
         os.set_inheritable(self.aux_stdout_wfd, True)
         os.set_inheritable(self.aux_stderr_wfd, True)
-        self.shell = subprocess.Popen(os.environ.get("SHELL") or "/bin/sh",
+        shell_command = [os.environ.get("SHELL") or "/bin/sh"]
+        if self.login_shell:
+            shell_command.append("-l")
+        self.shell = subprocess.Popen(shell_command,
                                       stdin=self.aux_stdin_rfd,
                                       stdout=subprocess.PIPE,
                                       stderr=subprocess.PIPE,
