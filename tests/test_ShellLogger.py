@@ -278,8 +278,8 @@ def test_finalize_creates_html_with_correct_information(
     assert ">test cmd</" in html_text
     assert f"Duration: {shell_logger.log_book[0]['duration']}" in html_text
     assert f"Time:</span> {shell_logger.log_book[0]['timestamp']}" in html_text
-    assert ("Command:</span> <code>sleep 1; echo 'Hello world out'; sleep 1; "
-            "echo 'Hello world error' 1&gt;&amp;2") in html_text
+    assert ("Command:</span> <pre><code>sleep 1; echo 'Hello world out'; "
+            "sleep 1; echo 'Hello world error' 1&gt;&amp;2") in html_text
     assert f"CWD:</span> {Path.cwd()}" in html_text
     assert "Return Code:</span> 0" in html_text
 
