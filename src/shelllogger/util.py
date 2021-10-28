@@ -729,7 +729,6 @@ def html_encode(text: str) -> str:
         .replace('&', "&amp;")
         .replace('<', "&lt;")
         .replace('>', "&gt;")
-        .replace('-', "-&#8288;")  # Non-breaking dashes.
     )
 
 
