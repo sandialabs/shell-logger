@@ -42,8 +42,7 @@ function outputSearch(caller)
     {
         td = tr[i].getElementsByTagName("td");
         txtValue = td[1].textContent || td[1].innerText;
-        txtValue = txtValue.replaceAll("<[^>]*>", "");
-        txtValue = txtValue.replaceAll("\u2060", "").toUpperCase();
+        txtValue = txtValue.replaceAll("<[^>]*>", "").toUpperCase();
         if (!filter ||
             (txtValue.match(filter) && (!(txtValue === lastTxtValue) ||
                                         showDuplicates)))
