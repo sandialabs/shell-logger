@@ -115,16 +115,16 @@ def append_html(*args: Union[str, Iterator[str]], output: Path) -> None:
 
 def fixed_width(text: str) -> str:
     """
-    Wrap the given ``text`` in a ``<code>...</code>`` block such that it
-    displays in a fixed-width font.
+    Wrap the given ``text`` in a ``<pre><code>...</code></pre>`` block
+    such that it displays in a fixed-width font.
 
     Parameters:
         text:  The text to wrap.
 
     Returns:
-        The ``<code>...</code>`` block.
+        The ``<pre><code>...</code></pre>`` block.
     """
-    return f"<code>{html_encode(text)}</code>"
+    return f"<pre><code>{html_encode(text)}</code></pre>"
 
 
 def flatten(element: Union[str, bytes, Iterable]) -> Iterator[str]:
