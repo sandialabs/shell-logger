@@ -72,4 +72,4 @@ open-sourcing process.
 Special thanks to the EMPIRE project for investing in the initial development
 of this tool, and [the GMS
 project](https://internal.corporate.wiki/display/gmswiki/Geophysical+Monitoring+System+Wiki)
-for contributing to its clean-up and preparation for open-sourcing.
+for serving as a second user and contributing to its clean-up.
