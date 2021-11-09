@@ -8,6 +8,7 @@ shelllogger
 
    ShellLogger
    Shell
+   StatsCollector
    classes
    util
    todo

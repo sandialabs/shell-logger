@@ -38,33 +38,6 @@ Ltrace
 .. autoclass:: shelllogger.ShellLogger.Ltrace
    :noindex:
 
-StatsCollector
---------------
-
-.. autoclass:: shelllogger.classes.StatsCollector
-   :noindex:
-
-.. automethod:: shelllogger.classes::stats_collectors
-   :noindex:
-
-DiskStatsCollector
-~~~~~~~~~~~~~~~~~~
-
-.. autoclass:: shelllogger.ShellLogger.DiskStatsCollector
-   :noindex:
-
-CPUStatsCollector
-~~~~~~~~~~~~~~~~~
-
-.. autoclass:: shelllogger.ShellLogger.CPUStatsCollector
-   :noindex:
-
-MemoryStatsCollector
-~~~~~~~~~~~~~~~~~~~~
-
-.. autoclass:: shelllogger.ShellLogger.MemoryStatsCollector
-   :noindex:
-
 AbstractMethod
 --------------
 .. autoexception:: shelllogger.classes.AbstractMethod

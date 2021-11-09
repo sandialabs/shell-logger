@@ -618,7 +618,7 @@ def test_stats() -> None:
     Ensure capturing CPU, memory, and disk statistics works correctly.
     """
     logger = ShellLogger(stack()[0][3], Path.cwd())
-    result = logger._run("sleep 1", measure=["cpu", "memory", "disk"],
+    result = logger._run("sleep 2", measure=["cpu", "memory", "disk"],
                          interval=0.1)
     assert len(result.stats["memory"]) > 1
     assert len(result.stats["memory"]) < 30

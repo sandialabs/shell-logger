@@ -1,30 +1,25 @@
 #!/usr/bin/env python3
 
 from __future__ import annotations
-from .classes import (Trace, StatsCollector, trace_collector, stats_collectors)
+from .classes import (Trace, trace_collector)
 from .Shell import Shell
+from .StatsCollector import stats_collectors
 from .util import (nested_simplenamespace_to_dict, opening_html_text,
                    closing_html_text, append_html, html_message_card,
                    message_card, command_card, child_logger_card,
                    parent_logger_card_html)
 from collections.abc import Iterable, Mapping
 from datetime import datetime, timedelta
-from typing import Iterator, List, Optional, Tuple, Union
+from typing import Iterator, List, Optional, Union
 from distutils import dir_util
 import json
-from multiprocessing.managers import SyncManager
 import os
 from pathlib import Path
 import random
 import shutil
 import string
 import tempfile
-import time
 from types import SimpleNamespace
-try:
-    import psutil
-except ModuleNotFoundError:
-    psutil = None
 
 
 class ShellLogger:
@@ -705,239 +700,6 @@ class Ltrace(Trace):
         if self.expression:
             args += f" -e '{self.expression}'"
         return args
-
-
-if psutil is not None:
-    @StatsCollector.subclass
-    class DiskStatsCollector(StatsCollector):
-        """
-        A means of running commands while collecting disk usage
-        statistics.
-        """
-        stat_name = "disk"
-
-        def __init__(self, interval: float, manager: SyncManager) -> None:
-            """
-            Initialize the :class:`DiskStatsCollector` object.
-
-            Parameters:
-                interval:  How many seconds to sleep between polling.
-                manager:  The multiprocessing manager used to control
-                    the process used to collect the statistics.
-            """
-            super().__init__(interval, manager)
-            self.stats = manager.dict()
-            self.mount_points = [
-                p.mountpoint for p in psutil.disk_partitions()
-            ]
-            for location in ["/tmp",
-                             "/dev/shm",
-                             f"/var/run/user/{os.getuid()}"]:
-                if (location not in self.mount_points
-                        and Path(location).exists()):
-                    self.mount_points.append(location)
-            for m in self.mount_points:
-                self.stats[m] = manager.list()
-
-        def collect(self) -> None:
-            """
-            Poll the disks to determine how much free space they have.
-            """
-            milliseconds_per_second = 10**3
-            timestamp = round(time.time() * milliseconds_per_second)
-            for m in self.mount_points:
-                self.stats[m].append((timestamp, psutil.disk_usage(m).percent))
-
-        def unproxied_stats(self) -> dict:
-            """
-            Translate the statistics from the multiprocessing
-            ``SyncManager`` 's data structure to a ``dict``.
-
-            Returns:
-                A mapping from the disk mount points to tuples of
-                timestamps and percent of disk space free.
-            """
-            return {k: list(v) for k, v in self.stats.items()}
-
-    @StatsCollector.subclass
-    class CPUStatsCollector(StatsCollector):
-        """
-        A means of running commands while collecting CPU usage
-        statistics.
-        """
-        stat_name = "cpu"
-
-        def __init__(self, interval: float, manager: SyncManager) -> None:
-            """
-            Initialize the :class:`CPUStatsCollector` object.
-
-            Parameters:
-                interval:  How many seconds to sleep between polling.
-                manager:  The multiprocessing manager used to control
-                    the process used to collect the statistics.
-            """
-            super().__init__(interval, manager)
-            self.stats = manager.list()
-
-        def collect(self) -> None:
-            """
-            Determine how heavily utilized the CPU is at the moment.
-            """
-            milliseconds_per_second = 10**3
-            timestamp = round(time.time() * milliseconds_per_second)
-            self.stats.append((timestamp, psutil.cpu_percent(interval=None)))
-
-        def unproxied_stats(self) -> List[Tuple[float, float]]:
-            """
-            Translate the statistics from the multiprocessing
-            ``SyncManager`` 's data structure to a ``list``.
-
-            Returns:
-                A list of (timestamp, % CPU used) data points.
-            """
-            return list(self.stats)
-
-    @StatsCollector.subclass
-    class MemoryStatsCollector(StatsCollector):
-        """
-        A means of running commands while collecting memory usage
-        statistics.
-        """
-        stat_name = "memory"
-
-        def __init__(self, interval: float, manager: SyncManager) -> None:
-            """
-            Initialize the :class:`MemoryStatsCollector` object.
-
-            Parameters:
-                interval:  How many seconds to sleep between polling.
-                manager:  The multiprocessing manager used to control
-                    the process used to collect the statistics.
-            """
-            super().__init__(interval, manager)
-            self.stats = manager.list()
-
-        def collect(self) -> None:
-            """
-            Determine how much memory is currently being used.
-            """
-            milliseconds_per_second = 10**3
-            timestamp = round(time.time() * milliseconds_per_second)
-            self.stats.append((timestamp, psutil.virtual_memory().percent))
-
-        def unproxied_stats(self) -> List[Tuple[float, float]]:
-            """
-            Translate the statistics from the multiprocessing
-            ``SyncManager`` 's data structure to a ``list``.
-
-            Returns:
-                A list of (timestamp, % memory used) data points.
-            """
-            return list(self.stats)
-
-# If we don't have `psutil`, return null objects.
-else:
-    @StatsCollector.subclass
-    class DiskStatsCollector(StatsCollector):
-        """
-        A phony :class:`DiskStatsCollector` used when ``psutil`` is
-        unavailable.  This collects no disk statistics.
-        """
-        stat_name = "disk"
-
-        def __init__(self, interval: float, manager: SyncManager) -> None:
-            """
-            Initialize the object via the parent's constructor.
-
-            Parameters:
-                interval:  How many seconds to sleep between polling.
-                manager:  The multiprocessing manager used to control
-                    the process used to collect the statistics.
-            """
-            super().__init__(interval, manager)
-
-        def collect(self) -> None:
-            """
-            Don't collect any disk statistics.
-            """
-            pass
-
-        def unproxied_stats(self) -> None:
-            """
-            If asked for the disk statistics, don't provide any.
-
-            Returns:
-                None
-            """
-            return None
-
-    @StatsCollector.subclass
-    class CPUStatsCollector(StatsCollector):
-        """
-        A phony :class:`CPUStatsCollector` used when ``psutil`` is
-        unavailable.  This collects no CPU statistics.
-        """
-        stat_name = "cpu"
-
-        def __init__(self, interval: float, manager: SyncManager) -> None:
-            """
-            Initialize the object via the parent's constructor.
-
-            Parameters:
-                interval:  How many seconds to sleep between polling.
-                manager:  The multiprocessing manager used to control
-                    the process used to collect the statistics.
-            """
-            super().__init__(interval, manager)
-
-        def collect(self) -> None:
-            """
-            Don't collect any CPU statistics.
-            """
-            pass
-
-        def unproxied_stats(self) -> None:
-            """
-            If asked for CPU statistics, don't provide any.
-
-            Returns:
-                None
-            """
-            return None
-
-    @StatsCollector.subclass
-    class MemoryStatsCollector(StatsCollector):
-        """
-        A phony :class:`MemoryStatsCollector` used when ``psutil`` is
-        unavailable.  This collects no memory statistics.
-        """
-        stat_name = "memory"
-
-        def __init__(self, interval: float, manager: SyncManager) -> None:
-            """
-            Initialize the object via the parent's constructor.
-
-            Parameters:
-                interval:  How many seconds to sleep between polling.
-                manager:  The multiprocessing manager used to control
-                    the process used to collect the statistics.
-            """
-            super().__init__(interval, manager)
-
-        def collect(self) -> None:
-            """
-            Don't collect any memory statistics.
-            """
-            pass
-
-        def unproxied_stats(self) -> None:
-            """
-            If asked for memory statistics, don't provide any.
-
-            Returns:
-                None
-            """
-            return None
 
 
 class ShellLoggerEncoder(json.JSONEncoder):
