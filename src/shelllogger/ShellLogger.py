@@ -1,132 +1,25 @@
 #!/usr/bin/env python3
 
 from __future__ import annotations
-from .classes import (Shell, Trace, StatsCollector, trace_collector,
-                      stats_collectors)
-from .util import (nested_simplenamespace_to_dict, opening_html_text,
-                   closing_html_text, append_html, html_message_card,
-                   message_card, command_card, child_logger_card,
-                   parent_logger_card_html)
+from .Shell import Shell
+from .StatsCollector import stats_collectors
+from .Trace import trace_collector
+from .HTMLUtilities import (nested_simplenamespace_to_dict, opening_html_text,
+                            closing_html_text, append_html, html_message_card,
+                            message_card, command_card, child_logger_card,
+                            parent_logger_card_html)
 from collections.abc import Iterable, Mapping
 from datetime import datetime, timedelta
-from typing import Iterator, List, Optional, Tuple, Union
+from typing import Iterator, List, Optional, Union
 from distutils import dir_util
 import json
-from multiprocessing.managers import SyncManager
 import os
 from pathlib import Path
 import random
 import shutil
 import string
 import tempfile
-import time
 from types import SimpleNamespace
-try:
-    import psutil
-except ModuleNotFoundError:
-    psutil = None
-
-
-class ShellLoggerEncoder(json.JSONEncoder):
-    """
-    This is a helper class to make the :class:`ShellLogger` class JSON
-    serializable.  It is used in the process of saving
-    :class:`ShellLogger` objects to JSON.
-
-    Usage::
-
-        import json
-        with open('path_to_json_file', 'w') as jf:
-            json.dump(data, jf, cls=ShellLoggerEncoder)
-    """
-
-    def default(self, obj: object) -> object:
-        """
-        Serialize an object; that is, encode it in a string format.
-
-        Parameters:
-            obj:  Any Python object.
-
-        Returns:
-            The JSON serialization of the given object.
-        """
-        if isinstance(obj, ShellLogger):
-            return {**{'__type__': 'ShellLogger'},
-                    **{k: self.default(v) for k, v in obj.__dict__.items()}}
-        elif isinstance(obj, (int, float, str, bytes)):
-            return obj
-        elif isinstance(obj, Mapping):
-            return {k: self.default(v) for k, v in obj.items()}
-        elif isinstance(obj, tuple):
-            return {'__type__': 'tuple',
-                    'items': obj}
-        elif isinstance(obj, Iterable):
-            return [self.default(x) for x in obj]
-        elif isinstance(obj, datetime):
-            return {'__type__': 'datetime',
-                    'value': obj.strftime('%Y-%m-%d_%H:%M:%S:%f'),
-                    'format': '%Y-%m-%d_%H:%M:%S:%f'}
-        elif isinstance(obj, Path):
-            return {'__type__': 'Path',
-                    'value': str(obj)}
-        elif obj is None:
-            return None
-        elif isinstance(obj, Shell):
-            return {"__type__": "Shell",
-                    "pwd": obj.pwd(),
-                    "login_shell": obj.login_shell}
-        else:
-            return json.JSONEncoder.default(self, obj)
-
-
-class ShellLoggerDecoder(json.JSONDecoder):
-    """
-    This is a helper class to make the :class:`ShellLogger` class JSON
-    serializable.  It is used in the process of retrieving
-    :class:`ShellLogger` objects from JSON.
-
-    Usage::
-
-        import json
-        with open('path_to_json_file', 'r') as jf:
-            logger = json.load(jf, cls=ShellLoggerDecoder)
-    """
-
-    def __init__(self):
-        """
-        Initialize the decoder.
-        """
-        json.JSONDecoder.__init__(self, object_hook=self.dict_to_object)
-
-    @staticmethod
-    def dict_to_object(obj: dict) -> object:
-        """
-        This converts data dictionaries given by the JSONDecoder into
-        objects of type :class:`ShellLogger`, :class:`datetime`, etc.
-
-        Parameters:
-            obj:  The JSON-serialized representation of an object.
-
-        Returns:
-            The object represented by the JSON serialization.
-        """
-        if '__type__' not in obj:
-            return obj
-        elif obj['__type__'] == 'ShellLogger':
-            logger = ShellLogger(obj["name"], obj["log_dir"],
-                                 obj["stream_dir"], obj["html_file"],
-                                 obj["indent"], obj["login_shell"],
-                                 obj["log_book"], obj["init_time"],
-                                 obj["done_time"], obj["duration"])
-            return logger
-        elif obj['__type__'] == 'datetime':
-            return datetime.strptime(obj['value'], obj['format'])
-        elif obj['__type__'] == 'Path':
-            return Path(obj['value'])
-        elif obj['__type__'] == 'tuple':
-            return tuple(obj['items'])
-        elif obj['__type__'] == 'Shell':
-            return Shell(Path(obj['pwd']), obj["login_shell"])
 
 
 class ShellLogger:
@@ -751,292 +644,103 @@ class ShellLogger:
                                ulimit=ulimit)
 
 
-@Trace.subclass
-class Strace(Trace):
+class ShellLoggerEncoder(json.JSONEncoder):
     """
-    An interface between :class:`ShellLogger` and the ``strace``
-    command.
+    This is a helper class to make the :class:`ShellLogger` class JSON
+    serializable.  It is used in the process of saving
+    :class:`ShellLogger` objects to JSON.
+
+    Usage::
+
+        import json
+        with open('path_to_json_file', 'w') as jf:
+            json.dump(data, jf, cls=ShellLoggerEncoder)
     """
-    trace_name = "strace"
 
-    def __init__(self, **kwargs) -> None:
+    def default(self, obj: object) -> object:
         """
-        Initialize the :class:`Strace` instance.
+        Serialize an object; that is, encode it in a string format.
+
+        Parameters:
+            obj:  Any Python object.
+
+        Returns:
+            The JSON serialization of the given object.
         """
-        super().__init__(**kwargs)
-        self.summary = True if kwargs.get("summary") else False
-        self.expression = kwargs.get("expression")
-
-    @property
-    def trace_args(self) -> str:
-        """
-        Wraps a command in a ``strace`` command.
-        """
-        args = f"strace -f -o {self.output_path}"
-        if self.summary:
-            args += " -c"
-        if self.expression:
-            args += f" -e '{self.expression}'"
-        return args
-
-
-@Trace.subclass
-class Ltrace(Trace):
-    """
-    An interface between :class:`ShellLogger` and the ``ltrace``
-    command.
-    """
-    trace_name = "ltrace"
-
-    def __init__(self, **kwargs):
-        """
-        Initialize the :class:`Ltrace` instance.
-        """
-        super().__init__(**kwargs)
-        self.summary = True if kwargs.get("summary") else False
-        self.expression = kwargs.get("expression")
-
-    @property
-    def trace_args(self):
-        """
-        Wraps a command in a ``ltrace`` command.
-        """
-        args = f"ltrace -C -f -o {self.output_path}"
-        if self.summary:
-            args += " -c"
-        if self.expression:
-            args += f" -e '{self.expression}'"
-        return args
-
-
-if psutil is not None:
-    @StatsCollector.subclass
-    class DiskStatsCollector(StatsCollector):
-        """
-        A means of running commands while collecting disk usage
-        statistics.
-        """
-        stat_name = "disk"
-
-        def __init__(self, interval: float, manager: SyncManager) -> None:
-            """
-            Initialize the :class:`DiskStatsCollector` object.
-
-            Parameters:
-                interval:  How many seconds to sleep between polling.
-                manager:  The multiprocessing manager used to control
-                    the process used to collect the statistics.
-            """
-            super().__init__(interval, manager)
-            self.stats = manager.dict()
-            self.mount_points = [
-                p.mountpoint for p in psutil.disk_partitions()
-            ]
-            for location in ["/tmp",
-                             "/dev/shm",
-                             f"/var/run/user/{os.getuid()}"]:
-                if (location not in self.mount_points
-                        and Path(location).exists()):
-                    self.mount_points.append(location)
-            for m in self.mount_points:
-                self.stats[m] = manager.list()
-
-        def collect(self) -> None:
-            """
-            Poll the disks to determine how much free space they have.
-            """
-            milliseconds_per_second = 10**3
-            timestamp = round(time.time() * milliseconds_per_second)
-            for m in self.mount_points:
-                self.stats[m].append((timestamp, psutil.disk_usage(m).percent))
-
-        def unproxied_stats(self) -> dict:
-            """
-            Translate the statistics from the multiprocessing
-            ``SyncManager`` 's data structure to a ``dict``.
-
-            Returns:
-                A mapping from the disk mount points to tuples of
-                timestamps and percent of disk space free.
-            """
-            return {k: list(v) for k, v in self.stats.items()}
-
-    @StatsCollector.subclass
-    class CPUStatsCollector(StatsCollector):
-        """
-        A means of running commands while collecting CPU usage
-        statistics.
-        """
-        stat_name = "cpu"
-
-        def __init__(self, interval: float, manager: SyncManager) -> None:
-            """
-            Initialize the :class:`CPUStatsCollector` object.
-
-            Parameters:
-                interval:  How many seconds to sleep between polling.
-                manager:  The multiprocessing manager used to control
-                    the process used to collect the statistics.
-            """
-            super().__init__(interval, manager)
-            self.stats = manager.list()
-
-        def collect(self) -> None:
-            """
-            Determine how heavily utilized the CPU is at the moment.
-            """
-            milliseconds_per_second = 10**3
-            timestamp = round(time.time() * milliseconds_per_second)
-            self.stats.append((timestamp, psutil.cpu_percent(interval=None)))
-
-        def unproxied_stats(self) -> List[Tuple[float, float]]:
-            """
-            Translate the statistics from the multiprocessing
-            ``SyncManager`` 's data structure to a ``list``.
-
-            Returns:
-                A list of (timestamp, % CPU used) data points.
-            """
-            return list(self.stats)
-
-    @StatsCollector.subclass
-    class MemoryStatsCollector(StatsCollector):
-        """
-        A means of running commands while collecting memory usage
-        statistics.
-        """
-        stat_name = "memory"
-
-        def __init__(self, interval: float, manager: SyncManager) -> None:
-            """
-            Initialize the :class:`MemoryStatsCollector` object.
-
-            Parameters:
-                interval:  How many seconds to sleep between polling.
-                manager:  The multiprocessing manager used to control
-                    the process used to collect the statistics.
-            """
-            super().__init__(interval, manager)
-            self.stats = manager.list()
-
-        def collect(self) -> None:
-            """
-            Determine how much memory is currently being used.
-            """
-            milliseconds_per_second = 10**3
-            timestamp = round(time.time() * milliseconds_per_second)
-            self.stats.append((timestamp, psutil.virtual_memory().percent))
-
-        def unproxied_stats(self) -> List[Tuple[float, float]]:
-            """
-            Translate the statistics from the multiprocessing
-            ``SyncManager`` 's data structure to a ``list``.
-
-            Returns:
-                A list of (timestamp, % memory used) data points.
-            """
-            return list(self.stats)
-
-# If we don't have `psutil`, return null objects.
-else:
-    @StatsCollector.subclass
-    class DiskStatsCollector(StatsCollector):
-        """
-        A phony :class:`DiskStatsCollector` used when ``psutil`` is
-        unavailable.  This collects no disk statistics.
-        """
-        stat_name = "disk"
-
-        def __init__(self, interval: float, manager: SyncManager) -> None:
-            """
-            Initialize the object via the parent's constructor.
-
-            Parameters:
-                interval:  How many seconds to sleep between polling.
-                manager:  The multiprocessing manager used to control
-                    the process used to collect the statistics.
-            """
-            super().__init__(interval, manager)
-
-        def collect(self) -> None:
-            """
-            Don't collect any disk statistics.
-            """
-            pass
-
-        def unproxied_stats(self) -> None:
-            """
-            If asked for the disk statistics, don't provide any.
-
-            Returns:
-                None
-            """
+        if isinstance(obj, ShellLogger):
+            return {**{'__type__': 'ShellLogger'},
+                    **{k: self.default(v) for k, v in obj.__dict__.items()}}
+        elif isinstance(obj, (int, float, str, bytes)):
+            return obj
+        elif isinstance(obj, Mapping):
+            return {k: self.default(v) for k, v in obj.items()}
+        elif isinstance(obj, tuple):
+            return {'__type__': 'tuple',
+                    'items': obj}
+        elif isinstance(obj, Iterable):
+            return [self.default(x) for x in obj]
+        elif isinstance(obj, datetime):
+            return {'__type__': 'datetime',
+                    'value': obj.strftime('%Y-%m-%d_%H:%M:%S:%f'),
+                    'format': '%Y-%m-%d_%H:%M:%S:%f'}
+        elif isinstance(obj, Path):
+            return {'__type__': 'Path',
+                    'value': str(obj)}
+        elif obj is None:
             return None
+        elif isinstance(obj, Shell):
+            return {"__type__": "Shell",
+                    "pwd": obj.pwd(),
+                    "login_shell": obj.login_shell}
+        else:
+            return json.JSONEncoder.default(self, obj)
 
-    @StatsCollector.subclass
-    class CPUStatsCollector(StatsCollector):
+
+class ShellLoggerDecoder(json.JSONDecoder):
+    """
+    This is a helper class to make the :class:`ShellLogger` class JSON
+    serializable.  It is used in the process of retrieving
+    :class:`ShellLogger` objects from JSON.
+
+    Usage::
+
+        import json
+        with open('path_to_json_file', 'r') as jf:
+            logger = json.load(jf, cls=ShellLoggerDecoder)
+    """
+
+    def __init__(self):
         """
-        A phony :class:`CPUStatsCollector` used when ``psutil`` is
-        unavailable.  This collects no CPU statistics.
+        Initialize the decoder.
         """
-        stat_name = "cpu"
+        json.JSONDecoder.__init__(self, object_hook=self.dict_to_object)
 
-        def __init__(self, interval: float, manager: SyncManager) -> None:
-            """
-            Initialize the object via the parent's constructor.
-
-            Parameters:
-                interval:  How many seconds to sleep between polling.
-                manager:  The multiprocessing manager used to control
-                    the process used to collect the statistics.
-            """
-            super().__init__(interval, manager)
-
-        def collect(self) -> None:
-            """
-            Don't collect any CPU statistics.
-            """
-            pass
-
-        def unproxied_stats(self) -> None:
-            """
-            If asked for CPU statistics, don't provide any.
-
-            Returns:
-                None
-            """
-            return None
-
-    @StatsCollector.subclass
-    class MemoryStatsCollector(StatsCollector):
+    @staticmethod
+    def dict_to_object(obj: dict) -> object:
         """
-        A phony :class:`MemoryStatsCollector` used when ``psutil`` is
-        unavailable.  This collects no memory statistics.
+        This converts data dictionaries given by the JSONDecoder into
+        objects of type :class:`ShellLogger`, :class:`datetime`, etc.
+
+        Parameters:
+            obj:  The JSON-serialized representation of an object.
+
+        Returns:
+            The object represented by the JSON serialization.
         """
-        stat_name = "memory"
-
-        def __init__(self, interval: float, manager: SyncManager) -> None:
-            """
-            Initialize the object via the parent's constructor.
-
-            Parameters:
-                interval:  How many seconds to sleep between polling.
-                manager:  The multiprocessing manager used to control
-                    the process used to collect the statistics.
-            """
-            super().__init__(interval, manager)
-
-        def collect(self) -> None:
-            """
-            Don't collect any memory statistics.
-            """
-            pass
-
-        def unproxied_stats(self) -> None:
-            """
-            If asked for memory statistics, don't provide any.
-
-            Returns:
-                None
-            """
-            return None
+        if '__type__' not in obj:
+            return obj
+        elif obj['__type__'] == 'ShellLogger':
+            logger = ShellLogger(obj["name"], obj["log_dir"],
+                                 obj["stream_dir"], obj["html_file"],
+                                 obj["indent"], obj["login_shell"],
+                                 obj["log_book"], obj["init_time"],
+                                 obj["done_time"], obj["duration"])
+            return logger
+        elif obj['__type__'] == 'datetime':
+            return datetime.strptime(obj['value'], obj['format'])
+        elif obj['__type__'] == 'Path':
+            return Path(obj['value'])
+        elif obj['__type__'] == 'tuple':
+            return tuple(obj['items'])
+        elif obj['__type__'] == 'Shell':
+            return Shell(Path(obj['pwd']), obj["login_shell"])

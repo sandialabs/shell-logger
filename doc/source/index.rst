@@ -7,8 +7,11 @@ shelllogger
    :caption: Contents
 
    ShellLogger
-   classes
-   util
+   Shell
+   AbstractMethod
+   StatsCollector
+   Trace
+   HTMLUtilities
    todo
 
 The ``shelllogger`` Python module allows you to interact with the shell, while
