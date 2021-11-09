@@ -1,5 +1,5 @@
-StatsCollector Class Reference
-==============================
+StatsCollector
+==============
 
 .. autoclass:: shelllogger.StatsCollector.StatsCollector
    :noindex:

@@ -1,5 +1,5 @@
-Shell Class Reference
-=====================
+Shell
+=====
 
-.. autoclass:: shelllogger.Shell
+.. automodule:: shelllogger.Shell
    :noindex:

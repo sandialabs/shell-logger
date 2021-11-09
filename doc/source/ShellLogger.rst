@@ -1,5 +1,5 @@
-ShellLogger Class Reference
-===========================
+ShellLogger
+===========
 
 .. autoclass:: shelllogger.ShellLogger
    :noindex:

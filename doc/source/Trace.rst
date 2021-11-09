@@ -1,5 +1,5 @@
-Trace Class Reference
-=====================
+Trace
+=====
 
 .. autoclass:: shelllogger.Trace.Trace
    :noindex:
