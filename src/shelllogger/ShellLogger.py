@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 
 from __future__ import annotations
-from .classes import (Shell, Trace, StatsCollector, trace_collector,
-                      stats_collectors)
+from .classes import (Trace, StatsCollector, trace_collector, stats_collectors)
+from .Shell import Shell
 from .util import (nested_simplenamespace_to_dict, opening_html_text,
                    closing_html_text, append_html, html_message_card,
                    message_card, command_card, child_logger_card,
