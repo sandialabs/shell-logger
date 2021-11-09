@@ -8,10 +8,10 @@ shelllogger
 
    ShellLogger
    Shell
+   AbstractMethod
    StatsCollector
    Trace
-   AbstractMethod
-   util
+   HTMLUtilities
    todo
 
 The ``shelllogger`` Python module allows you to interact with the shell, while
