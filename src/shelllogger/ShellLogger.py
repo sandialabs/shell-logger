@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 
 from __future__ import annotations
-from .classes import (Trace, trace_collector)
 from .Shell import Shell
 from .StatsCollector import stats_collectors
+from .Trace import trace_collector
 from .util import (nested_simplenamespace_to_dict, opening_html_text,
                    closing_html_text, append_html, html_message_card,
                    message_card, command_card, child_logger_card,
@@ -642,64 +642,6 @@ class ShellLogger:
                                group=group,
                                shell=shell,
                                ulimit=ulimit)
-
-
-@Trace.subclass
-class Strace(Trace):
-    """
-    An interface between :class:`ShellLogger` and the ``strace``
-    command.
-    """
-    trace_name = "strace"
-
-    def __init__(self, **kwargs) -> None:
-        """
-        Initialize the :class:`Strace` instance.
-        """
-        super().__init__(**kwargs)
-        self.summary = True if kwargs.get("summary") else False
-        self.expression = kwargs.get("expression")
-
-    @property
-    def trace_args(self) -> str:
-        """
-        Wraps a command in a ``strace`` command.
-        """
-        args = f"strace -f -o {self.output_path}"
-        if self.summary:
-            args += " -c"
-        if self.expression:
-            args += f" -e '{self.expression}'"
-        return args
-
-
-@Trace.subclass
-class Ltrace(Trace):
-    """
-    An interface between :class:`ShellLogger` and the ``ltrace``
-    command.
-    """
-    trace_name = "ltrace"
-
-    def __init__(self, **kwargs):
-        """
-        Initialize the :class:`Ltrace` instance.
-        """
-        super().__init__(**kwargs)
-        self.summary = True if kwargs.get("summary") else False
-        self.expression = kwargs.get("expression")
-
-    @property
-    def trace_args(self):
-        """
-        Wraps a command in a ``ltrace`` command.
-        """
-        args = f"ltrace -C -f -o {self.output_path}"
-        if self.summary:
-            args += " -c"
-        if self.expression:
-            args += f" -e '{self.expression}'"
-        return args
 
 
 class ShellLoggerEncoder(json.JSONEncoder):

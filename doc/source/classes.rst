@@ -17,27 +17,6 @@ JSON Serialization
 .. autoclass:: shelllogger.ShellLoggerEncoder
    :noindex:
 
-Trace
------
-
-.. autoclass:: shelllogger.classes.Trace
-   :noindex:
-
-.. automethod:: shelllogger.classes::trace_collector
-   :noindex:
-
-Strace
-~~~~~~
-
-.. autoclass:: shelllogger.ShellLogger.Strace
-   :noindex:
-
-Ltrace
-~~~~~~
-
-.. autoclass:: shelllogger.ShellLogger.Ltrace
-   :noindex:
-
 AbstractMethod
 --------------
 .. autoexception:: shelllogger.classes.AbstractMethod

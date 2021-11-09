@@ -9,6 +9,7 @@ shelllogger
    ShellLogger
    Shell
    StatsCollector
+   Trace
    classes
    util
    todo
