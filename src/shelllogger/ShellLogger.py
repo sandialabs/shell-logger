@@ -27,108 +27,6 @@ except ModuleNotFoundError:
     psutil = None
 
 
-class ShellLoggerEncoder(json.JSONEncoder):
-    """
-    This is a helper class to make the :class:`ShellLogger` class JSON
-    serializable.  It is used in the process of saving
-    :class:`ShellLogger` objects to JSON.
-
-    Usage::
-
-        import json
-        with open('path_to_json_file', 'w') as jf:
-            json.dump(data, jf, cls=ShellLoggerEncoder)
-    """
-
-    def default(self, obj: object) -> object:
-        """
-        Serialize an object; that is, encode it in a string format.
-
-        Parameters:
-            obj:  Any Python object.
-
-        Returns:
-            The JSON serialization of the given object.
-        """
-        if isinstance(obj, ShellLogger):
-            return {**{'__type__': 'ShellLogger'},
-                    **{k: self.default(v) for k, v in obj.__dict__.items()}}
-        elif isinstance(obj, (int, float, str, bytes)):
-            return obj
-        elif isinstance(obj, Mapping):
-            return {k: self.default(v) for k, v in obj.items()}
-        elif isinstance(obj, tuple):
-            return {'__type__': 'tuple',
-                    'items': obj}
-        elif isinstance(obj, Iterable):
-            return [self.default(x) for x in obj]
-        elif isinstance(obj, datetime):
-            return {'__type__': 'datetime',
-                    'value': obj.strftime('%Y-%m-%d_%H:%M:%S:%f'),
-                    'format': '%Y-%m-%d_%H:%M:%S:%f'}
-        elif isinstance(obj, Path):
-            return {'__type__': 'Path',
-                    'value': str(obj)}
-        elif obj is None:
-            return None
-        elif isinstance(obj, Shell):
-            return {"__type__": "Shell",
-                    "pwd": obj.pwd(),
-                    "login_shell": obj.login_shell}
-        else:
-            return json.JSONEncoder.default(self, obj)
-
-
-class ShellLoggerDecoder(json.JSONDecoder):
-    """
-    This is a helper class to make the :class:`ShellLogger` class JSON
-    serializable.  It is used in the process of retrieving
-    :class:`ShellLogger` objects from JSON.
-
-    Usage::
-
-        import json
-        with open('path_to_json_file', 'r') as jf:
-            logger = json.load(jf, cls=ShellLoggerDecoder)
-    """
-
-    def __init__(self):
-        """
-        Initialize the decoder.
-        """
-        json.JSONDecoder.__init__(self, object_hook=self.dict_to_object)
-
-    @staticmethod
-    def dict_to_object(obj: dict) -> object:
-        """
-        This converts data dictionaries given by the JSONDecoder into
-        objects of type :class:`ShellLogger`, :class:`datetime`, etc.
-
-        Parameters:
-            obj:  The JSON-serialized representation of an object.
-
-        Returns:
-            The object represented by the JSON serialization.
-        """
-        if '__type__' not in obj:
-            return obj
-        elif obj['__type__'] == 'ShellLogger':
-            logger = ShellLogger(obj["name"], obj["log_dir"],
-                                 obj["stream_dir"], obj["html_file"],
-                                 obj["indent"], obj["login_shell"],
-                                 obj["log_book"], obj["init_time"],
-                                 obj["done_time"], obj["duration"])
-            return logger
-        elif obj['__type__'] == 'datetime':
-            return datetime.strptime(obj['value'], obj['format'])
-        elif obj['__type__'] == 'Path':
-            return Path(obj['value'])
-        elif obj['__type__'] == 'tuple':
-            return tuple(obj['items'])
-        elif obj['__type__'] == 'Shell':
-            return Shell(Path(obj['pwd']), obj["login_shell"])
-
-
 class ShellLogger:
     """
     This class will keep track of commands run in the shell, their
@@ -1040,3 +938,105 @@ else:
                 None
             """
             return None
+
+
+class ShellLoggerEncoder(json.JSONEncoder):
+    """
+    This is a helper class to make the :class:`ShellLogger` class JSON
+    serializable.  It is used in the process of saving
+    :class:`ShellLogger` objects to JSON.
+
+    Usage::
+
+        import json
+        with open('path_to_json_file', 'w') as jf:
+            json.dump(data, jf, cls=ShellLoggerEncoder)
+    """
+
+    def default(self, obj: object) -> object:
+        """
+        Serialize an object; that is, encode it in a string format.
+
+        Parameters:
+            obj:  Any Python object.
+
+        Returns:
+            The JSON serialization of the given object.
+        """
+        if isinstance(obj, ShellLogger):
+            return {**{'__type__': 'ShellLogger'},
+                    **{k: self.default(v) for k, v in obj.__dict__.items()}}
+        elif isinstance(obj, (int, float, str, bytes)):
+            return obj
+        elif isinstance(obj, Mapping):
+            return {k: self.default(v) for k, v in obj.items()}
+        elif isinstance(obj, tuple):
+            return {'__type__': 'tuple',
+                    'items': obj}
+        elif isinstance(obj, Iterable):
+            return [self.default(x) for x in obj]
+        elif isinstance(obj, datetime):
+            return {'__type__': 'datetime',
+                    'value': obj.strftime('%Y-%m-%d_%H:%M:%S:%f'),
+                    'format': '%Y-%m-%d_%H:%M:%S:%f'}
+        elif isinstance(obj, Path):
+            return {'__type__': 'Path',
+                    'value': str(obj)}
+        elif obj is None:
+            return None
+        elif isinstance(obj, Shell):
+            return {"__type__": "Shell",
+                    "pwd": obj.pwd(),
+                    "login_shell": obj.login_shell}
+        else:
+            return json.JSONEncoder.default(self, obj)
+
+
+class ShellLoggerDecoder(json.JSONDecoder):
+    """
+    This is a helper class to make the :class:`ShellLogger` class JSON
+    serializable.  It is used in the process of retrieving
+    :class:`ShellLogger` objects from JSON.
+
+    Usage::
+
+        import json
+        with open('path_to_json_file', 'r') as jf:
+            logger = json.load(jf, cls=ShellLoggerDecoder)
+    """
+
+    def __init__(self):
+        """
+        Initialize the decoder.
+        """
+        json.JSONDecoder.__init__(self, object_hook=self.dict_to_object)
+
+    @staticmethod
+    def dict_to_object(obj: dict) -> object:
+        """
+        This converts data dictionaries given by the JSONDecoder into
+        objects of type :class:`ShellLogger`, :class:`datetime`, etc.
+
+        Parameters:
+            obj:  The JSON-serialized representation of an object.
+
+        Returns:
+            The object represented by the JSON serialization.
+        """
+        if '__type__' not in obj:
+            return obj
+        elif obj['__type__'] == 'ShellLogger':
+            logger = ShellLogger(obj["name"], obj["log_dir"],
+                                 obj["stream_dir"], obj["html_file"],
+                                 obj["indent"], obj["login_shell"],
+                                 obj["log_book"], obj["init_time"],
+                                 obj["done_time"], obj["duration"])
+            return logger
+        elif obj['__type__'] == 'datetime':
+            return datetime.strptime(obj['value'], obj['format'])
+        elif obj['__type__'] == 'Path':
+            return Path(obj['value'])
+        elif obj['__type__'] == 'tuple':
+            return tuple(obj['items'])
+        elif obj['__type__'] == 'Shell':
+            return Shell(Path(obj['pwd']), obj["login_shell"])
