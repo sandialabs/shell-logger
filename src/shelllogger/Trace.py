@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 from __future__ import annotations
-from .classes import AbstractMethod
+from .AbstractMethod import AbstractMethod
 from abc import abstractmethod
 from pathlib import Path
 
