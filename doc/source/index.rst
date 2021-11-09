@@ -7,6 +7,7 @@ shelllogger
    :caption: Contents
 
    ShellLogger
+   Shell
    classes
    util
    todo

@@ -17,12 +17,6 @@ JSON Serialization
 .. autoclass:: shelllogger.ShellLoggerEncoder
    :noindex:
 
-Shell
------
-
-.. autoclass:: shelllogger.classes.Shell
-   :noindex:
-
 Trace
 -----
 
