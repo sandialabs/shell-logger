@@ -52,10 +52,6 @@ shelllogger @ git+https://internal.gitlab.server/ShellLogger/ShellLogger@master#
 replacing `master` with whatever git reference you like, and then using `pip
 install -r requirements.txt` to handle installing it.
 
-Alternatively, if you're prevented from using the solution above, you can use
-`snapshot.py` to snapshot a subset of this repository into your own.  See the
-`--help` text for details.
-
 ## Where to Get Help
 
 If you're having trouble with `ShellLogger`, or just want to ask a question,
