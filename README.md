@@ -41,6 +41,17 @@ sl.log("Execute my first command in the shell.", "echo 'Hello World'")
 For more detailed usage and API information, please see [our
 documentation](http://shelllogger.internal.gitlab.pages/ShellLogger).
 
+## Adding `ShellLogger` as a Requirement for your Package
+
+If you'll be developing a package that will use `ShellLogger`, we recommend
+adding this to your `requirements.txt` file
+```
+shelllogger @ git+https://internal.gitlab.server/ShellLogger/ShellLogger@master#egg=shelllogger
+```
+
+replacing `master` with whatever git reference you like, and then using `pip
+install -r requirements.txt` to handle installing it.
+
 ## Where to Get Help
 
 If you're having trouble with `ShellLogger`, or just want to ask a question,
