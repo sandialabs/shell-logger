@@ -621,15 +621,12 @@ class ShellLogger:
             The working directory, environment, umask, hostname, user,
             group, shell, and ulimit.
         """
-        pwd, _ = self.shell.auxiliary_command(posix="pwd", nt="cd", strip=True)
-        environment, _ = self.shell.auxiliary_command(posix="env", nt="set")
+        pwd, _ = self.shell.auxiliary_command(posix="pwd", strip=True)
+        environment, _ = self.shell.auxiliary_command(posix="env")
         umask, _ = self.shell.auxiliary_command(posix="umask", strip=True)
         hostname, _ = self.shell.auxiliary_command(posix="hostname",
-                                                   nt="hostname",
                                                    strip=True)
-        user, _ = self.shell.auxiliary_command(posix="whoami",
-                                               nt="whoami",
-                                               strip=True)
+        user, _ = self.shell.auxiliary_command(posix="whoami", strip=True)
         group, _ = self.shell.auxiliary_command(posix="id -gn", strip=True)
         shell, _ = self.shell.auxiliary_command(posix="printenv SHELL",
                                                 strip=True)

@@ -119,7 +119,7 @@ class Shell:
         Returns:
             The current working directory.
         """
-        directory, _ = self.auxiliary_command(posix="pwd", nt="cd", strip=True)
+        directory, _ = self.auxiliary_command(posix="pwd", strip=True)
         return directory
 
     def cd(self, path: Path) -> None:
@@ -130,7 +130,7 @@ class Shell:
             path:  The directory to change to.
         """
         os.chdir(path)
-        self.auxiliary_command(posix=f"cd {path}", nt=f"cd {path}")
+        self.auxiliary_command(posix=f"cd {path}")
 
     def run(self, command: str, **kwargs) -> SimpleNamespace:
         """
