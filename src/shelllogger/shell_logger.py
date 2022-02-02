@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
 
 from __future__ import annotations
-from .Shell import Shell
-from .StatsCollector import stats_collectors
-from .Trace import trace_collector
-from .HTMLUtilities import (nested_simplenamespace_to_dict, opening_html_text,
-                            closing_html_text, append_html, html_message_card,
-                            message_card, command_card, child_logger_card,
-                            parent_logger_card_html)
+from .shell import Shell
+from .stats_collector import stats_collectors
+from .trace import trace_collector
+from .html_utilities import (nested_simplenamespace_to_dict, opening_html_text,
+                             closing_html_text, append_html, html_message_card,
+                             message_card, command_card, child_logger_card,
+                             parent_logger_card_html)
 from collections.abc import Iterable, Mapping
 from datetime import datetime, timedelta
 from typing import Iterator, List, Optional, Union
