@@ -490,8 +490,6 @@ def test_timing() -> None:
     command = "sleep 1"
     if os.name == "posix":
         command = "sleep 1"
-    elif os.name == "nt":
-        command = "timeout /nobreak /t 1"
     else:
         print(f"Warning: os.name is unrecognized: {os.name}; test may fail.")
     result = logger._run(command)
@@ -530,12 +528,7 @@ def test_working_directory() -> None:
     logger = ShellLogger(stack()[0][3], Path.cwd())
     command = "pwd"
     directory = "/tmp"
-    if os.name == "posix":
-        pass
-    elif os.name == "nt":
-        command = "cd"
-        directory = "C:\\Users"
-    else:
+    if os.name != "posix":
         print(f"Warning: os.name is unrecognized: {os.name}; test may fail.")
     result = logger._run(command, pwd=directory)
     assert result.stdout.strip() == directory
@@ -720,13 +713,7 @@ def test_change_pwd() -> None:
     pwd_command = "pwd"
     directory1 = "/"
     directory2 = "/tmp"
-    if os.name == "posix":
-        pass
-    elif os.name == "nt":
-        pwd_command = "cd"
-        directory1 = "C:\\"
-        directory2 = "C:\\Users"
-    else:
+    if os.name != "posix":
         print(f"Warning: os.name is unrecognized: {os.name}; test may fail.")
     logger._run(f"cd {directory1}")
     result = logger._run(pwd_command)
@@ -745,12 +732,7 @@ def test_returncode() -> None:
     logger = ShellLogger(stack()[0][3], Path.cwd())
     command = "false"
     expected_returncode = 1
-    if os.name == "posix":
-        pass
-    elif os.name == "nt":
-        command = "type nul | findstr NOPE"
-        expected_returncode = 1
-    else:
+    if os.name != "posix":
         print(f"Warning: os.name is unrecognized: {os.name}; test may fail.")
     result = logger._run(command)
     assert result.returncode == expected_returncode

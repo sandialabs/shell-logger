@@ -302,7 +302,6 @@ class Shell:
             2. You don't tee the ``stdout`` or ``stderr``.
 
         Todo:
-          * Rip out Windows support.
           * Maybe combine this with :func:`run` with extra flags.
           * Replace ``**kwargs`` with function arguments.
 
