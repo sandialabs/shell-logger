@@ -6,12 +6,12 @@ shelllogger
    :maxdepth: 3
    :caption: Contents
 
-   ShellLogger
-   Shell
-   AbstractMethod
-   StatsCollector
-   Trace
-   HTMLUtilities
+   shell_logger
+   shell
+   abstract_method
+   stats_collector
+   trace
+   html_utilities
    todo
 
 The ``shelllogger`` Python module allows you to interact with the shell, while
@@ -222,4 +222,5 @@ You can view the generated HTML log file `here
 More Details
 ------------
 
-For more detailed usage information, see the :doc:`ShellLogger`.
+For more detailed usage information, see the :doc:`shell_logger` class
+reference.

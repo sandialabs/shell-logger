@@ -192,8 +192,8 @@ def child_logger_card(log) -> Iterator[str]:
     Todo:
         * The type hinting for ``log`` is done in the docstring instead
           of the function signature, because to put it in the signature
-          would create a circular dependency between ``ShellLogger.py``
-          and ``HTMLUtilities.py``.  This function needs to be reworked
+          would create a circular dependency between ``shell_logger.py``
+          and ``html_utilities.py``.  This function needs to be reworked
           such that there's no longer a dependency on ``ShellLogger``.
     """
     child_html = log.to_html()

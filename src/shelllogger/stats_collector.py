@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 from __future__ import annotations
-from .AbstractMethod import AbstractMethod
+from .abstract_method import AbstractMethod
 from abc import abstractmethod
 from multiprocessing import Process
 from multiprocessing.managers import SyncManager
