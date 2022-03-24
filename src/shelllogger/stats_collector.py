@@ -122,6 +122,7 @@ class StatsCollector:
 
 
 if psutil is not None:
+
     @StatsCollector.subclass
     class DiskStatsCollector(StatsCollector):
         """
@@ -144,11 +145,15 @@ if psutil is not None:
             self.mount_points = [
                 p.mountpoint for p in psutil.disk_partitions()
             ]
-            for location in ["/tmp",
-                             "/dev/shm",
-                             f"/var/run/user/{os.getuid()}"]:
-                if (location not in self.mount_points
-                        and Path(location).exists()):
+            for location in [
+                "/tmp",
+                "/dev/shm",
+                f"/var/run/user/{os.getuid()}"
+            ]:
+                if (
+                    location not in self.mount_points
+                    and Path(location).exists()
+                ):
                     self.mount_points.append(location)
             for m in self.mount_points:
                 self.stats[m] = manager.list()
@@ -249,8 +254,10 @@ if psutil is not None:
             """
             return list(self.stats)
 
+
 # If we don't have `psutil`, return null objects.
 else:
+
     @StatsCollector.subclass
     class DiskStatsCollector(StatsCollector):
         """
