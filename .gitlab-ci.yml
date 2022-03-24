@@ -146,7 +146,7 @@ pytest:
       junit: tests/coverage.xml
 
 
-# Ensure we adhere to PEP8.
+# Ensure we pass the `flake8` linter.
 flake8:
   stage: test
   timeout: 5m
@@ -155,6 +155,27 @@ flake8:
   script:
     - python3 -m flake8
       --exclude=shelllogger-env
+
+
+# Ensure we adhere to our style guide.variables:
+yapf:
+  stage: test
+  timeout: 5m
+  cache:
+    <<: *global_cache
+  script:
+    - python3 -m yapf
+      --diff
+      --recursive
+      . > yapf.diff.txt
+    - |-
+      if [[ "$(wc -l yapf.diff.txt | awk '{print $1}')" != "0" ]]; then
+        echo "----------"
+        echo "Your code does not match our Python style guide."
+        echo "Run 'yapf -i' on the following files:"
+        grep "^+++.*(reformatted)$" yapf.diff.txt | awk '{print $2}'
+        exit 1
+      fi
 
 
 # Ensure the examples run without problems.
