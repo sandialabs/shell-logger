@@ -167,7 +167,11 @@ yapf:
     - python3 -m yapf
       --diff
       --recursive
-      . > yapf.diff.txt
+      --style .style.yapf
+      examples/
+      src/
+      tests/
+      > yapf.diff.txt
     - |-
       if [[ "$(wc -l yapf.diff.txt | awk '{print $1}')" != "0" ]]; then
         echo "----------"
