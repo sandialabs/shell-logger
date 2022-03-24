@@ -165,9 +165,9 @@ yapf:
     <<: *global_cache
   script:
     - python3 -m yapf
+      --style .style.yapf
       --diff
       --recursive
-      --style .style.yapf
       examples/
       src/
       tests/
