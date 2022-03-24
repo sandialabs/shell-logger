@@ -122,6 +122,41 @@ install:
 #-----------------------------------------------------------------------
 
 
+# Ensure the examples run without problems.
+examples:
+  artifacts:
+    paths:
+      - examples/log*
+      - examples/*.html
+  cache:
+    <<: *global_cache
+    policy: pull
+  script:
+    - cd examples
+    - python3 ./hello_world_html.py
+    - cp -L log_hello_world_html/Hello_World_HTML.html .
+    - python3 ./hello_world_html_and_console.py
+    - cp -L log_hello_world_html_and_console/Hello_World_HTML_and_Console.html
+      .
+    - python3 ./hello_world_html_with_stats.py
+    - cp -L log_hello_world_html_with_stats/Hello_World_HTML_with_Stats.html .
+    - python3 ./build_flex.py
+    - cp -L log_build_flex/Build_Flex.html .
+  stage: test
+  timeout: 5m
+
+
+# Ensure we pass the `flake8` linter.
+flake8:
+  cache:
+    <<: *global_cache
+  script:
+    - python3 -m flake8
+      --exclude=shelllogger-env
+  stage: test
+  timeout: 5m
+
+
 # Execute the unit tests.
 pytest:
   artifacts:
@@ -142,17 +177,6 @@ pytest:
       --cov-report=xml
       --full-trace
       tests/
-  stage: test
-  timeout: 5m
-
-
-# Ensure we pass the `flake8` linter.
-flake8:
-  cache:
-    <<: *global_cache
-  script:
-    - python3 -m flake8
-      --exclude=shelllogger-env
   stage: test
   timeout: 5m
 
@@ -184,30 +208,6 @@ yapf:
         grep "^+++.*(reformatted)$" yapf.diff.txt | awk '{print $2}'
         exit 1
       fi
-  stage: test
-  timeout: 5m
-
-
-# Ensure the examples run without problems.
-examples:
-  artifacts:
-    paths:
-      - examples/log*
-      - examples/*.html
-  cache:
-    <<: *global_cache
-    policy: pull
-  script:
-    - cd examples
-    - python3 ./hello_world_html.py
-    - cp -L log_hello_world_html/Hello_World_HTML.html .
-    - python3 ./hello_world_html_and_console.py
-    - cp -L log_hello_world_html_and_console/Hello_World_HTML_and_Console.html
-      .
-    - python3 ./hello_world_html_with_stats.py
-    - cp -L log_hello_world_html_with_stats/Hello_World_HTML_with_Stats.html .
-    - python3 ./build_flex.py
-    - cp -L log_build_flex/Build_Flex.html .
   stage: test
   timeout: 5m
 
