@@ -668,7 +668,7 @@ def test_trace_and_stats() -> None:
     """
     logger = ShellLogger(stack()[0][3], Path.cwd())
     if os.uname().sysname == "Linux":
-        measure = ["cpu", "memory", "disk"],
+        measure = ["cpu", "memory", "disk"]
         result = logger._run(
             "sleep 1",
             measure=measure,
@@ -740,7 +740,7 @@ def test_log_book_trace_and_stats() -> None:
     """
     if os.uname().sysname == "Linux":
         logger = ShellLogger(stack()[0][3], Path.cwd())
-        measure = ["cpu", "memory", "disk"],
+        measure = ["cpu", "memory", "disk"]
         logger.log(
             "Sleep",
             "sleep 1",
