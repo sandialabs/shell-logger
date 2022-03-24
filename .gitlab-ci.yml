@@ -56,8 +56,6 @@ after_script:
 # Create the virtual environment, install the requirements, and save the
 # environment to the cache.
 requirements:
-  stage: prepare
-  timeout: 10m
   before_script:
     - conda create --prefix ./shelllogger-env --yes python=3.7 pip
   cache:
@@ -79,6 +77,8 @@ requirements:
 
     # Show the contents of the virtual environment.
     - conda list
+  stage: prepare
+  timeout: 10m
 
 
 #-----------------------------------------------------------------------
@@ -88,24 +88,22 @@ requirements:
 
 # Test building a distribution.
 wheel:
-  stage: install
-  timeout: 5m
-  cache:
-    <<: *global_cache
-    policy: pull
-  script:
-    - pip wheel --no-deps -w dist .
   artifacts:
     name: "shelllogger-dist"
     paths:
       - dist/shelllogger*.whl
     expire_in: 6 weeks
+  cache:
+    <<: *global_cache
+    policy: pull
+  script:
+    - pip wheel --no-deps -w dist .
+  stage: install
+  timeout: 5m
 
 
 # Test installation of the package.
 install:
-  stage: install
-  timeout: 5m
   cache:
     <<: *global_cache
   script:
@@ -115,6 +113,8 @@ install:
 
     # Show the contents of the virtual environment to ensure it's there.
     - conda list
+  stage: install
+  timeout: 5m
 
 
 #-----------------------------------------------------------------------
@@ -124,10 +124,15 @@ install:
 
 # Execute the unit tests.
 pytest:
-  stage: test
-  timeout: 5m
+  artifacts:
+    paths:
+      - tests/htmlcov
+    reports:
+      cobertura: tests/coverage.xml
+      junit: tests/coverage.xml
   cache:
     <<: *global_cache
+  coverage: '/TOTAL\s*[0-9]*\s*[0-9]*\s*[0-9]*\s*[0-9]*\s*(\d+%)/'
   script:
     - python3 -m pytest
       --cov=src.shelllogger
@@ -137,30 +142,28 @@ pytest:
       --cov-report=xml
       --full-trace
       tests/
-  coverage: '/TOTAL\s*[0-9]*\s*[0-9]*\s*[0-9]*\s*[0-9]*\s*(\d+%)/'
-  artifacts:
-    paths:
-      - tests/htmlcov
-    reports:
-      cobertura: tests/coverage.xml
-      junit: tests/coverage.xml
+  stage: test
+  timeout: 5m
 
 
 # Ensure we pass the `flake8` linter.
 flake8:
-  stage: test
-  timeout: 5m
   cache:
     <<: *global_cache
   script:
     - python3 -m flake8
       --exclude=shelllogger-env
+  stage: test
+  timeout: 5m
 
 
 # Ensure we adhere to our style guide.variables:
 yapf:
-  stage: test
-  timeout: 5m
+  artifacts:
+    expire_in: 1 week
+    paths:
+      - yapf.diff.txt
+    when: on_failure
   cache:
     <<: *global_cache
   script:
@@ -181,17 +184,16 @@ yapf:
         grep "^+++.*(reformatted)$" yapf.diff.txt | awk '{print $2}'
         exit 1
       fi
-  artifacts:
-    expire_in: 1 week
-    paths:
-      - yapf.diff.txt
-    when: on_failure
+  stage: test
+  timeout: 5m
 
 
 # Ensure the examples run without problems.
 examples:
-  stage: test
-  timeout: 5m
+  artifacts:
+    paths:
+      - examples/log*
+      - examples/*.html
   cache:
     <<: *global_cache
     policy: pull
@@ -206,10 +208,8 @@ examples:
     - cp -L log_hello_world_html_with_stats/Hello_World_HTML_with_Stats.html .
     - python3 ./build_flex.py
     - cp -L log_build_flex/Build_Flex.html .
-  artifacts:
-    paths:
-      - examples/log*
-      - examples/*.html
+  stage: test
+  timeout: 5m
 
 
 #-----------------------------------------------------------------------
@@ -219,16 +219,16 @@ examples:
 
 # Generate the documentation.
 sphinx:
-  stage: documentation
-  timeout: 5m
+  artifacts:
+    paths:
+      - doc/html
   cache:
     <<: *global_cache
   script:
     - cd doc
     - bash make_html_docs.sh
-  artifacts:
-    paths:
-      - doc/html
+  stage: documentation
+  timeout: 5m
 
 
 #-----------------------------------------------------------------------
@@ -238,8 +238,9 @@ sphinx:
 
 # Publish coverage data and documentation (if on the main branch).
 pages:
-  stage: deploy
-  timeout: 5m
+  artifacts:
+    paths:
+      - public
   cache:
     <<: *global_cache
     policy: pull
@@ -250,9 +251,8 @@ pages:
     - mv tests/htmlcov public/.
     - mv doc/html/* public/.
     - mv examples/*.html public/examples/.
-  artifacts:
-    paths:
-      - public
+  stage: deploy
+  timeout: 5m
 
 
 #-----------------------------------------------------------------------
@@ -262,8 +262,6 @@ pages:
 
 # Test that uninstalling from a virtual environment works.
 uninstall:
-  stage: finish
-  timeout: 5m
   cache:
     <<: *global_cache
   script:
@@ -271,3 +269,5 @@ uninstall:
 
     # Show the contents of the virtual environment.
     - conda list
+  stage: finish
+  timeout: 5m
