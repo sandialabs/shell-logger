@@ -204,7 +204,9 @@ yapf:
       if [[ "$(wc -l yapf.diff.txt | awk '{print $1}')" != "0" ]]; then
         echo "----------"
         echo "Your code does not match our Python style guide."
-        echo "Run 'yapf -i' on the following files:"
+        echo -n "Run 'yapf --style .style.yapf --in-place --recursive "
+        echo "examples/ src/ tests/' in the repository root to fix it."
+        echo "The offending files are:"
         grep "^+++.*(reformatted)$" yapf.diff.txt | awk '{print $2}'
         exit 1
       fi
