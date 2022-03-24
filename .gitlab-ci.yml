@@ -164,6 +164,7 @@ yapf:
   cache:
     <<: *global_cache
   script:
+    - set +e
     - python3 -m yapf
       --style .style.yapf
       --diff
@@ -180,6 +181,11 @@ yapf:
         grep "^+++.*(reformatted)$" yapf.diff.txt | awk '{print $2}'
         exit 1
       fi
+  artifacts:
+    expire_in: 1 week
+    paths:
+      - yapf.diff.txt
+    when: on_failure
 
 
 # Ensure the examples run without problems.
