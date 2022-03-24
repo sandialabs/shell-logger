@@ -33,9 +33,9 @@ class Shell:
     """
 
     def __init__(
-            self,
-            pwd: Path = Path.cwd(),
-            login_shell: bool = False
+        self,
+        pwd: Path = Path.cwd(),
+        login_shell: bool = False
     ) -> None:
         """
         Initialize a :class:`Shell` object.
@@ -55,18 +55,26 @@ class Shell:
         self.aux_stderr_rfd, self.aux_stderr_wfd = os.pipe()
 
         # Get the current flags of the file descriptors.
-        aux_stdout_write_flags = fcntl.fcntl(self.aux_stdout_wfd,
-                                             fcntl.F_GETFL)
-        aux_stderr_write_flags = fcntl.fcntl(self.aux_stderr_wfd,
-                                             fcntl.F_GETFL)
+        aux_stdout_write_flags = fcntl.fcntl(
+            self.aux_stdout_wfd,
+            fcntl.F_GETFL
+        )
+        aux_stderr_write_flags = fcntl.fcntl(
+            self.aux_stderr_wfd,
+            fcntl.F_GETFL
+        )
 
         # Make writes non-blocking.
-        fcntl.fcntl(self.aux_stdout_wfd,
-                    fcntl.F_SETFL,
-                    aux_stdout_write_flags | os.O_NONBLOCK)
-        fcntl.fcntl(self.aux_stderr_wfd,
-                    fcntl.F_SETFL,
-                    aux_stderr_write_flags | os.O_NONBLOCK)
+        fcntl.fcntl(
+            self.aux_stdout_wfd,
+            fcntl.F_SETFL,
+            aux_stdout_write_flags | os.O_NONBLOCK
+        )
+        fcntl.fcntl(
+            self.aux_stderr_wfd,
+            fcntl.F_SETFL,
+            aux_stderr_write_flags | os.O_NONBLOCK
+        )
 
         # Ensure the file descriptors are inheritable by the shell
         # subprocess.
@@ -75,11 +83,13 @@ class Shell:
         shell_command = [os.environ.get("SHELL") or "/bin/sh"]
         if self.login_shell:
             shell_command.append("-l")
-        self.shell_subprocess = subprocess.Popen(shell_command,
-                                                 stdin=self.aux_stdin_rfd,
-                                                 stdout=subprocess.PIPE,
-                                                 stderr=subprocess.PIPE,
-                                                 close_fds=False)
+        self.shell_subprocess = subprocess.Popen(
+            shell_command,
+            stdin=self.aux_stdin_rfd,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            close_fds=False
+        )
         os.set_inheritable(self.aux_stdout_wfd, False)
         os.set_inheritable(self.aux_stderr_wfd, False)
 
@@ -90,9 +100,14 @@ class Shell:
         """
         Close all the open file descriptors.
         """
-        for fd in [self.aux_stdin_rfd, self.aux_stdin_wfd,
-                   self.aux_stdout_rfd, self.aux_stdout_wfd,
-                   self.aux_stderr_rfd, self.aux_stderr_wfd]:
+        for fd in [
+            self.aux_stdin_rfd,
+            self.aux_stdin_wfd,
+            self.aux_stdout_rfd,
+            self.aux_stdout_wfd,
+            self.aux_stderr_rfd,
+            self.aux_stderr_wfd
+        ]:
             try:
                 os.close(fd)
             except OSError as e:
@@ -152,8 +167,10 @@ class Shell:
         # heredocs to tell the shell "this is one giant statement".
         # Then run the command.
         if kwargs.get("devnull_stdin"):
-            os.write(self.aux_stdin_wfd,
-                     f"{{\n{command}\n}} </dev/null\n".encode())
+            os.write(
+                self.aux_stdin_wfd,
+                f"{{\n{command}\n}} </dev/null\n".encode()
+            )
         else:
             os.write(self.aux_stdin_wfd, f"{{\n{command}\n}}\n".encode())
 
@@ -169,8 +186,11 @@ class Shell:
         # Tee the output to multiple sinks (files, strings,
         # `stdout`/`stderr`).
         try:
-            output = self.tee(self.shell_subprocess.stdout,
-                              self.shell_subprocess.stderr, **kwargs)
+            output = self.tee(
+                self.shell_subprocess.stdout,
+                self.shell_subprocess.stderr,
+                **kwargs
+            )
 
         # Note:  If something goes wrong in `tee()`, the only way to reliably
         # propagate an exception from a thread that's spawned is to raise a
@@ -192,19 +212,21 @@ class Shell:
             return_code = int(aux_out)
         except ValueError:
             return_code = "N/A"
-        return SimpleNamespace(returncode=return_code,
-                               args=command,
-                               stdout=output.stdout_str,
-                               stderr=output.stderr_str,
-                               start=start,
-                               finish=finish,
-                               wall=finish - start)
+        return SimpleNamespace(
+            returncode=return_code,
+            args=command,
+            stdout=output.stdout_str,
+            stderr=output.stderr_str,
+            start=start,
+            finish=finish,
+            wall=finish - start
+        )
 
     @staticmethod
     def tee(
-            stdout: Optional[IO[bytes]],
-            stderr: Optional[IO[bytes]],
-            **kwargs
+        stdout: Optional[IO[bytes]],
+        stderr: Optional[IO[bytes]],
+        **kwargs
     ) -> SimpleNamespace:
         """
         Split ``stdout`` and ``stderr`` file objects to write to
@@ -266,7 +288,7 @@ class Shell:
         threads = [
             Thread(target=write, args=(stdout, stdout_tee)),
             Thread(target=write, args=(stderr, stderr_tee)),
-        ]
+        ]  # yapf: disable
         for thread in threads:
             thread.daemon = True
             thread.start()
@@ -278,18 +300,17 @@ class Shell:
         # Close any open file descriptors and return the `stdout` and
         # `stderr`.
         for file in (stdout_tee + stderr_tee):
-            if (file not in [None, sys.stdout, sys.stderr, sys.stdin]
-                    and not file.closed):
+            if (
+                file not in [None, sys.stdout, sys.stderr, sys.stdin]
+                and not file.closed
+            ):  # yapf: disable
                 file.close()
-        return SimpleNamespace(
-            stdout_str=stdout_str,
-            stderr_str=stderr_str
-        )
+        return SimpleNamespace(stdout_str=stdout_str, stderr_str=stderr_str)
 
     def auxiliary_command(
             self,
             **kwargs
-    ) -> Tuple[Optional[str], Optional[str]]:
+    ) -> Tuple[Optional[str], Optional[str]]:  # yapf: disable
         """
         Run auxiliary commands like `umask`, `pwd`, `env`, etc.
 
@@ -323,15 +344,19 @@ class Shell:
             aux = os.read(self.aux_stdout_rfd, max_anonymous_pipe_buffer_size)
             while aux[-1] != 4:
                 stdout += aux.decode()
-                aux = os.read(self.aux_stdout_rfd,
-                              max_anonymous_pipe_buffer_size)
+                aux = os.read(
+                    self.aux_stdout_rfd,
+                    max_anonymous_pipe_buffer_size
+                )
             aux = aux[:-1]
             stdout += aux.decode()
             aux = os.read(self.aux_stderr_rfd, max_anonymous_pipe_buffer_size)
             while aux[-1] != 4:
                 stderr += aux.decode()
-                aux = os.read(self.aux_stderr_rfd,
-                              max_anonymous_pipe_buffer_size)
+                aux = os.read(
+                    self.aux_stderr_rfd,
+                    max_anonymous_pipe_buffer_size
+                )
             aux = aux[:-1]
             stderr += aux.decode()
             if kwargs.get("strip"):

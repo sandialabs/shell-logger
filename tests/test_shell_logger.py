@@ -49,18 +49,22 @@ def shell_logger() -> ShellLogger:
 
     # Run the command.
     #                      `stdout`        ;               `stderr`
-    cmd = ("sleep 1; echo 'Hello world out'; sleep 1; echo 'Hello world "
-           "error' 1>&2")
-    kwargs = {"measure": ["cpu", "memory", "disk"],
-              "return_info": True,
-              "interval": 0.1}
+    cmd = (
+        "sleep 1; echo 'Hello world out'; sleep 1; echo 'Hello world error' "
+        "1>&2"
+    )
+    measure = ["cpu", "memory", "disk"]
+    kwargs = {"measure": measure, "return_info": True, "interval": 0.1}
     if os.uname().sysname == "Linux":
-        kwargs.update({"trace": "ltrace",
-                       "expression": "setlocale",
-                       "summary": True})
+        kwargs.update({
+            "trace": "ltrace",
+            "expression": "setlocale",
+            "summary": True
+        })
     else:
-        print(f"Warning: uname is not 'Linux': {os.uname()}; ltrace not "
-              "tested.")
+        print(
+            f"Warning: uname is not 'Linux': {os.uname()}; ltrace not tested."
+        )
     parent.log("test cmd", cmd, Path.cwd(), **kwargs)
     parent.print("This is a message")
 
@@ -99,7 +103,7 @@ def test_initialization_creates_html_file() -> None:
 
 
 def test_log_method_creates_tmp_stdout_stderr_files(
-        shell_logger: ShellLogger
+    shell_logger: ShellLogger
 ) -> None:
     """
     Verify that logging a command will create files in the
@@ -160,9 +164,9 @@ def test_log_method_return_info_works_correctly(return_info: bool) -> None:
 @pytest.mark.parametrize('live_stdout', [True, False])
 @pytest.mark.parametrize('live_stderr', [True, False])
 def test_log_method_live_stdout_stderr_works_correctly(
-        capsys: CaptureFixture,
-        live_stdout: bool,
-        live_stderr: bool
+    capsys: CaptureFixture,
+    live_stdout: bool,
+    live_stderr: bool
 ) -> None:
     """
     Verify that the ``live_stdout`` and ``live_stdout`` flags work as
@@ -176,8 +180,6 @@ def test_log_method_live_stdout_stderr_works_correctly(
             the :func:`log` command.
     """
     logger = ShellLogger(stack()[0][3], Path.cwd())
-
-    #           `stdout`         ;      `stderr`
     cmd = "echo 'Hello world out'; echo 'Hello world error' 1>&2"
     logger.log("test cmd", cmd, Path.cwd(), live_stdout, live_stderr)
     out, err = capsys.readouterr()
@@ -192,7 +194,7 @@ def test_log_method_live_stdout_stderr_works_correctly(
 
 
 def test_child_logger_duration_displayed_correctly_in_html(
-        shell_logger: ShellLogger
+    shell_logger: ShellLogger
 ) -> None:
     """
     Verify that the overview of child loggers in the HTML file displays
@@ -216,7 +218,7 @@ def test_child_logger_duration_displayed_correctly_in_html(
 
 
 def test_finalize_creates_json_with_correct_information(
-        shell_logger: ShellLogger
+    shell_logger: ShellLogger
 ) -> None:
     """
     Verify that the :func:`finalize` method creates a JSON file with the
@@ -257,7 +259,7 @@ def test_finalize_creates_json_with_correct_information(
 
 
 def test_finalize_creates_html_with_correct_information(
-        shell_logger: ShellLogger
+    shell_logger: ShellLogger
 ) -> None:
     """
     Verify that the :func:`finalize` method creates an HTML file with
@@ -278,8 +280,10 @@ def test_finalize_creates_html_with_correct_information(
     assert ">test cmd</" in html_text
     assert f"Duration: {shell_logger.log_book[0]['duration']}" in html_text
     assert f"Time:</span> {shell_logger.log_book[0]['timestamp']}" in html_text
-    assert ("Command:</span> <pre><code>sleep 1; echo 'Hello world out'; "
-            "sleep 1; echo 'Hello world error' 1&gt;&amp;2") in html_text
+    assert (
+        "Command:</span> <pre><code>sleep 1; echo 'Hello world out'; sleep 1; "
+        "echo 'Hello world error' 1&gt;&amp;2"
+    ) in html_text
     assert f"CWD:</span> {Path.cwd()}" in html_text
     assert "Return Code:</span> 0" in html_text
 
@@ -289,8 +293,9 @@ def test_finalize_creates_html_with_correct_information(
         assert "trace</" in html_text
         assert "setlocale" in html_text
     else:
-        print(f"Warning:  uname is not 'Linux':  {os.uname()}; trace not "
-              "tested.")
+        print(
+            f"Warning:  uname is not 'Linux':  {os.uname()}; trace not tested."
+        )
     assert "getenv" not in html_text
     assert 'class="card-title">Memory Usage' in html_text
     assert "<canvas" in html_text
@@ -311,7 +316,7 @@ def test_finalize_creates_html_with_correct_information(
 
 
 def test_log_dir_html_symlinks_to_stream_dir_html(
-        shell_logger: ShellLogger
+    shell_logger: ShellLogger
 ) -> None:
     """
     Verify that the :func:`finalize` method symlinks
@@ -331,8 +336,8 @@ def test_log_dir_html_symlinks_to_stream_dir_html(
 
 
 def test_json_file_can_reproduce_html_file(
-        shell_logger: ShellLogger
-) -> None:
+    shell_logger: ShellLogger
+) -> None:  # yapf: disable
     """
     Verify that a JSON file can properly recreate the original HTML file
     created when :func:`finalize` is called.
@@ -373,8 +378,10 @@ def test_under_stress() -> None:
     Test that all is well when handling lots of output.
     """
     logger = ShellLogger(stack()[0][3], Path.cwd())
-    cmd = ("dd if=/dev/urandom bs=1024 count=262144 | "
-           "LC_ALL=C tr -c '[:print:]' '*' ; sleep 1")
+    cmd = (
+        "dd if=/dev/urandom bs=1024 count=262144 | "
+        "LC_ALL=C tr -c '[:print:]' '*' ; sleep 1"
+    )
     msg = "Get 256 MB of stdout from /dev/urandom"
     logger.log(msg, cmd)
     assert logger.log_book[0]["returncode"] == 0
@@ -421,8 +428,10 @@ def test_logger_does_not_store_stdout_string_by_default() -> None:
     Ensure we don't hold a commands ``stdout`` in memory by default.
     """
     logger = ShellLogger(stack()[0][3], Path.cwd())
-    cmd = ("dd if=/dev/urandom bs=1024 count=262144 | "
-           "LC_ALL=C tr -c '[:print:]' '*' ; sleep 1")
+    cmd = (
+        "dd if=/dev/urandom bs=1024 count=262144 | "
+        "LC_ALL=C tr -c '[:print:]' '*' ; sleep 1"
+    )
     msg = "Get 256 MB of stdout from /dev/urandom"
     logger.log(msg, cmd)
     mem_usage = psutil.Process().memory_info().rss
@@ -433,8 +442,10 @@ def test_logger_does_not_store_stdout_string_by_default() -> None:
     assert mem_usage > bytes_in_128_mb
 
 
-@pytest.mark.skipif(os.uname().sysname == "Darwin",
-                    reason="`ltrace` doesn't exist for Darwin")
+@pytest.mark.skipif(
+    os.uname().sysname == "Darwin",
+    reason="`ltrace` doesn't exist for Darwin"
+)
 def test_logger_does_not_store_trace_string_by_default() -> None:
     """
     Ensure we don't keep trace output in memory by default.
@@ -442,8 +453,13 @@ def test_logger_does_not_store_trace_string_by_default() -> None:
     logger = ShellLogger(stack()[0][3], Path.cwd())
     logger.log("echo hello", "echo hello", Path.cwd(), trace="ltrace")
     assert logger.log_book[0]["trace"] is None
-    logger.log("echo hello", "echo hello", Path.cwd(), return_info=True,
-               trace="ltrace")
+    logger.log(
+        "echo hello",
+        "echo hello",
+        Path.cwd(),
+        return_info=True,
+        trace="ltrace"
+    )
     assert logger.log_book[1]["trace"] is not None
 
 
@@ -516,8 +532,10 @@ def test_auxiliary_data() -> None:
         assert logger._run("printenv SHELL").stdout.strip() == result.shell
         assert logger._run("ulimit -a").stdout == result.ulimit
     else:
-        print(f"Warning: os.name is not 'posix': {os.name}; umask, "
-              "group, shell, and ulimit not tested.")
+        print(
+            f"Warning: os.name is not 'posix': {os.name}; umask, group, "
+            "shell, and ulimit not tested."
+        )
 
 
 def test_working_directory() -> None:
@@ -547,8 +565,10 @@ def test_trace() -> None:
         result = logger._run("echo hello", trace="strace")
         assert f'execve("{echo_location}' in result.trace
     else:
-        print(f"Warning: uname is not 'Linux': {os.uname()}; strace/ltrace "
-              "not tested.")
+        print(
+            f"Warning: uname is not 'Linux': {os.uname()}; strace/ltrace not "
+            "tested."
+        )
 
 
 def test_trace_expression() -> None:
@@ -561,8 +581,10 @@ def test_trace_expression() -> None:
         assert 'getenv("POSIXLY_CORRECT")' in result.trace
         assert result.trace.count('\n') == 2
     else:
-        print(f"Warning: uname is not 'Linux': {os.uname()}; ltrace "
-              "expression not tested.")
+        print(
+            f"Warning: uname is not 'Linux': {os.uname()}; ltrace expression "
+            "not tested."
+        )
 
 
 def test_trace_summary() -> None:
@@ -579,8 +601,10 @@ def test_trace_summary() -> None:
         assert f'execve("{echo_location}' not in result.trace
         assert "execve" in result.trace
     else:
-        print(f"Warning: uname is not 'Linux': {os.uname()}; strace/ltrace "
-              "summary not tested.")
+        print(
+            f"Warning: uname is not 'Linux': {os.uname()}; strace/ltrace "
+            "summary not tested."
+        )
 
 
 def test_trace_expression_and_summary() -> None:
@@ -591,19 +615,29 @@ def test_trace_expression_and_summary() -> None:
     logger = ShellLogger(stack()[0][3], Path.cwd())
     if os.uname().sysname == "Linux":
         echo_location = logger._run("which echo").stdout.strip()
-        result = logger._run("echo hello", trace="strace", expression="execve",
-                             summary=True)
+        result = logger._run(
+            "echo hello",
+            trace="strace",
+            expression="execve",
+            summary=True
+        )
         assert f'execve("{echo_location}' not in result.trace
         assert "execve" in result.trace
         assert "getenv" not in result.trace
-        result = logger._run("echo hello", trace="ltrace", expression="getenv",
-                             summary=True)
+        result = logger._run(
+            "echo hello",
+            trace="ltrace",
+            expression="getenv",
+            summary=True
+        )
         assert 'getenv("POSIXLY_CORRECT")' not in result.trace
         assert "getenv" in result.trace
         assert "strcmp" not in result.trace
     else:
-        print(f"Warning: uname is not 'Linux': {os.uname()}; strace/ltrace "
-              "expression+summary not tested.")
+        print(
+            f"Warning: uname is not 'Linux': {os.uname()}; strace/ltrace "
+            "expression+summary not tested."
+        )
 
 
 def test_stats() -> None:
@@ -611,8 +645,8 @@ def test_stats() -> None:
     Ensure capturing CPU, memory, and disk statistics works correctly.
     """
     logger = ShellLogger(stack()[0][3], Path.cwd())
-    result = logger._run("sleep 2", measure=["cpu", "memory", "disk"],
-                         interval=0.1)
+    measure = ["cpu", "memory", "disk"]
+    result = logger._run("sleep 2", measure=measure, interval=0.1)
     assert len(result.stats["memory"]) > 1
     assert len(result.stats["memory"]) < 30
     assert len(result.stats["cpu"]) > 1
@@ -621,8 +655,10 @@ def test_stats() -> None:
         assert len(result.stats["disk"]["/"]) > 1
         assert len(result.stats["disk"]["/"]) < 30
     else:
-        print(f"Warning: os.name is not 'posix': {os.name}; disk usage not "
-              "fully tested.")
+        print(
+            f"Warning: os.name is not 'posix': {os.name}; disk usage not "
+            "fully tested."
+        )
 
 
 def test_trace_and_stats() -> None:
@@ -632,9 +668,15 @@ def test_trace_and_stats() -> None:
     """
     logger = ShellLogger(stack()[0][3], Path.cwd())
     if os.uname().sysname == "Linux":
-        result = logger._run("sleep 1", measure=["cpu", "memory", "disk"],
-                             interval=0.1, trace="ltrace",
-                             expression="setlocale", summary=True)
+        measure = ["cpu", "memory", "disk"]
+        result = logger._run(
+            "sleep 1",
+            measure=measure,
+            interval=0.1,
+            trace="ltrace",
+            expression="setlocale",
+            summary=True
+        )
         assert "setlocale" in result.trace
         assert "sleep" not in result.trace
         assert len(result.stats["memory"]) > 5
@@ -644,8 +686,9 @@ def test_trace_and_stats() -> None:
         assert len(result.stats["disk"]["/"]) > 5
         assert len(result.stats["disk"]["/"]) < 50
     else:
-        print(f"Warning: uname is not 'Linux': {os.uname()}; ltrace not "
-              "tested.")
+        print(
+            f"Warning: uname is not 'Linux': {os.uname()}; ltrace not tested."
+        )
 
 
 def test_trace_and_stat() -> None:
@@ -655,21 +698,29 @@ def test_trace_and_stat() -> None:
     """
     logger = ShellLogger(stack()[0][3], Path.cwd())
     if os.uname().sysname == "Linux":
-        result = logger._run("sleep 1", measure=["cpu"], interval=0.1,
-                             trace="ltrace", expression="setlocale",
-                             summary=True)
+        result = logger._run(
+            "sleep 1",
+            measure=["cpu"],
+            interval=0.1,
+            trace="ltrace",
+            expression="setlocale",
+            summary=True
+        )
         assert "setlocale" in result.trace
         assert "sleep" not in result.trace
         assert result.stats.get("memory") is None
         assert result.stats.get("disk") is None
         assert result.stats.get("cpu") is not None
     else:
-        print(f"Warning: uname is not 'Linux': {os.uname()}; ltrace not "
-              "tested.")
+        print(
+            f"Warning: uname is not 'Linux': {os.uname()}; ltrace not tested."
+        )
 
 
-@pytest.mark.skipif(os.uname().sysname == "Darwin",
-                    reason="`ltrace`/`strace` don't exist for Darwin")
+@pytest.mark.skipif(
+    os.uname().sysname == "Darwin",
+    reason="`ltrace`/`strace` don't exist for Darwin"
+)
 @pytest.mark.skip(reason="Not sure it's worth it to fix this or not")
 def test_set_env_trace() -> None:
     """
@@ -689,9 +740,17 @@ def test_log_book_trace_and_stats() -> None:
     """
     if os.uname().sysname == "Linux":
         logger = ShellLogger(stack()[0][3], Path.cwd())
-        logger.log("Sleep", "sleep 1", return_info=True,
-                   measure=["cpu", "memory", "disk"], interval=0.1,
-                   trace="ltrace", expression="setlocale", summary=True)
+        measure = ["cpu", "memory", "disk"]
+        logger.log(
+            "Sleep",
+            "sleep 1",
+            return_info=True,
+            measure=measure,
+            interval=0.1,
+            trace="ltrace",
+            expression="setlocale",
+            summary=True
+        )
         assert "setlocale" in logger.log_book[0]["trace"]
         assert "sleep" not in logger.log_book[0]["trace"]
         assert len(logger.log_book[0]["stats"]["memory"]) > 5
@@ -701,8 +760,9 @@ def test_log_book_trace_and_stats() -> None:
         assert len(logger.log_book[0]["stats"]["disk"]["/"]) > 5
         assert len(logger.log_book[0]["stats"]["disk"]["/"]) < 50
     else:
-        print(f"Warning: uname is not 'Linux': {os.uname()}; ltrace not "
-              "tested.")
+        print(
+            f"Warning: uname is not 'Linux': {os.uname()}; ltrace not tested."
+        )
 
 
 def test_change_pwd() -> None:
@@ -747,8 +807,9 @@ def test_sgr_gets_converted_to_html() -> None:
     logger.print("\x1B[31mHello\x1B[0m")
     logger.print("\x1B[31;43m\x1B[4mthere\x1B[0m")
     logger.print("\x1B[38;5;196m\x1B[48;5;232m\x1B[4mmr.\x1B[0m logger")
-    logger.print("\x1B[38;2;96;140;240m\x1B[48;2;240;140;10mmrs.\x1B[0m "
-                 "logger")
+    logger.print(
+        "\x1B[38;2;96;140;240m\x1B[48;2;240;140;10mmrs.\x1B[0m logger"
+    )
     logger.finalize()
 
     # Load the HTML file and make sure it checks out.
@@ -777,8 +838,10 @@ def test_html_print(capsys: CaptureFixture) -> None:
         capsys:  A fixture for capturing the ``stdout``.
     """
     logger = ShellLogger(stack()[0][3], Path.cwd())
-    logger.html_print("The quick brown fox jumps over the lazy dog.",
-                      msg_title="Brown Fox")
+    logger.html_print(
+        "The quick brown fox jumps over the lazy dog.",
+        msg_title="Brown Fox"
+    )
     logger.print("The quick orange zebra jumps over the lazy dog.")
     out, err = capsys.readouterr()
     logger.finalize()
@@ -860,7 +923,9 @@ def test_invalid_decodings() -> None:
     Ensure we appropriately handle invalid bytes when decoding output.
     """
     logger = ShellLogger(stack()[0][3], Path.cwd())
-    result = logger.log("Print invalid start byte for bytes decode()",
-                        "printf '\\xFDHello\\n'",
-                        return_info=True)
+    result = logger.log(
+        "Print invalid start byte for bytes decode()",
+        "printf '\\xFDHello\\n'",
+        return_info=True
+    )
     assert result["stdout"] == "Hello\n"
