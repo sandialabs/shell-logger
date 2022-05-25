@@ -65,7 +65,7 @@ Before you begin hacking on `ShellLogger`, you'll need to do three things:
    git clone git@internal.gitlab.server:${USER}/ShellLogger
    cd ShellLogger
    git remote add upstream git@internal.gitlab.server:ShellLogger/ShellLogger
-   get fetch upstream
+   git fetch upstream
    ```
 3. **Set Up your Environment:**  Install the requirements with
    ```bash
