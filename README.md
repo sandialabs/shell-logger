@@ -1,7 +1,7 @@
 [![pipeline status](https://internal.gitlab.server/ShellLogger/ShellLogger/badges/master/pipeline.svg)](https://internal.gitlab.server/ShellLogger/ShellLogger/pipelines)
 [![coverage report](https://internal.gitlab.server/ShellLogger/ShellLogger/badges/master/coverage.svg)](http://shelllogger.internal.gitlab.pages/ShellLogger/htmlcov)
 [![documentation](https://img.shields.io/badge/docs-latest-green.svg)](http://shelllogger.internal.gitlab.pages/ShellLogger)
-[![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-2.1-4baaaa.svg)](CODE_OF_CONDUCT.md),
+[![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-2.1-4baaaa.svg)](CODE_OF_CONDUCT.md)
 
 # ShellLogger
 
