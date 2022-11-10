@@ -116,9 +116,9 @@ documentation on it](https://docs.gitlab.com/ee/user/markdown.html).
 In the top-left of the page when creating an issue, use the drop-down menu to
 select a [description
 template](https://docs.gitlab.com/ee/user/project/description_templates.html)
-(~"Type :: Bug", ~"Type :: Design", ~"Type :: Documentation",
-~"Type :: Feature", ~"Type :: Parent", ~"Type :: Question",
-~"Type :: Refactor", or ~"Type :: Task").  Follow the instructions that appear
+(~"Type :: Bug", ~"Type :: Discussion", ~"Type :: Documentation",
+~"Type :: Feature", ~"Type :: Question", ~"Type :: Refactor",
+~"Type :: Security", or ~"Type :: Task").  Follow the instructions that appear
 in the template.
 
 ### Linked Issues
