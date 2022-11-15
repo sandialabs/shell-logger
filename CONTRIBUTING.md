@@ -57,7 +57,7 @@ Before you begin hacking on `ShellLogger`, you'll need to do three things:
    project maintainer will first give you [**Reporter**
    permissions](https://docs.gitlab.com/ee/user/permissions.html).
 2. **Fork the Repository:**  Again on [`ShellLogger`'s project
-   page](https://internal.gitlab.server/ShellLogger/ShellLogger), in the 
+   page](https://internal.gitlab.server/ShellLogger/ShellLogger), in the
    top-right corner, you'll see a button to [fork the
    repository](https://docs.gitlab.com/ee/user/project/repository/forking_workflow.html#creating-a-fork).
    Do so, and then clone your fork and set it up with
@@ -185,9 +185,16 @@ name would be `123-implement-awesome-new-feature`.
 ### As Work Continues
 
 Do whatever work is necessary to address the issue you're tackling.  Break your
-work into logical, working commits.  Feel free to commit and push small chunks
-early and often and then use `git rebase -i` to reorganize your
-commits before sharing.
+work into logical, working commits.  Use either the [Conventional Commit plugin
+for Pycharm](https://plugins.jetbrains.com/plugin/13389-conventional-commit) or
+the [Conventional Commits extension for VS
+Code](https://marketplace.visualstudio.com/items?itemName=vivaxy.vscode-conventional-commits)
+(or something similar) to ensure your commit messages adhere to the
+[Conventional Commits
+specification](https://www.conventionalcommits.org/en/v1.0.0/).
+
+Feel free to commit and push small chunks early and often and then use `git
+rebase -i` to reorganize your commits before sharing.
 
 > **Note:**  If you rebase a branch that's already been pushed to a remote,
 > you'll wind up changing the history, which will require a force push with
