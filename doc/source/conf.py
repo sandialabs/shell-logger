@@ -20,7 +20,10 @@ sys.path.append(str(Path.cwd().parent.parent.resolve() / "src"))
 # -- Project information -----------------------------------------------------
 
 project = "ShellLogger"
-copyright = "2021, Sandia National Laboratories"
+copyright = (
+    "2024, National Technology & Engineering Solutions of Sandia, LLC "
+    "(NTESS)"
+)
 author = "Josh Braun, David Collins, Jason M. Gates"
 version = "1.0.0"
 release = version

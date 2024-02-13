@@ -1,4 +1,10 @@
 #!/usr/bin/env python3
+"""
+A simple example, capturing various system statistics.
+
+Copyright The shell-logger Authors.
+SPDX-License-Identifier: BSD-3-Clause
+"""
 
 from pathlib import Path
 from shelllogger import ShellLogger

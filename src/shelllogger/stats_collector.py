@@ -1,4 +1,10 @@
 #!/usr/bin/env python3
+"""
+Provides the various means of collecting machine statistics.
+
+Copyright The shell-logger Authors.
+SPDX-License-Identifier: BSD-3-Clause
+"""
 
 from __future__ import annotations
 from .abstract_method import AbstractMethod

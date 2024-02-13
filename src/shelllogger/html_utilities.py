@@ -1,4 +1,10 @@
 #!/usr/bin/env python3
+"""
+Various utitlities for building the HTML log file.
+
+Copyright The shell-logger Authors.
+SPDX-License-Identifier: BSD-3-Clause
+"""
 from collections.abc import Iterable, Mapping
 from datetime import datetime
 import pkgutil

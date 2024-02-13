@@ -1,3 +1,9 @@
+"""
+The unit test suite for the ``shell_logger`` package.
+
+Copyright The shell-logger Authors.
+SPDX-License-Identifier: BSD-3-Clause
+"""
 from _pytest.capture import CaptureFixture
 from _pytest.monkeypatch import MonkeyPatch
 from inspect import stack

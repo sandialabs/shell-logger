@@ -1,4 +1,10 @@
 #!/usr/bin/env python3
+"""
+Provides the :class:`Shell` class.
+
+Copyright The shell-logger Authors.
+SPDX-License-Identifier: BSD-3-Clause
+"""
 
 from __future__ import annotations
 import fcntl
