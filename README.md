@@ -1,87 +1,93 @@
-[![pipeline status](https://internal.gitlab.server/ShellLogger/ShellLogger/badges/master/pipeline.svg)](https://internal.gitlab.server/ShellLogger/ShellLogger/pipelines)
-[![coverage report](https://internal.gitlab.server/ShellLogger/ShellLogger/badges/master/coverage.svg)](http://shelllogger.internal.gitlab.pages/ShellLogger/htmlcov)
-[![documentation](https://img.shields.io/badge/docs-latest-green.svg)](http://shelllogger.internal.gitlab.pages/ShellLogger)
+> **WARNING:**  *This package is still in the process of being open sourced.
+> Until that work is done and this banner is removed, don't expect anything
+> documented here to be accurate.*
+
+[![Code Style: black](https://img.shields.io/badge/Code%20Style-black-000000.svg)](https://github.com/psf/black)
+[![codecov](https://codecov.io/gh/sandialabs/shell-logger/branch/master/graph/badge.svg?token=FmDStZ6FVR)](https://codecov.io/gh/sandialabs/shell-logger)
+[![CodeQL](https://github.com/sandialabs/shell-logger/actions/workflows/github-code-scanning/codeql/badge.svg)](https://github.com/sandialabs/shell-logger/actions/workflows/github-code-scanning/codeql)
+[![Conda Version](https://img.shields.io/conda/v/conda-forge/shell-logger?label=conda-forge)](https://anaconda.org/conda-forge/shell-logger)
+![Conda Downloads](https://img.shields.io/conda/d/conda-forge/shell-logger?label=conda-forge%20downloads)
+[![Continuous Integration](https://github.com/sandialabs/shell-logger/actions/workflows/continuous-integration.yml/badge.svg)](https://github.com/sandialabs/shell-logger/actions/workflows/continuous-integration.yml)
 [![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-2.1-4baaaa.svg)](CODE_OF_CONDUCT.md)
+[![GitHub contributors](https://img.shields.io/github/contributors/sandialabs/shell-logger.svg)](https://github.com/sandialabs/shell-logger/graphs/contributors)
+[![Documentation Status](https://readthedocs.org/projects/shell-logger/badge/?version=latest)](https://shell-logger.readthedocs.io/en/latest/?badge=latest)
+[![Anaconda-Server Badge](https://anaconda.org/conda-forge/shell-logger/badges/license.svg)](LICENSE.md)
+[![Linting: Pylint](https://img.shields.io/badge/Linting-Pylint-yellowgreen)](https://github.com/pylint-dev/pylint)
+[![Merged PRs](https://img.shields.io/github/issues-pr-closed-raw/sandialabs/shell-logger.svg?label=merged+PRs)](https://github.com/sandialabs/shell-logger/pulls?q=is:pr+is:merged)
+[![OpenSSF Best Practices](https://bestpractices.coreinfrastructure.org/projects/1234567890/badge)](https://bestpractices.coreinfrastructure.org/projects/1234567890)
+![Anaconda-Server Badge](https://anaconda.org/conda-forge/shell-logger/badges/platforms.svg)
+[![pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit)](https://github.com/pre-commit/pre-commit)
+[![pre-commit.ci Status](https://results.pre-commit.ci/badge/github/sandialabs/shell-logger/master.svg)](https://results.pre-commit.ci/latest/github/sandialabs/shell-logger/master)
+[![PyPI - Version](https://img.shields.io/pypi/v/shell-logger?label=PyPI)](https://pypi.org/project/shell-logger/)
+![PyPI - Downloads](https://img.shields.io/pypi/dm/shell-logger?label=PyPI%20downloads)
+![Python Version](https://img.shields.io/badge/Python-3.8|3.9|3.10|3.11|3.12-blue.svg)
+[![Security: Bandit](https://img.shields.io/badge/Security-Bandit-yellow.svg)](https://github.com/PyCQA/bandit)
 
-# ShellLogger
+# shell-logger
 
-The `shelllogger` Python module allows you to interact with the shell, while
+The `shell-logger` Python package allows you to interact with the shell, while
 logging various metadata, statistics, and trace information.  Any time you're
 tempted to write your own wrapper around things like `subprocess.Popen()` or
-`subprocess.run()`, consider using `shelllogger.ShellLogger.log()` instead.  If
-you're familiar with [the Unix script
-command](https://man7.org/linux/man-pages/man1/script.1.html), this is similar
-in principle, but with substantially more functionality.  If you're familiar
-with [Python's logging module](https://docs.python.org/3/library/logging.html),
-the motivation is similar, but this intends to capture what's happening *in the
-shell* rather than in Python itself.
+`subprocess.run()`, consider using `shell_logger.ShellLogger.log()` instead.
+If you're familiar with [the Unix script command][script], this is similar in
+principle, but with substantially more functionality.  If you're familiar with
+[Python's logging module][logging], the motivation is similar, but this intends
+to capture what's happening *in the shell* rather than in Python itself.
+
+[script]:  https://man7.org/linux/man-pages/man1/script.1.html
+[logging]:  https://docs.python.org/3/library/logging.html
 
 ## Installation
 
-To get up and running with `ShellLogger`, do the following:
+To get up and running with `shell-logger`, simply:
 ```bash
-git clone git@internal.gitlab.server:ShellLogger/ShellLogger
-cd ShellLogger
-python3 -m pip install .
+python3 -m pip install shell-logger
 ```
-
-> **Note:**  You may want to install the package in a separate Python
-> environment, using either
-> [conda](https://conda.io/projects/conda/en/latest/user-guide/concepts/environments.html)
-> or [venv](https://docs.python.org/3/tutorial/venv.html).
 
 ## Usage
 
 Once the package is installed, you can simply
 ```python
-from shelllogger import ShellLogger
+from shell_logger import ShellLogger
 sl = ShellLogger("Title of Log File")
 sl.log("Execute my first command in the shell.", "echo 'Hello World'")
 ```
 
-For more detailed usage and API information, please see [our
-documentation](http://shelllogger.internal.gitlab.pages/ShellLogger).
+For more detailed usage and API information, please see
+[our documentation][readthedocs].
 
-## Adding `ShellLogger` as a Requirement for your Package
-
-If you'll be developing a package that will use `ShellLogger`, we recommend
-adding this to your `requirements.txt` file
-```
-shelllogger @ git+https://internal.gitlab.server/ShellLogger/ShellLogger@master#egg=shelllogger
-```
-
-replacing `master` with whatever git reference you like, and then using `pip
-install -r requirements.txt` to handle installing it.
+[readthedocs]:  https://shell-logger.readthedocs.io
 
 ## Where to Get Help
 
-If you're having trouble with `ShellLogger`, or just want to ask a question,
-head on over to [our issue
-board](https://internal.gitlab.server/ShellLogger/ShellLogger/-/issues).  If a
-quick search doesn't yield what you're looking for, feel free to file a
-~"Type :: Question" issue.
+If you're having trouble with `shell-logger`, or just want to ask a question,
+head on over to [our issue board][issues].  If a quick search doesn't yield
+what you're looking for, feel free to file an issue.
+
+[issues]:  https://github.com/sandialabs/shell-logger/issues
 
 ## Contributing
 
-If you're interested in contributing to the development of `ShellLogger`, we'd
-love to have your help :grinning:  Check out our [contributing
-guidelines](https://internal.gitlab.server/ShellLogger/ShellLogger/-/blob/master/CONTRIBUTING.md)
-for how to get started.  [Past
-contributors](https://internal.gitlab.server/ShellLogger/ShellLogger/-/graphs/master)
-include:
-* @josbrau
-* @mswan
-* @dcollin
-* @jmgate
+If you're interested in contributing to the development of `shell-logger`, we'd
+love to have your help :grinning:  Check out our
+[contributing guidelines](CONTRIBUTING.md) for how to get started.
+[Past contributors][contributors] include:
+* [@bbraunj](https://github.com/bbraunj)
+* Scot Swan
+* [@dc-snl](https://github.com/dc-snl)
+* [@jmgate](https://github.com/jmgate)
+* [@mvlopri](https://github.com/mvlopri)
+
+[contributors]:  https://github.com/sandialabs/shell-logger/graphs/contributors
 
 ## License
 
-License information will be added after `ShellLogger` makes it through Sandia's
-open-sourcing process.
+See [LICENSE.md](LICENSE.md).
 
 ## Credits
 
 Special thanks to the EMPIRE project for investing in the initial development
-of this tool, and [the GMS
-project](https://internal.corporate.wiki/display/gmswiki/Geophysical+Monitoring+System+Wiki)
-for serving as a second user and contributing to its clean-up.
+of this tool, and [the GMS project][gms] for serving as a second user and
+contributing to its clean-up.
+
+[gms]: https://github.com/SNL-GMS/GMS-PI21-OPEN/

@@ -1,6 +1,8 @@
 # Security Vulnerabilities
 
-If you discover a security vulnerability in `ShellLogger`, please file an issue
-using the ~"Type :: Security" issue template.  See [our contributing
-guidelines](CONTRIBUTING.md) for details.  We thank you in advance for helping
-to improve the security of this package.
+If you discover a security vulnerability in `shell-logger`, please head on
+over to the [Security Advisories page][advisories] and
+draft a new advisory.  We thank you in advance for helping to improve the
+security of this package.
+
+[advisories]:  https://github.com/sandialabs/shell-logger/security/advisories
