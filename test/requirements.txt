@@ -1,0 +1,16 @@
+# Requirements for testing `shell-logger`.
+
+bandit
+black
+dateparser
+flake8
+flake8-bugbear
+mypy
+pre-commit
+prospector
+psutil
+pyroma
+pytest
+pytest-cov
+pytest-mock
+toml
