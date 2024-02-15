@@ -73,7 +73,7 @@ love to have your help :grinning:  Check out our
 [contributing guidelines](CONTRIBUTING.md) for how to get started.
 [Past contributors][contributors] include:
 * [@bbraunj](https://github.com/bbraunj)
-* Scot Swan
+* [@sswan](https://github.com/sswan)
 * [@dc-snl](https://github.com/dc-snl)
 * [@jmgate](https://github.com/jmgate)
 * [@mvlopri](https://github.com/mvlopri)
