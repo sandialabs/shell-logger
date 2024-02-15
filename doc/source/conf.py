@@ -15,11 +15,11 @@
 from pathlib import Path
 import sys
 
-sys.path.append(str(Path.cwd().parent.parent.resolve() / "src"))
+sys.path.append(str(Path.cwd().parent.parent.resolve() / "shell_logger"))
 
 # -- Project information -----------------------------------------------------
 
-project = "ShellLogger"
+project = "shell-logger"
 copyright = (
     "2024, National Technology & Engineering Solutions of Sandia, LLC "
     "(NTESS)"

@@ -5,9 +5,8 @@ An example of cloning, configuring, building, and installing software.
 Copyright The shell-logger Authors.
 SPDX-License-Identifier: BSD-3-Clause
 """
-
 from pathlib import Path
-from shelllogger import ShellLogger
+from shell_logger import ShellLogger
 
 sl = ShellLogger("Build Flex", Path.cwd() / f"log_{Path(__file__).stem}")
 sl.print(

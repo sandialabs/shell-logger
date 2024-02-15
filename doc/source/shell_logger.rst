@@ -1,13 +1,13 @@
 ShellLogger
 ===========
 
-.. autoclass:: shelllogger.ShellLogger
+.. autoclass:: shell_logger.ShellLogger
    :noindex:
 
 JSON Serialization
 ------------------
 
-.. autoclass:: shelllogger.ShellLoggerDecoder
+.. autoclass:: shell_logger.ShellLoggerDecoder
    :noindex:
 
 .. todo::
@@ -15,5 +15,5 @@ JSON Serialization
    Figure out why the documentation below is pulling in the docstring for the
    base class as well.
 
-.. autoclass:: shelllogger.ShellLoggerEncoder
+.. autoclass:: shell_logger.ShellLoggerEncoder
    :noindex:

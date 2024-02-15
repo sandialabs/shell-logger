@@ -1,5 +1,5 @@
 Shell
 =====
 
-.. automodule:: shelllogger.shell
+.. automodule:: shell_logger.shell
    :noindex:
