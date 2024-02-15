@@ -1,12 +1,12 @@
 [tool.poetry]
-name = "shelllogger"
+name = "shell-logger"
 version = "1.0.0"
-license = ""
+license = "LICENSE.md"
 readme = "README.md"
 keywords = ["shell", "logging"]
-repository = "https://internal.gitlab.server/ShellLogger/ShellLogger"
+repository = "https://github.com/sandialabs/shell-logger"
 description = "A tool for keeping track of Python's interactions with the shell."
-documentation = "INSERT URL FOR SPHINX DOCS HERE"
+documentation = "https://shell-logger.readthedocs.io"
 authors = [
     "Josh Braun <josbrau@sandia.gov>",
     "David Collins <dcollin@sandia.gov>",
@@ -17,7 +17,7 @@ classifiers = [
     "Intended Audience :: Developers",
     "Intended Audience :: Information Technology",
     "Intended Audience :: System Administrators",
-    # "Licence :: FILL THIS OUT",  UNCOMMENT AFTER ADDING LICENSE
+    "License :: OSI Approved :: BSD License",
     "Natural Language :: English",
     "Operating System :: MacOS",
     "Operating System :: POSIX",
@@ -33,15 +33,11 @@ classifiers = [
     "Topic :: System :: System Shells",
     "Typing :: Typed"
 ]
-packages = [
-    { include = "shelllogger", from = "src" },
-]
-# include = ["CHANGELOG.md"]  UNCOMMENT WHEN WE ADD A CHANGELOG
 
 
 [tool.poetry.urls]
-CI = "https://internal.gitlab.server/ShellLogger/ShellLogger/-/pipelines"
-Issues = "https://internal.gitlab.server/ShellLogger/ShellLogger/-/issues"
+CI = "https://github.com/sandialabs/shell-logger/actions"
+Issues = "https://github.com/sandialabs/shell-logger/issues"
 
 
 [tool.poetry.dependencies]

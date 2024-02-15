@@ -1,26 +1,26 @@
 StatsCollector
 ==============
 
-.. autoclass:: shelllogger.stats_collector.StatsCollector
+.. autoclass:: shell_logger.stats_collector.StatsCollector
    :noindex:
 
-.. automethod:: shelllogger.stats_collector::stats_collectors
+.. automethod:: shell_logger.stats_collector::stats_collectors
    :noindex:
 
 DiskStatsCollector
 ------------------
 
-.. autoclass:: shelllogger.stats_collector.DiskStatsCollector
+.. autoclass:: shell_logger.stats_collector.DiskStatsCollector
    :noindex:
 
 CPUStatsCollector
 -----------------
 
-.. autoclass:: shelllogger.stats_collector.CPUStatsCollector
+.. autoclass:: shell_logger.stats_collector.CPUStatsCollector
    :noindex:
 
 MemoryStatsCollector
 --------------------
 
-.. autoclass:: shelllogger.stats_collector.MemoryStatsCollector
+.. autoclass:: shell_logger.stats_collector.MemoryStatsCollector
    :noindex:

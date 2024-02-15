@@ -1,5 +1,5 @@
-shelllogger
-===========
+shell-logger
+============
 
 .. toctree::
    :hidden:
@@ -14,16 +14,17 @@ shelllogger
    html_utilities
    todo
 
-The ``shelllogger`` Python module allows you to interact with the shell, while
-logging various metadata, statistics, and trace information.  Any time you're
-tempted to write your own wrapper around things like :class:`subprocess.Popen`
-or :func:`subprocess.run`, consider using :func:`ShellLogger.log` instead.  If
-you're familiar with `the Unix script command
-<https://man7.org/linux/man-pages/man1/script.1.html>`_, this is similar in
-principle, but with substantially more functionality.  If you're familiar with
-`Python's logging module <https://docs.python.org/3/library/logging.html>`_,
-the motivation is similar, but this intends to capture what's happening *in the
-shell* rather than in Python itself.
+The ``shell-logger`` Python package allows you to interact with the shell,
+while logging various metadata, statistics, and trace information.  Any time
+you're tempted to write your own wrapper around things like
+:class:`subprocess.Popen` or :func:`subprocess.run`, consider using
+:func:`ShellLogger.log` instead.  If you're familiar with `the Unix script
+command <https://man7.org/linux/man-pages/man1/script.1.html>`_, this is
+similar in principle, but with substantially more functionality.  If you're
+familiar with `Python's logging module
+<https://docs.python.org/3/library/logging.html>`_, the motivation is similar,
+but this intends to capture what's happening *in the shell* rather than in
+Python itself.
 
 The following talk from the `US-RSE Virtual Workshop 2021
 <https://us-rse.org/virtual-workshop-2021/>`_ illustrates the module's
@@ -49,8 +50,8 @@ functionality.
         </iframe>
     </div>
 
-Where to Get shelllogger
-------------------------
+Where to Get shell-logger
+-------------------------
 
 The source repository for this module can be found `here
 <https://internal.gitlab.server/ShellLogger/ShellLogger>`_.  See the project's
@@ -58,8 +59,8 @@ The source repository for this module can be found `here
 <https://internal.gitlab.server/ShellLogger/ShellLogger/-/blob/master/README.md>`_
 for details on how to clone, install, and otherwise interact with the project.
 
-Using shelllogger
------------------
+Using shell-logger
+------------------
 
 At a high-level, :func:`ShellLogger.log` allows you to execute commands, given
 as strings, in the shell.  When a command is executed, :class:`ShellLogger`
@@ -92,29 +93,29 @@ Example 1:  The Basics
 For this initial example, let's first consider a simple "Hello World" script
 written in bash:
 
-.. literalinclude:: ../../examples/hello_world.sh
+.. literalinclude:: ../../example/hello_world.sh
    :language: bash
    :linenos:
-   :caption: ``examples/hello_world.sh``
+   :caption: ``example/hello_world.sh``
 
-The equivalent Python script written with ``shelllogger``, demonstrating its
+The equivalent Python script written with ``shell-logger``, demonstrating its
 basic functionality where it's logging commands only to the HTML log file, is
 the following:
 
-.. literalinclude:: ../../examples/hello_world_html.py
+.. literalinclude:: ../../example/hello_world_html.py
    :language: python
    :linenos:
-   :caption: ``examples/hello_world_html.py``
+   :caption: ``example/hello_world_html.py``
 
 Running the script yields
 
 .. code-block::
 
    This example demonstrates logging information solely to the HTML log file.
-   Open /Users/jmgate/workspace/ShellLogger/examples/log_hello_world_html/2021-09-22_14.56.42.558599_szt68acx/Hello_ShellLogger.html to view the log.
+   Open /Users/jmgate/workspace/shell-logger/example/log_hello_world_html/2021-09-22_14.56.42.558599_szt68acx/Hello_ShellLogger.html to view the log.
 
 You can view the generated HTML log file `here
-<http://shelllogger.internal.gitlab.pages/ShellLogger/examples/Hello_World_HTML.html>`__.
+<http://shelllogger.internal.gitlab.pages/shell-logger/example/Hello_World_HTML.html>`__.
 When you open that file, you'll see something like
 
 .. image:: images/html_log.png
@@ -171,14 +172,14 @@ This next example demonstrates logging commands both to the HTML log file and
 the console.  The primary differences between this and **Example 1** are the
 highlighted lines below.
 
-.. literalinclude:: ../../examples/hello_world_html_and_console.py
+.. literalinclude:: ../../example/hello_world_html_and_console.py
    :language: python
    :linenos:
    :emphasize-lines: 11, 13
-   :caption: ``examples/hello_world_html_and_console.py``
+   :caption: ``example/hello_world_html_and_console.py``
 
 You can view the generated HTML log file `here
-<http://shelllogger.internal.gitlab.pages/ShellLogger/examples/Hello_World_HTML_and_Console.html>`__.
+<http://shelllogger.internal.gitlab.pages/shell-logger/example/Hello_World_HTML_and_Console.html>`__.
 
 Example 3:  Collecting Statistics
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -187,37 +188,37 @@ In this example, we demonstrate how easy it is to capture various statistics
 while running your commands in the shell.  The primary differences between this
 and **Example 1** are the highlighted lines below.
 
-.. literalinclude:: ../../examples/hello_world_html_with_stats.py
+.. literalinclude:: ../../example/hello_world_html_with_stats.py
    :language: python
    :linenos:
    :emphasize-lines: 12, 14
-   :caption: ``examples/hello_world_html_with_stats.py``
+   :caption: ``example/hello_world_html_with_stats.py``
 
 You can view the generated HTML log file `here
-<http://shelllogger.internal.gitlab.pages/ShellLogger/examples/Hello_World_HTML_with_Stats.html>`__.
+<http://shelllogger.internal.gitlab.pages/shell-logger/example/Hello_World_HTML_with_Stats.html>`__.
 
 Example 4:  Building a Code
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-In this final example, we use ``shelllogger`` to do some "real work"---cloning,
-configuring, and building `flex <https://github.com/westes/flex.git>`_, a fast
-lexical analyzer generator.  Before we do that, let's take a look at what the
-bash script would look like:
+In this final example, we use ``shell-logger`` to do some "real
+work"---cloning, configuring, and building `flex
+<https://github.com/westes/flex.git>`_, a fast lexical analyzer generator.
+Before we do that, let's take a look at what the bash script would look like:
 
-.. literalinclude:: ../../examples/build_flex.sh
+.. literalinclude:: ../../example/build_flex.sh
    :language: bash
    :linenos:
-   :caption: ``examples/build_flex.sh``
+   :caption: ``example/build_flex.sh``
 
-The equivalent Python script using ``shelllogger`` is the following:
+The equivalent Python script using ``shell-logger`` is the following:
 
-.. literalinclude:: ../../examples/build_flex.py
+.. literalinclude:: ../../example/build_flex.py
    :language: python
    :linenos:
-   :caption: ``examples/build_flex.py``
+   :caption: ``example/build_flex.py``
 
 You can view the generated HTML log file `here
-<http://shelllogger.internal.gitlab.pages/ShellLogger/examples/Build_Flex.html>`__.
+<http://shelllogger.internal.gitlab.pages/shell-logger/example/Build_Flex.html>`__.
 
 More Details
 ------------

@@ -12,7 +12,7 @@ import os
 from pathlib import Path
 import pytest
 import re
-from src.shelllogger import ShellLogger, ShellLoggerDecoder
+from shell_logger import ShellLogger, ShellLoggerDecoder
 try:
     import psutil
 except ModuleNotFoundError:

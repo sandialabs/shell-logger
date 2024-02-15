@@ -1,6 +1,6 @@
 [run]
 omit =
-    */tests/*
+    */test/*
     */venv*
 branch = True
 dynamic_context = test_function
@@ -18,14 +18,14 @@ exclude_lines =
     if False:
 
 [html]
-directory = tests/htmlcov
-title = ShellLogger Coverage Report
+directory = test/htmlcov
+title = shell-logger Coverage Report
 show_contexts = True
 
 [xml]
-output = tests/coverage.xml
+output = test/coverage.xml
 
 [json]
-output = tests/coverage.json
+output = test/coverage.json
 pretty_print = True
 show_contexts = True

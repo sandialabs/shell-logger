@@ -5,9 +5,8 @@ A simple example, sending output to the log file and console.
 Copyright The shell-logger Authors.
 SPDX-License-Identifier: BSD-3-Clause
 """
-
 from pathlib import Path
-from shelllogger import ShellLogger
+from shell_logger import ShellLogger
 
 sl = ShellLogger(
     "Hello World HTML and Console",

@@ -5,7 +5,6 @@ Provides the :class:`AbstractMethod` exception.
 Copyright The shell-logger Authors.
 SPDX-License-Identifier: BSD-3-Clause
 """
-
 import inspect
 
 

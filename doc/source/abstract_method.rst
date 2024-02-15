@@ -1,5 +1,5 @@
 AbstractMethod
 ==============
 
-.. autoexception:: shelllogger.abstract_method.AbstractMethod
+.. autoexception:: shell_logger.abstract_method.AbstractMethod
    :noindex:

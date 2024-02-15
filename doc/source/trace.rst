@@ -1,20 +1,20 @@
 Trace
 =====
 
-.. autoclass:: shelllogger.trace.Trace
+.. autoclass:: shell_logger.trace.Trace
    :noindex:
 
-.. automethod:: shelllogger.trace::trace_collector
+.. automethod:: shell_logger.trace::trace_collector
    :noindex:
 
 STrace
 ------
 
-.. autoclass:: shelllogger.trace.STrace
+.. autoclass:: shell_logger.trace.STrace
    :noindex:
 
 LTrace
 ------
 
-.. autoclass:: shelllogger.trace.LTrace
+.. autoclass:: shell_logger.trace.LTrace
    :noindex:

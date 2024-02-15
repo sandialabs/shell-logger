@@ -5,7 +5,6 @@ Provides the :class:`Shell` class.
 Copyright The shell-logger Authors.
 SPDX-License-Identifier: BSD-3-Clause
 """
-
 from __future__ import annotations
 import fcntl
 from io import StringIO
