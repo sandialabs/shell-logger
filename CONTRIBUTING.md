@@ -5,6 +5,20 @@ development :grinning:  Here's everything you need to know.
 
 
 
+## Contributor License Agreement
+
+By contributing to this software project, you are agreeing to the following
+terms and conditions for your contributions:
+
+* You agree your contributions are submitted under the
+  [license used by this project](LICENSE.md).
+* You represent you are authorized to make the contributions and grant the
+  license.  If your employer has rights to intellectual property that includes
+  your contributions, you represent that you have received permission to make
+  contributions and grant the required license on behalf of that employer.
+
+
+
 ## Setting Up Your Environment
 
 Before you begin hacking on `shell-logger`, you'll need to do four things:
