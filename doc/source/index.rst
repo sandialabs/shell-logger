@@ -19,16 +19,18 @@ while logging various metadata, statistics, and trace information.  Any time
 you're tempted to write your own wrapper around things like
 :class:`subprocess.Popen` or :func:`subprocess.run`, consider using
 :func:`ShellLogger.log` instead.  If you're familiar with `the Unix script
-command <https://man7.org/linux/man-pages/man1/script.1.html>`_, this is
-similar in principle, but with substantially more functionality.  If you're
-familiar with `Python's logging module
-<https://docs.python.org/3/library/logging.html>`_, the motivation is similar,
-but this intends to capture what's happening *in the shell* rather than in
-Python itself.
+command`_, this is similar in principle, but with substantially more
+functionality.  If you're familiar with `Python's logging module`_, the
+motivation is similar, but this intends to capture what's happening *in the
+shell* rather than in Python itself.
 
-The following talk from the `US-RSE Virtual Workshop 2021
-<https://us-rse.org/virtual-workshop-2021/>`_ illustrates the module's
-functionality.
+.. _the Unix script command: https://man7.org/linux/man-pages/man1/script.1.html
+.. _Python's logging module: https://docs.python.org/3/library/logging.html
+
+The following talk from the `US-RSE Virtual Workshop 2021`_ illustrates the
+module's functionality.
+
+.. _US-RSE Virtual Workshop 2021: https://us-rse.org/virtual-workshop-2021/
 
 .. raw:: html
 
@@ -53,11 +55,12 @@ functionality.
 Where to Get shell-logger
 -------------------------
 
-The source repository for this module can be found `here
-<https://internal.gitlab.server/ShellLogger/ShellLogger>`_.  See the project's
-`README.md
-<https://internal.gitlab.server/ShellLogger/ShellLogger/-/blob/master/README.md>`_
-for details on how to clone, install, and otherwise interact with the project.
+The source repository for this module can be found `on GitHub`_.  See the
+project's `README`_ for details on how to clone, install, and otherwise
+interact with the project.
+
+.. _on GitHub: https://github.com/sandialabs/shell-logger
+.. _README: https://github.com/sandialabs/shell-logger/blob/master/README.md
 
 Using shell-logger
 ------------------
@@ -105,6 +108,7 @@ the following:
 .. literalinclude:: ../../example/hello_world_html.py
    :language: python
    :linenos:
+   :lines: 11-
    :caption: ``example/hello_world_html.py``
 
 Running the script yields
@@ -112,10 +116,8 @@ Running the script yields
 .. code-block::
 
    This example demonstrates logging information solely to the HTML log file.
-   Open /Users/jmgate/workspace/shell-logger/example/log_hello_world_html/2021-09-22_14.56.42.558599_szt68acx/Hello_ShellLogger.html to view the log.
+   Open <path-to-example-dir>/log_hello_world_html/<timestamp>_<unique-str>/Hello_ShellLogger.html to view the log.
 
-You can view the generated HTML log file `here
-<http://shelllogger.internal.gitlab.pages/shell-logger/example/Hello_World_HTML.html>`__.
 When you open that file, you'll see something like
 
 .. image:: images/html_log.png
@@ -175,11 +177,9 @@ highlighted lines below.
 .. literalinclude:: ../../example/hello_world_html_and_console.py
    :language: python
    :linenos:
-   :emphasize-lines: 11, 13
+   :lines: 11-
+   :emphasize-lines: 15-16, 22-23
    :caption: ``example/hello_world_html_and_console.py``
-
-You can view the generated HTML log file `here
-<http://shelllogger.internal.gitlab.pages/shell-logger/example/Hello_World_HTML_and_Console.html>`__.
 
 Example 3:  Collecting Statistics
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -191,11 +191,9 @@ and **Example 1** are the highlighted lines below.
 .. literalinclude:: ../../example/hello_world_html_with_stats.py
    :language: python
    :linenos:
-   :emphasize-lines: 12, 14
+   :lines: 11-
+   :emphasize-lines: 16, 22
    :caption: ``example/hello_world_html_with_stats.py``
-
-You can view the generated HTML log file `here
-<http://shelllogger.internal.gitlab.pages/shell-logger/example/Hello_World_HTML_with_Stats.html>`__.
 
 Example 4:  Building a Code
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -215,10 +213,8 @@ The equivalent Python script using ``shell-logger`` is the following:
 .. literalinclude:: ../../example/build_flex.py
    :language: python
    :linenos:
+   :lines: 11-
    :caption: ``example/build_flex.py``
-
-You can view the generated HTML log file `here
-<http://shelllogger.internal.gitlab.pages/shell-logger/example/Build_Flex.html>`__.
 
 More Details
 ------------

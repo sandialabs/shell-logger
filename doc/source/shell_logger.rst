@@ -2,13 +2,11 @@ ShellLogger
 ===========
 
 .. autoclass:: shell_logger.ShellLogger
-   :noindex:
 
 JSON Serialization
 ------------------
 
 .. autoclass:: shell_logger.ShellLoggerDecoder
-   :noindex:
 
 .. todo::
 
@@ -16,4 +14,3 @@ JSON Serialization
    base class as well.
 
 .. autoclass:: shell_logger.ShellLoggerEncoder
-   :noindex:
