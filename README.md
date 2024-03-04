@@ -91,7 +91,3 @@ of this tool, and [the GMS project][gms] for serving as a second user and
 contributing to its clean-up.
 
 [gms]: https://github.com/SNL-GMS/GMS-PI21-OPEN/
-
-
-
-
