@@ -24,7 +24,7 @@ class AbstractMethod(NotImplementedError):
         implemented for the class to be concrete.
         """
         class_name = (
-            inspect.stack()[1].frame.f_locals['self'].__class__.__name__
+            inspect.stack()[1].frame.f_locals["self"].__class__.__name__
         )
         method_name = inspect.stack()[1].function
         super().__init__(f"`{class_name}` must implement `{method_name}()`.")

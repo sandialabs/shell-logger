@@ -23,14 +23,14 @@ sl.log(
     f"git clone --depth 1 --branch {FLEX_VERSION} "
     f"https://github.com/westes/flex.git {FLEX_VERSION}",
     live_stdout=True,
-    live_stderr=True
+    live_stderr=True,
 )
 sl.log(
     "Run `autogen`.",
     "./autogen.sh",
     cwd=Path.cwd() / FLEX_VERSION,
     live_stdout=True,
-    live_stderr=True
+    live_stderr=True,
 )
 measure = ["cpu", "memory", "disk"]
 sl.log(
@@ -39,7 +39,7 @@ sl.log(
     cwd=Path.cwd() / FLEX_VERSION,
     live_stdout=True,
     live_stderr=True,
-    measure=measure
+    measure=measure,
 )
 sl.log(
     "Build `libcompat.la`.",
@@ -47,7 +47,7 @@ sl.log(
     cwd=Path.cwd() / f"{FLEX_VERSION}/lib",
     live_stdout=True,
     live_stderr=True,
-    measure=measure
+    measure=measure,
 )
 sl.log(
     "Build & install flex.",
@@ -55,7 +55,7 @@ sl.log(
     cwd=Path.cwd() / FLEX_VERSION,
     live_stdout=True,
     live_stderr=True,
-    measure=measure
+    measure=measure,
 )
 sl.finalize()
 print(f"Open {sl.html_file} to view the log.")

@@ -4,6 +4,7 @@ Configuration file for the Sphinx documentation builder.
 For the full list of built-in configuration values, see the documentation:
 https://www.sphinx-doc.org/en/master/usage/configuration.html
 """
+
 from pathlib import Path
 import sys
 
@@ -53,7 +54,7 @@ html_static_path = ["_static"]
 autodoc_default_options = {
     "show-inheritance": True,
     "members": True,
-    "undoc-members": True
+    "undoc-members": True,
 }
 autoclass_content = "both"
 autodoc_preserve_defaults = True

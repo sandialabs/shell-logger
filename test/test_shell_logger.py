@@ -17,6 +17,7 @@ from pathlib import Path
 import pytest
 import re
 from shell_logger import ShellLogger, ShellLoggerDecoder
+
 try:
     import psutil
 except ModuleNotFoundError:
@@ -55,7 +56,7 @@ def shell_logger() -> ShellLogger:
     """
 
     # Initialize a parent `ShellLogger`.
-    parent = ShellLogger('Parent', Path.cwd())
+    parent = ShellLogger("Parent", Path.cwd())
 
     # Run the command.
     #                      `stdout`        ;               `stderr`
@@ -66,11 +67,9 @@ def shell_logger() -> ShellLogger:
     measure = ["cpu", "memory", "disk"]
     kwargs = {"measure": measure, "return_info": True, "interval": 0.1}
     if os.uname().sysname == "Linux":
-        kwargs.update({
-            "trace": "ltrace",
-            "expression": "setlocale",
-            "summary": True
-        })
+        kwargs.update(
+            {"trace": "ltrace", "expression": "setlocale", "summary": True}
+        )
     else:
         print(
             f"Warning: uname is not 'Linux': {os.uname()}; ltrace not tested."
@@ -109,11 +108,11 @@ def test_initialization_creates_html_file() -> None:
     logger = ShellLogger(stack()[0][3], Path.cwd())
     timestamp = logger.init_time.strftime("%Y-%m-%d_%H.%M.%S.%f")
     streamm_dir = next(Path.cwd().glob(f"{timestamp}_*"))
-    assert (streamm_dir / f'{stack()[0][3]}.html').exists()
+    assert (streamm_dir / f"{stack()[0][3]}.html").exists()
 
 
 def test_log_method_creates_tmp_stdout_stderr_files(
-    shell_logger: ShellLogger
+    shell_logger: ShellLogger,
 ) -> None:
     """
     Verify that logging a command will create files in the
@@ -125,8 +124,8 @@ def test_log_method_creates_tmp_stdout_stderr_files(
     """
 
     # Get the paths for the `stdout`/`stderr` files.
-    cmd_id = shell_logger.log_book[0]['cmd_id']
-    cmd_ts = shell_logger.log_book[0]['timestamp']
+    cmd_id = shell_logger.log_book[0]["cmd_id"]
+    cmd_ts = shell_logger.log_book[0]["timestamp"]
     stdout_file = shell_logger.stream_dir / f"{cmd_ts}_{cmd_id}_stdout"
     stderr_file = shell_logger.stream_dir / f"{cmd_ts}_{cmd_id}_stderr"
     assert stdout_file.exists()
@@ -135,14 +134,14 @@ def test_log_method_creates_tmp_stdout_stderr_files(
     print(f"{stderr_file}")
 
     # Make sure the information written to these files is correct.
-    with open(stdout_file, 'r') as out, open(stderr_file, 'r') as err:
+    with open(stdout_file, "r") as out, open(stderr_file, "r") as err:
         out_txt = out.readline()
         err_txt = err.readline()
-        assert 'Hello world out' in out_txt
-        assert 'Hello world error' in err_txt
+        assert "Hello world out" in out_txt
+        assert "Hello world error" in err_txt
 
 
-@pytest.mark.parametrize('return_info', [True, False])
+@pytest.mark.parametrize("return_info", [True, False])
 def test_log_method_return_info_works_correctly(return_info: bool) -> None:
     """
     **@pytest.mark.parametrize('return_info', [True, False])**
@@ -162,21 +161,19 @@ def test_log_method_return_info_works_correctly(return_info: bool) -> None:
     cmd = "echo 'Hello world out'; echo 'Hello world error' 1>&2"
     result = logger.log("test cmd", cmd, Path.cwd(), return_info=return_info)
     if return_info:
-        assert "Hello world out" in result['stdout']
-        assert "Hello world error" in result['stderr']
-        assert result['return_code'] == 0
+        assert "Hello world out" in result["stdout"]
+        assert "Hello world error" in result["stderr"]
+        assert result["return_code"] == 0
     else:
-        assert result['stdout'] is None
-        assert result['stderr'] is None
-        assert result['return_code'] == 0
+        assert result["stdout"] is None
+        assert result["stderr"] is None
+        assert result["return_code"] == 0
 
 
-@pytest.mark.parametrize('live_stdout', [True, False])
-@pytest.mark.parametrize('live_stderr', [True, False])
+@pytest.mark.parametrize("live_stdout", [True, False])
+@pytest.mark.parametrize("live_stderr", [True, False])
 def test_log_method_live_stdout_stderr_works_correctly(
-    capsys: CaptureFixture,
-    live_stdout: bool,
-    live_stderr: bool
+    capsys: CaptureFixture, live_stdout: bool, live_stderr: bool
 ) -> None:
     """
     Verify that the ``live_stdout`` and ``live_stdout`` flags work as
@@ -204,7 +201,7 @@ def test_log_method_live_stdout_stderr_works_correctly(
 
 
 def test_child_logger_duration_displayed_correctly_in_html(
-    shell_logger: ShellLogger
+    shell_logger: ShellLogger,
 ) -> None:
     """
     Verify that the overview of child loggers in the HTML file displays
@@ -219,7 +216,7 @@ def test_child_logger_duration_displayed_correctly_in_html(
     child3 = shell_logger.add_child("Child 3")
     child3.log("Wait 0.006s", "sleep 0.006")
     shell_logger.finalize()
-    with open(shell_logger.html_file, 'r') as hf:
+    with open(shell_logger.html_file, "r") as hf:
         html_text = hf.read()
     assert child2.duration is not None
     assert f"Duration: {child2.duration}" in html_text
@@ -228,7 +225,7 @@ def test_child_logger_duration_displayed_correctly_in_html(
 
 
 def test_finalize_creates_json_with_correct_information(
-    shell_logger: ShellLogger
+    shell_logger: ShellLogger,
 ) -> None:
     """
     Verify that the :func:`finalize` method creates a JSON file with the
@@ -242,7 +239,7 @@ def test_finalize_creates_json_with_correct_information(
     # Load from JSON.
     json_file = shell_logger.stream_dir / "Parent.json"
     assert json_file.exists()
-    with open(json_file, 'r') as jf:
+    with open(json_file, "r") as jf:
         loaded_logger = json.load(jf, cls=ShellLoggerDecoder)
 
     # Parent `ShellLogger`.
@@ -269,7 +266,7 @@ def test_finalize_creates_json_with_correct_information(
 
 
 def test_finalize_creates_html_with_correct_information(
-    shell_logger: ShellLogger
+    shell_logger: ShellLogger,
 ) -> None:
     """
     Verify that the :func:`finalize` method creates an HTML file with
@@ -283,7 +280,7 @@ def test_finalize_creates_html_with_correct_information(
     # Load the HTML file.
     html_file = shell_logger.stream_dir / "Parent.html"
     assert html_file.exists()
-    with open(html_file, 'r') as hf:
+    with open(html_file, "r") as hf:
         html_text = hf.read()
 
     # Ensure the command information is present.
@@ -326,7 +323,7 @@ def test_finalize_creates_html_with_correct_information(
 
 
 def test_log_dir_html_symlinks_to_stream_dir_html(
-    shell_logger: ShellLogger
+    shell_logger: ShellLogger,
 ) -> None:
     """
     Verify that the :func:`finalize` method symlinks
@@ -346,7 +343,7 @@ def test_log_dir_html_symlinks_to_stream_dir_html(
 
 
 def test_json_file_can_reproduce_html_file(
-    shell_logger: ShellLogger
+    shell_logger: ShellLogger,
 ) -> None:  # yapf: disable
     """
     Verify that a JSON file can properly recreate the original HTML file
@@ -360,7 +357,7 @@ def test_json_file_can_reproduce_html_file(
     # Load the original HTML file's contents.
     html_file = shell_logger.log_dir / "Parent.html"
     assert html_file.exists()
-    with open(html_file, 'r') as hf:
+    with open(html_file, "r") as hf:
         original_html = hf.read()
 
     # Delete the HTML file.
@@ -369,7 +366,7 @@ def test_json_file_can_reproduce_html_file(
     # Load the JSON data.
     json_file = shell_logger.stream_dir / "Parent.json"
     assert json_file.exists()
-    with open(json_file, 'r') as jf:
+    with open(json_file, "r") as jf:
         loaded_logger = json.load(jf, cls=ShellLoggerDecoder)
 
     # Finalize the loaded `ShellLogger` object.
@@ -377,7 +374,7 @@ def test_json_file_can_reproduce_html_file(
 
     # Load the new HTML file's contents and compare.
     assert html_file.exists()
-    with open(html_file, 'r') as hf:
+    with open(html_file, "r") as hf:
         new_html = hf.read()
     print(f"New Read: {html_file.resolve()}")
     assert original_html == new_html
@@ -453,8 +450,7 @@ def test_logger_does_not_store_stdout_string_by_default() -> None:
 
 
 @pytest.mark.skipif(
-    os.uname().sysname == "Darwin",
-    reason="`ltrace` doesn't exist for Darwin"
+    os.uname().sysname == "Darwin", reason="`ltrace` doesn't exist for Darwin"
 )
 def test_logger_does_not_store_trace_string_by_default() -> None:
     """
@@ -468,7 +464,7 @@ def test_logger_does_not_store_trace_string_by_default() -> None:
         "echo hello",
         Path.cwd(),
         return_info=True,
-        trace="ltrace"
+        trace="ltrace",
     )
     assert logger.log_book[1]["trace"] is not None
 
@@ -587,9 +583,9 @@ def test_trace_expression() -> None:
     """
     logger = ShellLogger(stack()[0][3], Path.cwd())
     if os.uname().sysname == "Linux":
-        result = logger._run("echo hello", trace="ltrace", expression='getenv')
+        result = logger._run("echo hello", trace="ltrace", expression="getenv")
         assert 'getenv("POSIXLY_CORRECT")' in result.trace
-        assert result.trace.count('\n') == 2
+        assert result.trace.count("\n") == 2
     else:
         print(
             f"Warning: uname is not 'Linux': {os.uname()}; ltrace expression "
@@ -626,19 +622,13 @@ def test_trace_expression_and_summary() -> None:
     if os.uname().sysname == "Linux":
         echo_location = logger._run("which echo").stdout.strip()
         result = logger._run(
-            "echo hello",
-            trace="strace",
-            expression="execve",
-            summary=True
+            "echo hello", trace="strace", expression="execve", summary=True
         )
         assert f'execve("{echo_location}' not in result.trace
         assert "execve" in result.trace
         assert "getenv" not in result.trace
         result = logger._run(
-            "echo hello",
-            trace="ltrace",
-            expression="getenv",
-            summary=True
+            "echo hello", trace="ltrace", expression="getenv", summary=True
         )
         assert 'getenv("POSIXLY_CORRECT")' not in result.trace
         assert "getenv" in result.trace
@@ -685,7 +675,7 @@ def test_trace_and_stats() -> None:
             interval=0.1,
             trace="ltrace",
             expression="setlocale",
-            summary=True
+            summary=True,
         )
         assert "setlocale" in result.trace
         assert "sleep" not in result.trace
@@ -714,7 +704,7 @@ def test_trace_and_stat() -> None:
             interval=0.1,
             trace="ltrace",
             expression="setlocale",
-            summary=True
+            summary=True,
         )
         assert "setlocale" in result.trace
         assert "sleep" not in result.trace
@@ -729,7 +719,7 @@ def test_trace_and_stat() -> None:
 
 @pytest.mark.skipif(
     os.uname().sysname == "Darwin",
-    reason="`ltrace`/`strace` don't exist for Darwin"
+    reason="`ltrace`/`strace` don't exist for Darwin",
 )
 @pytest.mark.skip(reason="Not sure it's worth it to fix this or not")
 def test_set_env_trace() -> None:
@@ -759,7 +749,7 @@ def test_log_book_trace_and_stats() -> None:
             interval=0.1,
             trace="ltrace",
             expression="setlocale",
-            summary=True
+            summary=True,
         )
         assert "setlocale" in logger.log_book[0]["trace"]
         assert "sleep" not in logger.log_book[0]["trace"]
@@ -825,7 +815,7 @@ def test_sgr_gets_converted_to_html() -> None:
     # Load the HTML file and make sure it checks out.
     html_file = logger.stream_dir / f"{logger.name}.html"
     assert html_file.exists()
-    with open(html_file, 'r') as hf:
+    with open(html_file, "r") as hf:
         html_text = hf.read()
     assert "\x1B" not in html_text
     assert ">Hello</span>" in html_text
@@ -849,8 +839,7 @@ def test_html_print(capsys: CaptureFixture) -> None:
     """
     logger = ShellLogger(stack()[0][3], Path.cwd())
     logger.html_print(
-        "The quick brown fox jumps over the lazy dog.",
-        msg_title="Brown Fox"
+        "The quick brown fox jumps over the lazy dog.", msg_title="Brown Fox"
     )
     logger.print("The quick orange zebra jumps over the lazy dog.")
     out, err = capsys.readouterr()
@@ -859,7 +848,7 @@ def test_html_print(capsys: CaptureFixture) -> None:
     # Load the HTML file and make sure it checks out.
     html_file = logger.stream_dir / f"{logger.name}.html"
     assert html_file.exists()
-    with open(html_file, 'r') as hf:
+    with open(html_file, "r") as hf:
         html_text = hf.read()
     assert "brown fox" not in out
     assert "brown fox" not in err
@@ -909,7 +898,7 @@ def test_append_mode() -> None:
     # Load the HTML file and ensure it checks out.
     html_file = logger1.stream_dir / f"{logger1.name}.html"
     assert html_file.exists()
-    with open(html_file, 'r') as hf:
+    with open(html_file, "r") as hf:
         html_text = hf.read()
     assert "once" in html_text
     assert "ONCE" in html_text
@@ -936,6 +925,6 @@ def test_invalid_decodings() -> None:
     result = logger.log(
         "Print invalid start byte for bytes decode()",
         "printf '\\xFDHello\\n'",
-        return_info=True
+        return_info=True,
     )
     assert result["stdout"] == "Hello\n"

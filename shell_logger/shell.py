@@ -42,9 +42,7 @@ class Shell:
     """
 
     def __init__(
-        self,
-        pwd: Path = Path.cwd(),
-        login_shell: bool = False
+        self, pwd: Path = Path.cwd(), login_shell: bool = False
     ) -> None:
         """
         Initialize a :class:`Shell` object.
@@ -65,24 +63,22 @@ class Shell:
 
         # Get the current flags of the file descriptors.
         aux_stdout_write_flags = fcntl.fcntl(
-            self.aux_stdout_wfd,
-            fcntl.F_GETFL
+            self.aux_stdout_wfd, fcntl.F_GETFL
         )
         aux_stderr_write_flags = fcntl.fcntl(
-            self.aux_stderr_wfd,
-            fcntl.F_GETFL
+            self.aux_stderr_wfd, fcntl.F_GETFL
         )
 
         # Make writes non-blocking.
         fcntl.fcntl(
             self.aux_stdout_wfd,
             fcntl.F_SETFL,
-            aux_stdout_write_flags | os.O_NONBLOCK
+            aux_stdout_write_flags | os.O_NONBLOCK,
         )
         fcntl.fcntl(
             self.aux_stderr_wfd,
             fcntl.F_SETFL,
-            aux_stderr_write_flags | os.O_NONBLOCK
+            aux_stderr_write_flags | os.O_NONBLOCK,
         )
 
         # Ensure the file descriptors are inheritable by the shell
@@ -97,7 +93,7 @@ class Shell:
             stdin=self.aux_stdin_rfd,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
-            close_fds=False
+            close_fds=False,
         )
         os.set_inheritable(self.aux_stdout_wfd, False)
         os.set_inheritable(self.aux_stderr_wfd, False)
@@ -115,7 +111,7 @@ class Shell:
             self.aux_stdout_rfd,
             self.aux_stdout_wfd,
             self.aux_stderr_rfd,
-            self.aux_stderr_wfd
+            self.aux_stderr_wfd,
         ]:
             try:
                 os.close(fd)
@@ -177,8 +173,7 @@ class Shell:
         # Then run the command.
         if kwargs.get("devnull_stdin"):
             os.write(
-                self.aux_stdin_wfd,
-                f"{{\n{command}\n}} </dev/null\n".encode()
+                self.aux_stdin_wfd, f"{{\n{command}\n}} </dev/null\n".encode()
             )
         else:
             os.write(self.aux_stdin_wfd, f"{{\n{command}\n}}\n".encode())
@@ -198,7 +193,7 @@ class Shell:
             output = self.tee(
                 self.shell_subprocess.stdout,
                 self.shell_subprocess.stderr,
-                **kwargs
+                **kwargs,
             )
 
         # Note:  If something goes wrong in `tee()`, the only way to reliably
@@ -228,14 +223,12 @@ class Shell:
             stderr=output.stderr_str,
             start=start,
             finish=finish,
-            wall=finish - start
+            wall=finish - start,
         )
 
     @staticmethod
     def tee(
-        stdout: Optional[IO[bytes]],
-        stderr: Optional[IO[bytes]],
-        **kwargs
+        stdout: Optional[IO[bytes]], stderr: Optional[IO[bytes]], **kwargs
     ) -> SimpleNamespace:
         """
         Split ``stdout`` and ``stderr`` file objects to write to
@@ -308,7 +301,7 @@ class Shell:
 
         # Close any open file descriptors and return the `stdout` and
         # `stderr`.
-        for file in (stdout_tee + stderr_tee):
+        for file in stdout_tee + stderr_tee:
             if (
                 file not in [None, sys.stdout, sys.stderr, sys.stdin]
                 and not file.closed
@@ -317,8 +310,7 @@ class Shell:
         return SimpleNamespace(stdout_str=stdout_str, stderr_str=stderr_str)
 
     def auxiliary_command(
-            self,
-            **kwargs
+        self, **kwargs
     ) -> Tuple[Optional[str], Optional[str]]:  # yapf: disable
         """
         Run auxiliary commands like `umask`, `pwd`, `env`, etc.
@@ -354,8 +346,7 @@ class Shell:
             while aux[-1] != 4:
                 stdout += aux.decode()
                 aux = os.read(
-                    self.aux_stdout_rfd,
-                    max_anonymous_pipe_buffer_size
+                    self.aux_stdout_rfd, max_anonymous_pipe_buffer_size
                 )
             aux = aux[:-1]
             stdout += aux.decode()
@@ -363,8 +354,7 @@ class Shell:
             while aux[-1] != 4:
                 stderr += aux.decode()
                 aux = os.read(
-                    self.aux_stderr_rfd,
-                    max_anonymous_pipe_buffer_size
+                    self.aux_stderr_rfd, max_anonymous_pipe_buffer_size
                 )
             aux = aux[:-1]
             stderr += aux.decode()

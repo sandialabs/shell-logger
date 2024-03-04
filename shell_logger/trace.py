@@ -43,6 +43,7 @@ class Trace:
     Provides an interface for the :class:`ShellLogger` to run commands
     with a certain trace (e.g., ``strace`` or ``ltrace``).
     """
+
     trace_name = "undefined"  # Should be defined by subclasses.
     subclasses = []
 
@@ -97,6 +98,7 @@ class STrace(Trace):
     An interface between :class:`ShellLogger` and the ``strace``
     command.
     """
+
     trace_name = "strace"
 
     def __init__(self, **kwargs) -> None:
@@ -126,6 +128,7 @@ class LTrace(Trace):
     An interface between :class:`ShellLogger` and the ``ltrace``
     command.
     """
+
     trace_name = "ltrace"
 
     def __init__(self, **kwargs):

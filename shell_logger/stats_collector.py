@@ -19,6 +19,7 @@ import os
 from pathlib import Path
 from time import sleep, time
 from typing import List, Tuple
+
 try:
     import psutil
 except ModuleNotFoundError:
@@ -53,6 +54,7 @@ class StatsCollector:
     Provides an interface for the :class:`ShellLogger` to run commands
     while collecting various system statistics.
     """
+
     stat_name = "undefined"  # Should be defined by subclasses.
     subclasses = []
 
@@ -138,6 +140,7 @@ if psutil is not None:
         A means of running commands while collecting disk usage
         statistics.
         """
+
         stat_name = "disk"
 
         def __init__(self, interval: float, manager: SyncManager) -> None:
@@ -157,7 +160,7 @@ if psutil is not None:
             for location in [
                 "/tmp",
                 "/dev/shm",
-                f"/var/run/user/{os.getuid()}"
+                f"/var/run/user/{os.getuid()}",
             ]:
                 if (
                     location not in self.mount_points
@@ -193,6 +196,7 @@ if psutil is not None:
         A means of running commands while collecting CPU usage
         statistics.
         """
+
         stat_name = "cpu"
 
         def __init__(self, interval: float, manager: SyncManager) -> None:
@@ -231,6 +235,7 @@ if psutil is not None:
         A means of running commands while collecting memory usage
         statistics.
         """
+
         stat_name = "memory"
 
         def __init__(self, interval: float, manager: SyncManager) -> None:
@@ -273,6 +278,7 @@ else:
         A phony :class:`DiskStatsCollector` used when ``psutil`` is
         unavailable.  This collects no disk statistics.
         """
+
         stat_name = "disk"
 
         def __init__(self, interval: float, manager: SyncManager) -> None:
@@ -307,6 +313,7 @@ else:
         A phony :class:`CPUStatsCollector` used when ``psutil`` is
         unavailable.  This collects no CPU statistics.
         """
+
         stat_name = "cpu"
 
         def __init__(self, interval: float, manager: SyncManager) -> None:
@@ -341,6 +348,7 @@ else:
         A phony :class:`MemoryStatsCollector` used when ``psutil`` is
         unavailable.  This collects no memory statistics.
         """
+
         stat_name = "memory"
 
         def __init__(self, interval: float, manager: SyncManager) -> None:

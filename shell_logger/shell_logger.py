@@ -22,7 +22,7 @@ from .html_utilities import (
     message_card,
     command_card,
     child_logger_card,
-    parent_logger_card_html
+    parent_logger_card_html,
 )
 from collections.abc import Iterable, Mapping
 from datetime import datetime, timedelta
@@ -139,7 +139,7 @@ class ShellLogger:
         log: Optional[List[object]] = None,
         init_time: Optional[datetime] = None,
         done_time: Optional[datetime] = None,
-        duration: Optional[str] = None
+        duration: Optional[str] = None,
     ) -> None:
         """
         Initialize a :class:`ShellLogger` object.
@@ -197,7 +197,7 @@ class ShellLogger:
             self.stream_dir = Path(
                 tempfile.mkdtemp(
                     dir=self.log_dir,
-                    prefix=self.init_time.strftime("%Y-%m-%d_%H.%M.%S.%f_")
+                    prefix=self.init_time.strftime("%Y-%m-%d_%H.%M.%S.%f_"),
                 )
             ).resolve()
         else:
@@ -206,13 +206,13 @@ class ShellLogger:
         # Create (or append to) the HTML log file.
         if html_file is None:
             self.html_file = self.stream_dir / (
-                self.name.replace(' ', '_') + '.html'
+                self.name.replace(" ", "_") + ".html"
             )  # yapf: disable
         else:
             self.html_file = html_file.resolve()
         if self.is_parent():
             if self.html_file.exists():
-                with open(self.html_file, 'a') as f:
+                with open(self.html_file, "a") as f:
                     f.write(
                         f"<!-- {self.init_time:} Append to log started -->"
                     )
@@ -246,8 +246,7 @@ class ShellLogger:
         """
         self.update_done_time()
         self.duration = self.strfdelta(
-            self.done_time - self.init_time,
-            "{hrs}h {min}m {sec}s"
+            self.done_time - self.init_time, "{hrs}h {min}m {sec}s"
         )
 
     def check_duration(self) -> str:
@@ -259,8 +258,7 @@ class ShellLogger:
             A string representation of the total duration.
         """
         return self.strfdelta(
-            datetime.now() - self.init_time,
-            "{hrs}h {min}m {sec}s"
+            datetime.now() - self.init_time, "{hrs}h {min}m {sec}s"
         )
 
     def change_log_dir(self, new_log_dir: Path) -> None:
@@ -289,8 +287,8 @@ class ShellLogger:
 
         # Change the `stream_dir`, `html_file`, and `log_dir` for every
         # child `ShellLogger` recursively.
-        self.stream_dir = (
-            new_log_dir / self.stream_dir.relative_to(self.log_dir)
+        self.stream_dir = new_log_dir / self.stream_dir.relative_to(
+            self.log_dir
         )
         self.html_file = new_log_dir / self.html_file.relative_to(self.log_dir)
         self.log_dir = new_log_dir.resolve()
@@ -321,7 +319,7 @@ class ShellLogger:
             self.stream_dir,
             self.html_file,
             self.indent + 1,
-            self.login_shell
+            self.login_shell,
         )
         self.log_book.append(child)
         return child
@@ -341,27 +339,27 @@ class ShellLogger:
         """
 
         # Dictionary to hold time delta info.
-        d = {'days': delta.days}
+        d = {"days": delta.days}
         microseconds_per_second = 10**6
         seconds_per_minute = 60
         minutes_per_hour = 60
-        total_ms = (
-            delta.microseconds + delta.seconds * microseconds_per_second
+        total_ms = delta.microseconds + delta.seconds * microseconds_per_second
+        d["hrs"], rem = divmod(
+            total_ms,
+            (minutes_per_hour * seconds_per_minute * microseconds_per_second),
         )
-        d['hrs'], rem = divmod(total_ms, (minutes_per_hour
-                                          * seconds_per_minute
-                                          * microseconds_per_second))
-        d['min'], rem = divmod(rem, (seconds_per_minute
-                                     * microseconds_per_second))
-        d['sec'] = rem / microseconds_per_second
+        d["min"], rem = divmod(
+            rem, (seconds_per_minute * microseconds_per_second)
+        )
+        d["sec"] = rem / microseconds_per_second
 
         # Round to 2 decimals
-        d['sec'] = round(d['sec'], 2)
+        d["sec"] = round(d["sec"], 2)
 
         # String template to help with recognizing the format.
         return fmt.format(**d)
 
-    def print(self, msg: str, end: str = '\n') -> None:
+    def print(self, msg: str, end: str = "\n") -> None:
         """
         Print a message and save it to the log.
 
@@ -370,7 +368,7 @@ class ShellLogger:
             end:  The string appended after the message:
         """
         print(msg, end=end)
-        log = {'msg': msg, 'timestamp': str(datetime.now()), 'cmd': None}
+        log = {"msg": msg, "timestamp": str(datetime.now()), "cmd": None}
         self.log_book.append(log)
 
     def html_print(self, msg: str, msg_title: str = "HTML Message") -> None:
@@ -382,10 +380,10 @@ class ShellLogger:
             msg_title:  Title of the message to save to the log.
         """
         log = {
-            'msg': msg,
-            'msg_title': msg_title,
-            'timestamp': str(datetime.now()),
-            'cmd': None
+            "msg": msg,
+            "msg_title": msg_title,
+            "timestamp": str(datetime.now()),
+            "cmd": None,
         }
         self.log_book.append(log)
 
@@ -436,16 +434,16 @@ class ShellLogger:
         """
         if self.is_parent():
             html_text = opening_html_text() + "\n"
-            with open(self.html_file, 'w') as f:
+            with open(self.html_file, "w") as f:
                 f.write(html_text)
 
         for element in self.to_html():
             append_html(element, output=self.html_file)
 
         if self.is_parent():
-            with open(self.html_file, 'a') as html:
+            with open(self.html_file, "a") as html:
                 html.write(closing_html_text())
-                html.write('\n')
+                html.write("\n")
 
             # Create a symlink in `log_dir` to the HTML file in
             # `stream_dir`.
@@ -458,15 +456,11 @@ class ShellLogger:
             # Save everything to a JSON file in the timestamped
             # `stream_dir`.
             json_file = self.stream_dir / (
-                self.name.replace(' ', '_') + '.json'
+                self.name.replace(" ", "_") + ".json"
             )  # yapf: disable
-            with open(json_file, 'w') as jf:
+            with open(json_file, "w") as jf:
                 json.dump(
-                    self,
-                    jf,
-                    cls=ShellLoggerEncoder,
-                    sort_keys=True,
-                    indent=4
+                    self, jf, cls=ShellLoggerEncoder, sort_keys=True, indent=4
                 )
 
     def log(
@@ -479,7 +473,7 @@ class ShellLogger:
         return_info: bool = False,
         verbose: bool = False,
         stdin_redirect: bool = True,
-        **kwargs
+        **kwargs,
     ) -> dict:
         """
         Execute a command, and log the corresponding information.
@@ -527,7 +521,7 @@ class ShellLogger:
         # Create a unique command ID that will be used to find the
         # location of the `stdout`/`stderr` files in the temporary
         # directory during finalization.
-        cmd_id = 'cmd_' + ''.join(
+        cmd_id = "cmd_" + "".join(
             random.choice(string.ascii_lowercase) for _ in range(9)
         )
 
@@ -537,23 +531,24 @@ class ShellLogger:
         stderr_path = self.stream_dir / f"{time_str}_{cmd_id}_stderr"
         trace_path = (
             self.stream_dir / f"{time_str}_{cmd_id}_trace"
-            if kwargs.get("trace") else None
+            if kwargs.get("trace")
+            else None
         )  # yapf: disable
 
         # Print the command to be executed.
-        with open(stdout_path, 'a'), open(stderr_path, 'a'):
+        with open(stdout_path, "a"), open(stderr_path, "a"):
             if verbose:
                 print(cmd)
 
         # Initialize the log information.
         log = {
-            'msg': msg,
-            'duration': None,
-            'timestamp': start_time.strftime("%Y-%m-%d_%H%M%S"),
-            'cmd': cmd,
-            'cmd_id': cmd_id,
-            'cwd': cwd,
-            'return_code': 0
+            "msg": msg,
+            "duration": None,
+            "timestamp": start_time.strftime("%Y-%m-%d_%H%M%S"),
+            "cmd": cmd,
+            "cmd_id": cmd_id,
+            "cwd": cwd,
+            "return_code": 0,
         }
 
         # Execute the command.
@@ -569,7 +564,7 @@ class ShellLogger:
             trace_path=trace_path,
             devnull_stdin=stdin_redirect,
             pwd=cwd,
-            **kwargs
+            **kwargs,
         )
 
         # Update the log information and save it to the `log_book`.
@@ -581,9 +576,9 @@ class ShellLogger:
         log = {**log, **nested_simplenamespace_to_dict(result)}
         self.log_book.append(log)
         return {
-            'return_code': log['return_code'],
-            'stdout': result.stdout,
-            'stderr': result.stderr
+            "return_code": log["return_code"],
+            "stdout": result.stdout,
+            "stderr": result.stderr,
         }
 
     def _run(self, command: str, **kwargs) -> SimpleNamespace:
@@ -656,8 +651,7 @@ class ShellLogger:
         if kwargs.get("pwd"):
             self.shell.cd(old_pwd)
         return SimpleNamespace(
-            **completed_process.__dict__,
-            **aux_info.__dict__
+            **completed_process.__dict__, **aux_info.__dict__
         )
 
     def auxiliary_information(self) -> SimpleNamespace:
@@ -672,12 +666,14 @@ class ShellLogger:
         pwd, _ = self.shell.auxiliary_command(posix="pwd", strip=True)
         environment, _ = self.shell.auxiliary_command(posix="env")
         umask, _ = self.shell.auxiliary_command(posix="umask", strip=True)
-        hostname, _ = self.shell.auxiliary_command(posix="hostname",
-                                                   strip=True)
+        hostname, _ = self.shell.auxiliary_command(
+            posix="hostname", strip=True
+        )
         user, _ = self.shell.auxiliary_command(posix="whoami", strip=True)
         group, _ = self.shell.auxiliary_command(posix="id -gn", strip=True)
-        shell, _ = self.shell.auxiliary_command(posix="printenv SHELL",
-                                                strip=True)
+        shell, _ = self.shell.auxiliary_command(
+            posix="printenv SHELL", strip=True
+        )
         ulimit, _ = self.shell.auxiliary_command(posix="ulimit -a")
         return SimpleNamespace(
             pwd=pwd,
@@ -687,7 +683,7 @@ class ShellLogger:
             user=user,
             group=group,
             shell=shell,
-            ulimit=ulimit
+            ulimit=ulimit,
         )
 
 
@@ -716,32 +712,32 @@ class ShellLoggerEncoder(json.JSONEncoder):
         """
         if isinstance(obj, ShellLogger):
             return {
-                **{'__type__': 'ShellLogger'},
-                **{k: self.default(v) for k, v in obj.__dict__.items()}
+                **{"__type__": "ShellLogger"},
+                **{k: self.default(v) for k, v in obj.__dict__.items()},
             }  # yapf: disable
         elif isinstance(obj, (int, float, str, bytes)):
             return obj
         elif isinstance(obj, Mapping):
             return {k: self.default(v) for k, v in obj.items()}
         elif isinstance(obj, tuple):
-            return {'__type__': 'tuple', 'items': obj}
+            return {"__type__": "tuple", "items": obj}
         elif isinstance(obj, Iterable):
             return [self.default(x) for x in obj]
         elif isinstance(obj, datetime):
             return {
-                '__type__': 'datetime',
-                'value': obj.strftime('%Y-%m-%d_%H:%M:%S:%f'),
-                'format': '%Y-%m-%d_%H:%M:%S:%f'
+                "__type__": "datetime",
+                "value": obj.strftime("%Y-%m-%d_%H:%M:%S:%f"),
+                "format": "%Y-%m-%d_%H:%M:%S:%f",
             }
         elif isinstance(obj, Path):
-            return {'__type__': 'Path', 'value': str(obj)}
+            return {"__type__": "Path", "value": str(obj)}
         elif obj is None:
             return None
         elif isinstance(obj, Shell):
             return {
                 "__type__": "Shell",
                 "pwd": obj.pwd(),
-                "login_shell": obj.login_shell
+                "login_shell": obj.login_shell,
             }
         else:
             return json.JSONEncoder.default(self, obj)
@@ -778,9 +774,9 @@ class ShellLoggerDecoder(json.JSONDecoder):
         Returns:
             The object represented by the JSON serialization.
         """
-        if '__type__' not in obj:
+        if "__type__" not in obj:
             return obj
-        elif obj['__type__'] == 'ShellLogger':
+        elif obj["__type__"] == "ShellLogger":
             logger = ShellLogger(
                 obj["name"],
                 obj["log_dir"],
@@ -791,14 +787,14 @@ class ShellLoggerDecoder(json.JSONDecoder):
                 obj["log_book"],
                 obj["init_time"],
                 obj["done_time"],
-                obj["duration"]
+                obj["duration"],
             )
             return logger
-        elif obj['__type__'] == 'datetime':
-            return datetime.strptime(obj['value'], obj['format'])
-        elif obj['__type__'] == 'Path':
-            return Path(obj['value'])
-        elif obj['__type__'] == 'tuple':
-            return tuple(obj['items'])
-        elif obj['__type__'] == 'Shell':
-            return Shell(Path(obj['pwd']), obj["login_shell"])
+        elif obj["__type__"] == "datetime":
+            return datetime.strptime(obj["value"], obj["format"])
+        elif obj["__type__"] == "Path":
+            return Path(obj["value"])
+        elif obj["__type__"] == "tuple":
+            return tuple(obj["items"])
+        elif obj["__type__"] == "Shell":
+            return Shell(Path(obj["pwd"]), obj["login_shell"])

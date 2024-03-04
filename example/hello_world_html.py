@@ -21,7 +21,7 @@ sl.log("Greet everyone to make them feel welcome.", "echo 'Hello World'")
 sl.log(
     "Tell everyone who you are, but from a different directory.",
     "whoami",
-    cwd=Path.cwd().parent
+    cwd=Path.cwd().parent,
 )
 sl.finalize()
 print(f"Open {sl.html_file} to view the log.")

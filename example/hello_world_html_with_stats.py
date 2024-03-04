@@ -13,8 +13,7 @@ from pathlib import Path
 from shell_logger import ShellLogger
 
 sl = ShellLogger(
-    "Hello World HTML with Stats",
-    Path.cwd() / f"log_{Path(__file__).stem}"
+    "Hello World HTML with Stats", Path.cwd() / f"log_{Path(__file__).stem}"
 )
 sl.print(
     "This example demonstrates logging information solely to the HTML log "
@@ -24,13 +23,13 @@ measure = ["cpu", "memory", "disk"]
 sl.log(
     "Greet everyone to make them feel welcome.",
     "echo 'Hello World'",
-    measure=measure
+    measure=measure,
 )
 sl.log(
     "Tell everyone who you are, but from a different directory.",
     "whoami",
     cwd=Path.cwd().parent,
-    measure=measure
+    measure=measure,
 )
 sl.finalize()
 print(f"Open {sl.html_file} to view the log.")
