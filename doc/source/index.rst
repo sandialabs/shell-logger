@@ -12,7 +12,6 @@ shell-logger
    stats_collector
    trace
    html_utilities
-   todo
 
 The ``shell-logger`` Python package allows you to interact with the shell,
 while logging various metadata, statistics, and trace information.  Any time
