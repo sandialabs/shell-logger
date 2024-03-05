@@ -77,8 +77,8 @@ repos:
           - id: pydocstyle
             additional_dependencies: ["tomli"]
 
-    # - repo: https://github.com/regebro/pyroma
-    #   rev: "4.2"
-    #   hooks:
-    #       - id: pyroma
-    #         additional_dependencies: ["poetry"]
+    - repo: https://github.com/regebro/pyroma
+      rev: "4.2"
+      hooks:
+          - id: pyroma
+            additional_dependencies: ["poetry"]
