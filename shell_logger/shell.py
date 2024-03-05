@@ -294,7 +294,7 @@ class Shell:
         threads = [
             Thread(target=write, args=(stdout, stdout_tee)),
             Thread(target=write, args=(stderr, stderr_tee)),
-        ]  # yapf: disable
+        ]
         for thread in threads:
             thread.daemon = True
             thread.start()
@@ -309,13 +309,13 @@ class Shell:
             if (
                 file not in [None, sys.stdout, sys.stderr, sys.stdin]
                 and not file.closed
-            ):  # yapf: disable
+            ):
                 file.close()
         return SimpleNamespace(stdout_str=stdout_str, stderr_str=stderr_str)
 
     def auxiliary_command(
         self, **kwargs
-    ) -> Tuple[Optional[str], Optional[str]]:  # yapf: disable
+    ) -> Tuple[Optional[str], Optional[str]]:
         """
         Run auxiliary commands like `umask`, `pwd`, `env`, etc.
 

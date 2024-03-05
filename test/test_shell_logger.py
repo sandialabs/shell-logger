@@ -346,7 +346,7 @@ def test_log_dir_html_symlinks_to_stream_dir_html(
 
 def test_json_file_can_reproduce_html_file(
     shell_logger: ShellLogger,
-) -> None:  # yapf: disable
+) -> None:
     """
     Verify that a JSON file can properly recreate the original HTML file
     created when :func:`finalize` is called.

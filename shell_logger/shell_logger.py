@@ -181,7 +181,7 @@ class ShellLogger:
         self.name = name
         self.log_book: List[Union[dict, ShellLogger]] = (
             log if log is not None else []
-        )  # yapf: disable
+        )
         self.init_time = datetime.now() if init_time is None else init_time
         self.done_time = datetime.now() if done_time is None else done_time
         self.duration = duration
@@ -210,7 +210,7 @@ class ShellLogger:
         if html_file is None:
             self.html_file = self.stream_dir / (
                 self.name.replace(" ", "_") + ".html"
-            )  # yapf: disable
+            )
         else:
             self.html_file = html_file.resolve()
         if self.is_parent():
@@ -474,7 +474,7 @@ class ShellLogger:
             # `stream_dir`.
             json_file = self.stream_dir / (
                 self.name.replace(" ", "_") + ".json"
-            )  # yapf: disable
+            )
             with open(json_file, "w") as jf:
                 json.dump(
                     self, jf, cls=ShellLoggerEncoder, sort_keys=True, indent=4
@@ -550,7 +550,7 @@ class ShellLogger:
             self.stream_dir / f"{time_str}_{cmd_id}_trace"
             if kwargs.get("trace")
             else None
-        )  # yapf: disable
+        )
 
         # Print the command to be executed.
         with open(stdout_path, "a"), open(stderr_path, "a"):
@@ -735,7 +735,7 @@ class ShellLoggerEncoder(json.JSONEncoder):
             return {
                 **{"__type__": "ShellLogger"},
                 **{k: self.default(v) for k, v in obj.__dict__.items()},
-            }  # yapf: disable
+            }
         elif isinstance(obj, (int, float, str, bytes)):
             return obj
         elif isinstance(obj, Mapping):

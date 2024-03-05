@@ -19,7 +19,7 @@ from typing import Iterator, List, TextIO, Tuple, Union
 
 def nested_simplenamespace_to_dict(
     namespace: Union[str, bytes, tuple, Mapping, Iterable, SimpleNamespace]
-) -> Union[str, bytes, tuple, dict, list]:  # yapf: disable
+) -> Union[str, bytes, tuple, dict, list]:
     """
     Convert a ``SimpleNamespace`` to a ``dict``.
 
@@ -43,7 +43,7 @@ def nested_simplenamespace_to_dict(
     elif isinstance(namespace, Mapping):
         return {
             k: nested_simplenamespace_to_dict(v) for k, v in namespace.items()
-        }  # yapf: disable
+        }
     elif isinstance(namespace, Iterable):
         return [nested_simplenamespace_to_dict(x) for x in namespace]
     elif isinstance(namespace, SimpleNamespace):
@@ -98,7 +98,7 @@ def append_html(*args: Union[str, Iterator[str]], output: Path) -> None:
 
     def _append_html(
         f: TextIO, *inner_args: Union[str, bytes, Iterable]
-    ) -> None:  # yapf: disable
+    ) -> None:
         """
         Write some text to the given HTML log file.
 
@@ -159,7 +159,7 @@ def flatten(element: Union[str, bytes, Iterable]) -> Iterator[str]:
 
 def parent_logger_card_html(
     name: str, *args: List[Iterator[str]]
-) -> Iterator[str]:  # yapf: disable
+) -> Iterator[str]:
     """
     Generate the HTML for a parent logger card.
 
@@ -214,7 +214,7 @@ def child_logger_card(log) -> Iterator[str]:
 
 def child_logger_card_html(
     name: str, duration: str, *args: Union[Iterator[str], List[Iterator[str]]]
-) -> Iterator[str]:  # yapf: disable
+) -> Iterator[str]:
     """
     Generate the HTML for a child logger card.
 
@@ -252,7 +252,7 @@ def child_logger_card_html(
 
 def command_card_html(
     log: dict, *args: Iterator[Union[str, Iterable]]
-) -> Iterator[str]:  # yapf: disable
+) -> Iterator[str]:
     """
     Generate the HTML for a command card.
 
@@ -311,7 +311,7 @@ def html_message_card(log: dict) -> Iterator[str]:
         .replace(":", "-")
         .replace("/", "_")
         .replace(".", "-")
-    )  # yapf: disable
+    )
     header, indent, footer = split_template(
         html_message_template,
         "message",
@@ -442,13 +442,13 @@ def command_card(log: dict, stream_dir: Path) -> Iterator[str]:
         ),
         output_block_card("stdout", stdout_path, cmd_id, collapsed=False),
         output_block_card("stderr", stderr_path, cmd_id, collapsed=False),
-    ]  # yapf: disable
+    ]
 
     # Compile the additional diagnostic information.
     diagnostics = [
         output_block_card("Environment", log["environment"], cmd_id),
         output_block_card("ulimit", log["ulimit"], cmd_id),
-    ]  # yapf: disable
+    ]
     if trace_path.exists():
         diagnostics.append(output_block_card("trace", trace_path, cmd_id))
 
@@ -471,7 +471,7 @@ def command_card(log: dict, stream_dir: Path) -> Iterator[str]:
                 x: y
                 for x, y in log["stats"]["disk"].items()
                 if x not in uninteresting_disks
-            }  # yapf: disable
+            }
 
             # We sort because JSON deserialization may change
             # the ordering of the map.
@@ -483,7 +483,7 @@ def command_card(log: dict, stream_dir: Path) -> Iterator[str]:
 
 def time_series_plot(
     cmd_id: str, data_tuples: List[Tuple[float, float]], series_title: str
-) -> Iterator[str]:  # yapf: disable
+) -> Iterator[str]:
     """
     Create the HTML for a plot of time series data.
 
@@ -504,7 +504,7 @@ def time_series_plot(
 
 def disk_time_series_plot(
     cmd_id: str, data_tuples: Tuple[float, float], volume_name: str
-) -> Iterator[str]:  # yapf: disable
+) -> Iterator[str]:
     """
     Generate a time series plot of disk usage.
 
@@ -553,7 +553,7 @@ def stat_chart_card(
 
 def output_block_card(
     title: str, output: Union[Path, str], cmd_id: str, collapsed: bool = True
-) -> Iterator[str]:  # yapf: disable
+) -> Iterator[str]:
     """
     Generate an output block card.
 
@@ -587,7 +587,7 @@ def output_block_card(
 
 def output_block(
     output: Union[Path, str], name: str, cmd_id: str
-) -> Iterator[str]:  # yapf: disable
+) -> Iterator[str]:
     """
     Generate an output block.
 
@@ -644,7 +644,7 @@ def diagnostics_card(cmd_id: str, *args: Iterator[str]) -> Iterator[str]:
 
 def output_block_html(
     lines: Union[TextIO, str], name: str, cmd_id: str
-) -> Iterator[str]:  # yapf: disable
+) -> Iterator[str]:
     """
     Generate the HTML for an output block.
 
@@ -676,7 +676,7 @@ def output_block_html(
 
 def split_template(
     template: str, split_at: str, **kwargs
-) -> Tuple[str, str, str]:  # yapf: disable
+) -> Tuple[str, str, str]:
     """
     Subdivide a HTML template.
 
@@ -753,7 +753,7 @@ def html_encode(text: str) -> str:
     """
     return sgr_to_html(
         text.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
-    )  # yapf: disable
+    )
 
 
 def sgr_to_html(text: str) -> str:
@@ -942,7 +942,7 @@ def html_header() -> str:
         + embed_script("search_output.js")
         + embed_html("search_icon.svg")
         + "</head>"
-    )  # yapf: disable
+    )
 
 
 def embed_style(resource: str) -> str:
@@ -966,7 +966,7 @@ def embed_style(resource: str) -> str:
         "<style>\n"
         + pkgutil.get_data(__name__, f"resources/{resource}").decode()
         + "\n</style>\n"
-    )  # yapf: disable
+    )
 
 
 def embed_script(resource: str) -> str:
@@ -986,7 +986,7 @@ def embed_script(resource: str) -> str:
         "<script>\n"
         + pkgutil.get_data(__name__, f"resources/{resource}").decode()
         + "\n</script>\n"
-    )  # yapf: disable
+    )
 
 
 def embed_html(resource: str) -> str:
