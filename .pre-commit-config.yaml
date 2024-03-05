@@ -60,10 +60,10 @@ repos:
       hooks:
           - id: flake8
 
-    # - repo: https://github.com/PyCQA/isort
-    #   rev: 5.13.2
-    #   hooks:
-    #       - id: isort
+    - repo: https://github.com/PyCQA/isort
+      rev: 5.13.2
+      hooks:
+          - id: isort
 
     # - repo: https://github.com/PyCQA/prospector
     #   rev: v1.10.3
