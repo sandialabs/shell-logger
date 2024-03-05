@@ -130,7 +130,7 @@ class Shell:
             ``True`` if the types and working directories of the two
             objects are equal; ``False`` otherwise.
         """
-        return type(self) == type(other) and self.pwd() == other.pwd()
+        return isinstance(self, type(other)) and self.pwd() == other.pwd()
 
     def pwd(self) -> str:
         """
