@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
-"""
-Provides the means of collecting various trace data.
-"""
+"""Provides the means of collecting various trace data."""
 
 # © 2024 National Technology & Engineering Solutions of Sandia, LLC
 # (NTESS).  Under the terms of Contract DE-NA0003525 with NTESS, the
@@ -10,13 +8,17 @@ Provides the means of collecting various trace data.
 # SPDX-License-Identifier: BSD-3-Clause
 
 from __future__ import annotations
-from .abstract_method import AbstractMethod
+
 from abc import abstractmethod
 from pathlib import Path
+
+from .abstract_method import AbstractMethod
 
 
 def trace_collector(**kwargs) -> Trace:
     """
+    Generate trace collectors.
+
     A factory method that returns any subclass of :class:`Trace` that
     has the ``@Trace.subclass`` decorator applied to it.
 
@@ -40,15 +42,20 @@ def trace_collector(**kwargs) -> Trace:
 
 class Trace:
     """
+    Trace a command run in the underlying shell.
+
     Provides an interface for the :class:`ShellLogger` to run commands
     with a certain trace (e.g., ``strace`` or ``ltrace``).
     """
+
     trace_name = "undefined"  # Should be defined by subclasses.
     subclasses = []
 
     @staticmethod
     def subclass(trace_subclass: type):
         """
+        Mark a class as being a supported trace collector.
+
         This is a class decorator that adds to a list of supported
         :class:`Trace` classes for the :func:`trace_collector` factory
         method.
@@ -59,8 +66,10 @@ class Trace:
 
     def __init__(self, **kwargs):
         """
-        Initialize the :class:`Trace` object, setting up the output file
-        where the trace information will be written.
+        Initialize the :class:`Trace` object.
+
+        Set up the output file where the trace information will be
+        written.
         """
         if kwargs.get("trace_path"):
             self.output_path = Path(kwargs["trace_path"])
@@ -69,8 +78,10 @@ class Trace:
 
     @property
     @abstractmethod
-    def trace_args(self) -> None:
+    def trace_args(self) -> str:
         """
+        Get the trace command.
+
         The trace command and the arguments you pass to it, but not the
         command you're tracing.  E.g., return `strace -f -c -e "open"`.
 
@@ -81,6 +92,8 @@ class Trace:
 
     def command(self, command: str):
         """
+        Get the command to be run in the underlying shell.
+
         Return a command that runs a trace on ``command``.  E.g., ``ls
         -l`` might get translated to ``strace -f -c -e 'open' -- ls
         -l``.
@@ -94,24 +107,23 @@ class Trace:
 @Trace.subclass
 class STrace(Trace):
     """
+    Run ``strace`` on commands.
+
     An interface between :class:`ShellLogger` and the ``strace``
     command.
     """
+
     trace_name = "strace"
 
     def __init__(self, **kwargs) -> None:
-        """
-        Initialize the :class:`STrace` instance.
-        """
+        """Initialize the :class:`STrace` instance."""
         super().__init__(**kwargs)
         self.summary = True if kwargs.get("summary") else False
         self.expression = kwargs.get("expression")
 
     @property
     def trace_args(self) -> str:
-        """
-        Wraps a command in a ``strace`` command.
-        """
+        """Wraps a command in a ``strace`` command."""
         args = f"strace -f -o {self.output_path}"
         if self.summary:
             args += " -c"
@@ -123,24 +135,23 @@ class STrace(Trace):
 @Trace.subclass
 class LTrace(Trace):
     """
+    Run ``ltrace`` on commands.
+
     An interface between :class:`ShellLogger` and the ``ltrace``
     command.
     """
+
     trace_name = "ltrace"
 
     def __init__(self, **kwargs):
-        """
-        Initialize the :class:`LTrace` instance.
-        """
+        """Initialize the :class:`LTrace` instance."""
         super().__init__(**kwargs)
         self.summary = True if kwargs.get("summary") else False
         self.expression = kwargs.get("expression")
 
     @property
     def trace_args(self):
-        """
-        Wraps a command in a ``ltrace`` command.
-        """
+        """Wraps a command in a ``ltrace`` command."""
         args = f"ltrace -C -f -o {self.output_path}"
         if self.summary:
             args += " -c"

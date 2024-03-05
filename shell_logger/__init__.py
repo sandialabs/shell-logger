@@ -1,6 +1,4 @@
-"""
-The ``shell_logger`` package.
-"""
+"""The ``shell_logger`` package."""
 
 # © 2024 National Technology & Engineering Solutions of Sandia, LLC
 # (NTESS).  Under the terms of Contract DE-NA0003525 with NTESS, the

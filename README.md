@@ -21,7 +21,6 @@
 [![PyPI - Version](https://img.shields.io/pypi/v/shell-logger?label=PyPI)](https://pypi.org/project/shell-logger/)
 ![PyPI - Downloads](https://img.shields.io/pypi/dm/shell-logger?label=PyPI%20downloads)
 ![Python Version](https://img.shields.io/badge/Python-3.8|3.9|3.10|3.11|3.12-blue.svg)
-[![Security: Bandit](https://img.shields.io/badge/Security-Bandit-yellow.svg)](https://github.com/PyCQA/bandit)
 
 # shell-logger
 

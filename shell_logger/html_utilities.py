@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
-"""
-Various utitlities for building the HTML log file.
-"""
+"""Various utitlities for building the HTML log file."""
 
 # © 2024 National Technology & Engineering Solutions of Sandia, LLC
 # (NTESS).  Under the terms of Contract DE-NA0003525 with NTESS, the
@@ -9,20 +7,22 @@ Various utitlities for building the HTML log file.
 
 # SPDX-License-Identifier: BSD-3-Clause
 
-from collections.abc import Iterable, Mapping
-from datetime import datetime
 import pkgutil
-from pathlib import Path
 import re
 import textwrap
+from collections.abc import Iterable, Mapping
+from datetime import datetime
+from pathlib import Path
 from types import SimpleNamespace
 from typing import Iterator, List, TextIO, Tuple, Union
 
 
 def nested_simplenamespace_to_dict(
     namespace: Union[str, bytes, tuple, Mapping, Iterable, SimpleNamespace]
-) -> Union[str, bytes, tuple, dict, list]:  # yapf: disable
+) -> Union[str, bytes, tuple, dict, list]:
     """
+    Convert a ``SimpleNamespace`` to a ``dict``.
+
     Convert a ``SimpleNamespace``, which may include nested namespaces,
     iterables, and mappings, to a ``dict`` containing the equivalent
     items.
@@ -42,9 +42,8 @@ def nested_simplenamespace_to_dict(
         return namespace
     elif isinstance(namespace, Mapping):
         return {
-            k: nested_simplenamespace_to_dict(v)
-            for k, v in namespace.items()
-        }  # yapf: disable
+            k: nested_simplenamespace_to_dict(v) for k, v in namespace.items()
+        }
     elif isinstance(namespace, Iterable):
         return [nested_simplenamespace_to_dict(x) for x in namespace]
     elif isinstance(namespace, SimpleNamespace):
@@ -64,7 +63,7 @@ def get_human_time(milliseconds: float) -> str:
         A string representation of the date and time.
     """
     seconds = milliseconds / 1000.0
-    return datetime.fromtimestamp(seconds).strftime('%Y-%m-%d %H:%M:%S.%f')
+    return datetime.fromtimestamp(seconds).strftime("%Y-%m-%d %H:%M:%S.%f")
 
 
 def opening_html_text() -> str:
@@ -98,9 +97,8 @@ def append_html(*args: Union[str, Iterator[str]], output: Path) -> None:
     """
 
     def _append_html(
-        f: TextIO,
-        *inner_args: Union[str, bytes, Iterable]
-    ) -> None:  # yapf: disable
+        f: TextIO, *inner_args: Union[str, bytes, Iterable]
+    ) -> None:
         """
         Write some text to the given HTML log file.
 
@@ -124,6 +122,8 @@ def append_html(*args: Union[str, Iterator[str]], output: Path) -> None:
 
 def fixed_width(text: str) -> str:
     """
+    Convert the text to a fixed-width font.
+
     Wrap the given ``text`` in a ``<pre><code>...</code></pre>`` block
     such that it displays in a fixed-width font.
 
@@ -138,7 +138,7 @@ def fixed_width(text: str) -> str:
 
 def flatten(element: Union[str, bytes, Iterable]) -> Iterator[str]:
     """
-    Takes a tree of lists and turns it into a flat iterable of strings.
+    Turn a tree of lists into a flat iterable of strings.
 
     Parameters:
         element:  An element of a tree.
@@ -158,10 +158,11 @@ def flatten(element: Union[str, bytes, Iterable]) -> Iterator[str]:
 
 
 def parent_logger_card_html(
-    name: str,
-    *args: List[Iterator[str]]
-) -> Iterator[str]:  # yapf: disable
+    name: str, *args: List[Iterator[str]]
+) -> Iterator[str]:
     """
+    Generate the HTML for a parent logger card.
+
     Generate the HTML for the card corresponding to the parent
     :class:`ShellLogger`.  The HTML elements are yielded one at a time
     to avoid loading *all* the data from the :class:`ShellLogger` into
@@ -176,9 +177,9 @@ def parent_logger_card_html(
         The header, followed by all the contents of the
         :class:`ShellLogger`, and then the footer.
     """
-    header, indent, footer = split_template(parent_logger_template,
-                                            "parent_body",
-                                            name=name)
+    header, indent, footer = split_template(
+        parent_logger_template, "parent_body", name=name
+    )
     yield header
     for arg in flatten(args):
         yield textwrap.indent(arg, indent)
@@ -187,6 +188,8 @@ def parent_logger_card_html(
 
 def child_logger_card(log) -> Iterator[str]:
     """
+    Generate a child logger card.
+
     Create a card to go in the HTML log file containing everything
     pertaining to a child :class:`ShellLogger`.
 
@@ -210,11 +213,11 @@ def child_logger_card(log) -> Iterator[str]:
 
 
 def child_logger_card_html(
-    name: str,
-    duration: str,
-    *args: Union[Iterator[str], List[Iterator[str]]]
-) -> Iterator[str]:  # yapf: disable
+    name: str, duration: str, *args: Union[Iterator[str], List[Iterator[str]]]
+) -> Iterator[str]:
     """
+    Generate the HTML for a child logger card.
+
     Generate the HTML for a card corresponding to the child
     :class:`ShellLogger`.  The HTML elements are yielded one at a time
     to avoid loading *all* the data from the :class:`ShellLogger` into
@@ -234,10 +237,9 @@ def child_logger_card_html(
       * Should we replace the ``for`` loop with the one found in
         :func:`parent_logger_card_html`?
     """
-    header, indent, footer = split_template(child_logger_template,
-                                            "child_body",
-                                            name=name,
-                                            duration=duration)
+    header, indent, footer = split_template(
+        child_logger_template, "child_body", name=name, duration=duration
+    )
     yield header
     for arg in args:
         if isinstance(arg, str):
@@ -249,10 +251,11 @@ def child_logger_card_html(
 
 
 def command_card_html(
-    log: dict,
-    *args: Iterator[Union[str, Iterable]]
-) -> Iterator[str]:  # yapf: disable
+    log: dict, *args: Iterator[Union[str, Iterable]]
+) -> Iterator[str]:
     """
+    Generate the HTML for a command card.
+
     Generate the HTML for a card corresponding to a command that was
     run.  The HTML elements are yielded one at a time to avoid loading
     *all* the data into memory at once.
@@ -267,13 +270,15 @@ def command_card_html(
         The header, followed by all the contents of the command card,
         and then the footer.
     """
-    header, indent, footer = split_template(command_template,
-                                            "more_info",
-                                            cmd_id=log["cmd_id"],
-                                            command=fixed_width(log["cmd"]),
-                                            message=log["msg"],
-                                            return_code=log["return_code"],
-                                            duration=log["duration"])
+    header, indent, footer = split_template(
+        command_template,
+        "more_info",
+        cmd_id=log["cmd_id"],
+        command=fixed_width(log["cmd"]),
+        message=log["msg"],
+        return_code=log["return_code"],
+        duration=log["duration"],
+    )
     yield header
     for arg in args:
         if isinstance(arg, str):
@@ -286,6 +291,8 @@ def command_card_html(
 
 def html_message_card(log: dict) -> Iterator[str]:
     """
+    Generate the HTML for a message card.
+
     Generate the HTML for a card corresponding to a message to only be
     included in the HTML log file (e.g., not printed to ``stdout`` as
     well).
@@ -300,26 +307,28 @@ def html_message_card(log: dict) -> Iterator[str]:
     """
     timestamp = (
         log["timestamp"]
-        .replace(' ', '_')
-        .replace(':', '-')
-        .replace('/', '_')
-        .replace('.', '-')
-    )  # yapf: disable
+        .replace(" ", "_")
+        .replace(":", "-")
+        .replace("/", "_")
+        .replace(".", "-")
+    )
     header, indent, footer = split_template(
         html_message_template,
         "message",
         title=log["msg_title"],
-        timestamp=timestamp
+        timestamp=timestamp,
     )
     text = html_encode(log["msg"])
-    text = "<pre>" + text.replace('\n', "<br>") + "</pre>"
+    text = "<pre>" + text.replace("\n", "<br>") + "</pre>"
     yield header
-    yield textwrap.indent(text, indent) + '\n'
+    yield textwrap.indent(text, indent) + "\n"
     yield footer
 
 
 def message_card(log: dict) -> Iterator[str]:
     """
+    Generate a message card.
+
     Generate the HTML for a card corresponding to a message to be both
     printed to ``stdout`` and included in the HTML log file.
 
@@ -333,14 +342,16 @@ def message_card(log: dict) -> Iterator[str]:
     """
     header, indent, footer = split_template(message_template, "message")
     text = html_encode(log["msg"])
-    text = "<pre>" + text.replace('\n', "<br>") + "</pre>"
+    text = "<pre>" + text.replace("\n", "<br>") + "</pre>"
     yield header
-    yield textwrap.indent(text, indent) + '\n'
+    yield textwrap.indent(text, indent) + "\n"
     yield footer
 
 
 def command_detail_list(cmd_id: str, *args: Iterator[str]) -> Iterator[str]:
     """
+    Generate the list of command details.
+
     Generate the HTML for a list of details associated with a command
     that was run.
 
@@ -354,9 +365,9 @@ def command_detail_list(cmd_id: str, *args: Iterator[str]) -> Iterator[str]:
         The header, followed by each of the details associated with the
         command that was run, and then the footer.
     """
-    header, indent, footer = split_template(command_detail_list_template,
-                                            "details",
-                                            cmd_id=cmd_id)
+    header, indent, footer = split_template(
+        command_detail_list_template, "details", cmd_id=cmd_id
+    )
     yield header
     for arg in args:
         if isinstance(arg, str):
@@ -365,12 +376,11 @@ def command_detail_list(cmd_id: str, *args: Iterator[str]) -> Iterator[str]:
 
 
 def command_detail(
-    cmd_id: str,
-    name: str,
-    value: str,
-    hidden: bool = False
+    cmd_id: str, name: str, value: str, hidden: bool = False
 ) -> str:
     """
+    Generate the HTML for a command detail.
+
     Create the HTML snippet for a detail associated with a command that
     was run.
 
@@ -387,9 +397,7 @@ def command_detail(
     """
     if hidden:
         return hidden_command_detail_template.format(
-            cmd_id=cmd_id,
-            name=name,
-            value=value
+            cmd_id=cmd_id, name=name, value=value
         )
     else:
         return command_detail_template.format(name=name, value=value)
@@ -397,6 +405,8 @@ def command_detail(
 
 def command_card(log: dict, stream_dir: Path) -> Iterator[str]:
     """
+    Generate a command card.
+
     Create a card in the HTML log file containing the output of a
     command, along with all its corresponding data (environment
     information, trace output, memory/CPU/disk statistics, etc.).
@@ -428,17 +438,17 @@ def command_card(log: dict, stream_dir: Path) -> Iterator[str]:
             command_detail(cmd_id, "Group", log["group"], hidden=True),
             command_detail(cmd_id, "Shell", log["shell"], hidden=True),
             command_detail(cmd_id, "umask", log["umask"], hidden=True),
-            command_detail(cmd_id, "Return Code", log["return_code"])
+            command_detail(cmd_id, "Return Code", log["return_code"]),
         ),
         output_block_card("stdout", stdout_path, cmd_id, collapsed=False),
         output_block_card("stderr", stderr_path, cmd_id, collapsed=False),
-    ]  # yapf: disable
+    ]
 
     # Compile the additional diagnostic information.
     diagnostics = [
         output_block_card("Environment", log["environment"], cmd_id),
         output_block_card("ulimit", log["ulimit"], cmd_id),
-    ]  # yapf: disable
+    ]
     if trace_path.exists():
         diagnostics.append(output_block_card("trace", trace_path, cmd_id))
 
@@ -455,13 +465,13 @@ def command_card(log: dict, stream_dir: Path) -> Iterator[str]:
                 "/var/log",
                 "/var/log/audit",
                 "/boot",
-                "/boot/efi"
+                "/boot/efi",
             ]
             disk_stats = {
                 x: y
                 for x, y in log["stats"]["disk"].items()
                 if x not in uninteresting_disks
-            }  # yapf: disable
+            }
 
             # We sort because JSON deserialization may change
             # the ordering of the map.
@@ -472,10 +482,8 @@ def command_card(log: dict, stream_dir: Path) -> Iterator[str]:
 
 
 def time_series_plot(
-    cmd_id: str,
-    data_tuples: List[Tuple[float, float]],
-    series_title: str
-) -> Iterator[str]:  # yapf: disable
+    cmd_id: str, data_tuples: List[Tuple[float, float]], series_title: str
+) -> Iterator[str]:
     """
     Create the HTML for a plot of time series data.
 
@@ -495,11 +503,11 @@ def time_series_plot(
 
 
 def disk_time_series_plot(
-    cmd_id: str,
-    data_tuples: Tuple[float, float],
-    volume_name: str
-) -> Iterator[str]:  # yapf: disable
+    cmd_id: str, data_tuples: Tuple[float, float], volume_name: str
+) -> Iterator[str]:
     """
+    Generate a time series plot of disk usage.
+
     Create the HTML for a plot of the disk usage time series data for a
     particular volume.
 
@@ -524,10 +532,7 @@ def disk_time_series_plot(
 
 
 def stat_chart_card(
-    labels: List[str],
-    data: List[float],
-    title: str,
-    identifier: str
+    labels: List[str], data: List[float], title: str, identifier: str
 ) -> Iterator[str]:
     """
     Create the HTML for a two-dimensional plot.
@@ -542,20 +547,16 @@ def stat_chart_card(
         A HTML snippet for the chart with all the details filled in.
     """
     yield stat_chart_template.format(
-        labels=labels,
-        data=data,
-        title=title,
-        id=identifier
+        labels=labels, data=data, title=title, id=identifier
     )
 
 
 def output_block_card(
-    title: str,
-    output: Union[Path, str],
-    cmd_id: str,
-    collapsed: bool = True
-) -> Iterator[str]:  # yapf: disable
+    title: str, output: Union[Path, str], cmd_id: str, collapsed: bool = True
+) -> Iterator[str]:
     """
+    Generate an output block card.
+
     Given the output from a command, generate a corresponding HTML card
     for inclusion in the log file.
 
@@ -571,16 +572,12 @@ def output_block_card(
         The header, followed by each line of the output, and then the
         footer.
     """
-    name = title.replace(' ', '_').lower()
+    name = title.replace(" ", "_").lower()
     template = (
         output_card_collapsed_template if collapsed else output_card_template
     )
     header, indent, footer = split_template(
-        template,
-        "output_block",
-        name=name,
-        title=title,
-        cmd_id=cmd_id
+        template, "output_block", name=name, title=title, cmd_id=cmd_id
     )
     yield header
     for line in output_block(output, name, cmd_id):
@@ -589,11 +586,11 @@ def output_block_card(
 
 
 def output_block(
-    output: Union[Path, str],
-    name: str,
-    cmd_id: str
-) -> Iterator[str]:  # yapf: disable
+    output: Union[Path, str], name: str, cmd_id: str
+) -> Iterator[str]:
     """
+    Generate an output block.
+
     Given the output from a command, generate the HTML equivalent for
     inclusion in the log file.
 
@@ -617,6 +614,8 @@ def output_block(
 
 def diagnostics_card(cmd_id: str, *args: Iterator[str]) -> Iterator[str]:
     """
+    Generate a diagnostics card.
+
     Generate a card containing system diagnostic information associated
     with a command that was run.
 
@@ -631,9 +630,7 @@ def diagnostics_card(cmd_id: str, *args: Iterator[str]) -> Iterator[str]:
         and then the footer.
     """
     header, indent, footer = split_template(
-        diagnostics_template,
-        "diagnostics",
-        cmd_id=cmd_id
+        diagnostics_template, "diagnostics", cmd_id=cmd_id
     )
     yield header
     for arg in args:
@@ -646,11 +643,11 @@ def diagnostics_card(cmd_id: str, *args: Iterator[str]) -> Iterator[str]:
 
 
 def output_block_html(
-    lines: Union[TextIO, str],
-    name: str,
-    cmd_id: str
-) -> Iterator[str]:  # yapf: disable
+    lines: Union[TextIO, str], name: str, cmd_id: str
+) -> Iterator[str]:
     """
+    Generate the HTML for an output block.
+
     Given the output of a command, generate its HTML equivalent for
     inclusion in the log file.
 
@@ -665,12 +662,9 @@ def output_block_html(
         output, and then the footer.
     """
     if isinstance(lines, str):
-        lines = lines.split('\n')
+        lines = lines.split("\n")
     header, indent, footer = split_template(
-        output_block_template,
-        "table_contents",
-        name=name,
-        cmd_id=cmd_id
+        output_block_template, "table_contents", name=name, cmd_id=cmd_id
     )
     yield header
     line_no = 0
@@ -681,11 +675,11 @@ def output_block_html(
 
 
 def split_template(
-    template: str,
-    split_at: str,
-    **kwargs
-) -> Tuple[str, str, str]:  # yapf: disable
+    template: str, split_at: str, **kwargs
+) -> Tuple[str, str, str]:
     """
+    Subdivide a HTML template.
+
     Take a templated HTML snippet and split it into a header and footer,
     meaning everything that comes before and after the line containing
     ``split_at``.  Also determine the indentation for the content that
@@ -722,8 +716,7 @@ def split_template(
     """
     fmt = {k: v for k, v in kwargs.items() if k != split_at}
     pattern = re.compile(
-        f"(.*\\n)(\\s*)\\{{{split_at}\\}}\\n(.*)",
-        flags=re.DOTALL
+        f"(.*\\n)(\\s*)\\{{{split_at}\\}}\\n(.*)", flags=re.DOTALL
     )
     before, indent, after = pattern.search(template).groups()
     return before.format(**fmt), indent, after.format(**fmt)
@@ -731,6 +724,8 @@ def split_template(
 
 def output_line_html(line: str, line_no: int) -> str:
     """
+    Generate the HTML for a line of output.
+
     Given a line of output from a command, along with the corresponding
     line number, create the HTML equivalent to be included in the log
     file.
@@ -757,15 +752,14 @@ def html_encode(text: str) -> str:
         The encoded text.
     """
     return sgr_to_html(
-        text
-        .replace('&', "&amp;")
-        .replace('<', "&lt;")
-        .replace('>', "&gt;")
-    )  # yapf: disable
+        text.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
+    )
 
 
 def sgr_to_html(text: str) -> str:
     """
+    Convert SGR to HTML.
+
     Translate Select Graphic Rendition (SGR, a.k.a. ANSI escape codes)
     to valid HTML/CSS.
 
@@ -779,7 +773,7 @@ def sgr_to_html(text: str) -> str:
     while text.find("\x1b[") >= 0:
         start = text.find("\x1b[")
         finish = text.find("m", start)
-        sgrs = text[start + 2:finish].split(';')
+        sgrs = text[start + 2 : finish].split(";")
         span_string = ""
         if len(sgrs) == 0:
             span_string += "</span>" * span_count
@@ -802,7 +796,7 @@ def sgr_to_html(text: str) -> str:
                     span_count += 1
                     span_string += sgr_4bit_color_and_style_to_html(sgrs[0])
                     sgrs = sgrs[1:]
-        text = text[:start] + span_string + text[finish + 1:]
+        text = text[:start] + span_string + text[finish + 1 :]
     return text
 
 
@@ -862,6 +856,8 @@ def sgr_4bit_color_and_style_to_html(sgr: str) -> str:
 
 def sgr_8bit_color_to_html(sgr_params: List[str]) -> str:
     """
+    Convert 8-bit SGR colors to HTML.
+
     Convert an 8-bit Select Graphic Rendition (SGR) code to valid
     HTML/CSS.
 
@@ -873,17 +869,17 @@ def sgr_8bit_color_to_html(sgr_params: List[str]) -> str:
     """
     sgr_256 = int(sgr_params[2]) if len(sgr_params) > 2 else 0
     if sgr_256 < 0 or sgr_256 > 255 or not sgr_params:
-        return '<span>'
+        return "<span>"
     if 15 < sgr_256 < 232:
-        red_6cube = (sgr_256-16) // 36
-        green_6cube = (sgr_256 - (16 + red_6cube*36)) // 6
-        blue_6cube = (sgr_256-16) % 6
+        red_6cube = (sgr_256 - 16) // 36
+        green_6cube = (sgr_256 - (16 + red_6cube * 36)) // 6
+        blue_6cube = (sgr_256 - 16) % 6
         red = str(51 * red_6cube)
         green = str(51 * green_6cube)
         blue = str(51 * blue_6cube)
         return sgr_24bit_color_to_html([sgr_params[0], "2", red, green, blue])
     elif 231 < sgr_256 < 256:
-        gray = str(8 + (sgr_256-232) * 10)
+        gray = str(8 + (sgr_256 - 232) * 10)
         return sgr_24bit_color_to_html([sgr_params[0], "2", gray, gray, gray])
     elif sgr_params[0] == "38":
         if sgr_256 < 8:
@@ -899,6 +895,8 @@ def sgr_8bit_color_to_html(sgr_params: List[str]) -> str:
 
 def sgr_24bit_color_to_html(sgr_params: List[str]) -> str:
     """
+    Convert 24-bit SGR colors to HTML.
+
     Convert a 24-bit Select Graphic Rendition (SGR) code to valid
     HTML/CSS.
 
@@ -914,7 +912,7 @@ def sgr_24bit_color_to_html(sgr_params: List[str]) -> str:
     elif len(sgr_params) > 1 and sgr_params[:2] == ["48", "2"]:
         return f'<span style="background-color: rgb({r}, {g}, {b})">'
     else:
-        return '<span>'
+        return "<span>"
 
 
 def html_header() -> str:
@@ -944,11 +942,13 @@ def html_header() -> str:
         + embed_script("search_output.js")
         + embed_html("search_icon.svg")
         + "</head>"
-    )  # yapf: disable
+    )
 
 
 def embed_style(resource: str) -> str:
     """
+    Embed a style in the HTML.
+
     Wrap the given ``resource`` in an appropriate ``<style>...</style>``
     block for embedding in the HTML header.
 
@@ -966,11 +966,13 @@ def embed_style(resource: str) -> str:
         "<style>\n"
         + pkgutil.get_data(__name__, f"resources/{resource}").decode()
         + "\n</style>\n"
-    )  # yapf: disable
+    )
 
 
 def embed_script(resource: str) -> str:
     """
+    Embed a script in the HTML.
+
     Wrap the given ``resource`` in an appropriate
     ``<script>...</script>`` block for embedding in the HTML header.
 
@@ -984,13 +986,15 @@ def embed_script(resource: str) -> str:
         "<script>\n"
         + pkgutil.get_data(__name__, f"resources/{resource}").decode()
         + "\n</script>\n"
-    )  # yapf: disable
+    )
 
 
 def embed_html(resource: str) -> str:
     """
-    Get a HTML ``resource`` froma file for the sake of embedding it into
-    the HTML header.
+    Embed the contents of a file in the HTML.
+
+    Get a HTML ``resource`` from a file for the sake of embedding it
+    into the HTML header.
 
     Parameters:
         resource:  The name of a HTML file to embed.
