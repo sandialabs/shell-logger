@@ -71,10 +71,10 @@ repos:
     #       - id: prospector
     #         additional_dependencies: ["dateparser"]
 
-    # - repo: https://github.com/PyCQA/pydocstyle
-    #   rev: 6.3.0
-    #   hooks:
-    #       - id: pydocstyle
+    - repo: https://github.com/PyCQA/pydocstyle
+      rev: 6.3.0
+      hooks:
+          - id: pydocstyle
 
     # - repo: https://github.com/regebro/pyroma
     #   rev: "4.2"
