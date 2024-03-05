@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
-"""
-Provides the various means of collecting machine statistics.
-"""
+"""Provides the various means of collecting machine statistics."""
 
 # © 2024 National Technology & Engineering Solutions of Sandia, LLC
 # (NTESS).  Under the terms of Contract DE-NA0003525 with NTESS, the
@@ -29,6 +27,8 @@ except ModuleNotFoundError:
 
 def stats_collectors(**kwargs) -> List[StatsCollector]:
     """
+    Generate stats collectors.
+
     A factory method that returns a list of any subclasses of
     :class:`StatsCollector` that have the ``@StatsCollector.subclass``
     decorator applied to them.
@@ -52,6 +52,8 @@ def stats_collectors(**kwargs) -> List[StatsCollector]:
 
 class StatsCollector:
     """
+    Collect statistics while running command in the shell.
+
     Provides an interface for the :class:`ShellLogger` to run commands
     while collecting various system statistics.
     """
@@ -62,6 +64,8 @@ class StatsCollector:
     @staticmethod
     def subclass(stats_collector_subclass: type):
         """
+        Mark a class as being a supported stats collector.
+
         This is a class decorator that adds to a list of supported
         :class:`StatsCollector` classes for the :func:`stats_collectors`
         factory method.
@@ -72,9 +76,10 @@ class StatsCollector:
 
     def __init__(self, interval: float, _: SyncManager):
         """
-        Initialize the :class:`StatsCollector` object, setting the
-        poling interval, and creating the process for collecting the
-        statistics.
+        Initialize the :class:`StatsCollector` object.
+
+        Set the poling interval, and create the process for collecting
+        the statistics.
 
         Parameters:
             interval:  How long to sleep between collecting statistics.
@@ -88,13 +93,16 @@ class StatsCollector:
 
     def start(self):
         """
-        Start a subprocess to poll at a certain interval for certain
-        statistics.
+        Start a subprocess.
+
+        Poll at a certain interval for certain statistics.
         """
         self.process.start()
 
     def loop(self):
         """
+        Loop while collecting statistics.
+
         Infinitely loop, collecting statistics, until the subprocess is
         terminated.
         """
@@ -105,8 +113,9 @@ class StatsCollector:
     @abstractmethod
     def collect(self):
         """
-        Instantaneously collect a statistic.  This is meant to be called
-        repeatedly after some time interval.
+        Instantaneously collect a statistic.
+
+        This is meant to be called repeatedly after some time interval.
 
         Raises:
             AbstractMethod:  This must be overridden by subclasses.
@@ -116,6 +125,8 @@ class StatsCollector:
     @abstractmethod
     def unproxied_stats(self):
         """
+        Convert to standard Python data types.
+
         Convert from Python's Manager's data structures to base Python
         data structures.
 
@@ -126,6 +137,8 @@ class StatsCollector:
 
     def finish(self):
         """
+        Stop collecting statistics.
+
         Terminate the infinite loop that's collecting the statistics,
         and then return the unproxied statistics.
         """
@@ -138,6 +151,8 @@ if psutil is not None:
     @StatsCollector.subclass
     class DiskStatsCollector(StatsCollector):
         """
+        Collect disk usage statistics.
+
         A means of running commands while collecting disk usage
         statistics.
         """
@@ -172,9 +187,7 @@ if psutil is not None:
                 self.stats[m] = manager.list()
 
         def collect(self) -> None:
-            """
-            Poll the disks to determine how much free space they have.
-            """
+            """Poll the disks to determine how much free space they have."""
             milliseconds_per_second = 10**3
             timestamp = round(time() * milliseconds_per_second)
             for m in self.mount_points:
@@ -182,6 +195,8 @@ if psutil is not None:
 
         def unproxied_stats(self) -> dict:
             """
+            Convert the statistics to standard Python data types.
+
             Translate the statistics from the multiprocessing
             ``SyncManager`` 's data structure to a ``dict``.
 
@@ -194,6 +209,8 @@ if psutil is not None:
     @StatsCollector.subclass
     class CPUStatsCollector(StatsCollector):
         """
+        Collect CPU statistics.
+
         A means of running commands while collecting CPU usage
         statistics.
         """
@@ -213,15 +230,15 @@ if psutil is not None:
             self.stats = manager.list()
 
         def collect(self) -> None:
-            """
-            Determine how heavily utilized the CPU is at the moment.
-            """
+            """Determine how heavily utilized the CPU is at the moment."""
             milliseconds_per_second = 10**3
             timestamp = round(time() * milliseconds_per_second)
             self.stats.append((timestamp, psutil.cpu_percent(interval=None)))
 
         def unproxied_stats(self) -> List[Tuple[float, float]]:
             """
+            Convert the statistics to standard Python data types.
+
             Translate the statistics from the multiprocessing
             ``SyncManager`` 's data structure to a ``list``.
 
@@ -233,6 +250,8 @@ if psutil is not None:
     @StatsCollector.subclass
     class MemoryStatsCollector(StatsCollector):
         """
+        Collect memory statistics.
+
         A means of running commands while collecting memory usage
         statistics.
         """
@@ -252,15 +271,15 @@ if psutil is not None:
             self.stats = manager.list()
 
         def collect(self) -> None:
-            """
-            Determine how much memory is currently being used.
-            """
+            """Determine how much memory is currently being used."""
             milliseconds_per_second = 10**3
             timestamp = round(time() * milliseconds_per_second)
             self.stats.append((timestamp, psutil.virtual_memory().percent))
 
         def unproxied_stats(self) -> List[Tuple[float, float]]:
             """
+            Convert the statistics to standard Python data types.
+
             Translate the statistics from the multiprocessing
             ``SyncManager`` 's data structure to a ``list``.
 
@@ -276,6 +295,8 @@ else:
     @StatsCollector.subclass
     class DiskStatsCollector(StatsCollector):
         """
+        A null disk statistics collector for when data aren't available.
+
         A phony :class:`DiskStatsCollector` used when ``psutil`` is
         unavailable.  This collects no disk statistics.
         """
@@ -294,9 +315,7 @@ else:
             super().__init__(interval, manager)
 
         def collect(self) -> None:
-            """
-            Don't collect any disk statistics.
-            """
+            """Don't collect any disk statistics."""
             pass
 
         def unproxied_stats(self) -> None:
@@ -311,6 +330,8 @@ else:
     @StatsCollector.subclass
     class CPUStatsCollector(StatsCollector):
         """
+        A null CPU statistics collector for when data aren't available.
+
         A phony :class:`CPUStatsCollector` used when ``psutil`` is
         unavailable.  This collects no CPU statistics.
         """
@@ -329,9 +350,7 @@ else:
             super().__init__(interval, manager)
 
         def collect(self) -> None:
-            """
-            Don't collect any CPU statistics.
-            """
+            """Don't collect any CPU statistics."""
             pass
 
         def unproxied_stats(self) -> None:
@@ -346,6 +365,8 @@ else:
     @StatsCollector.subclass
     class MemoryStatsCollector(StatsCollector):
         """
+        A null memory stats collector for when data aren't available.
+
         A phony :class:`MemoryStatsCollector` used when ``psutil`` is
         unavailable.  This collects no memory statistics.
         """
@@ -364,9 +385,7 @@ else:
             super().__init__(interval, manager)
 
         def collect(self) -> None:
-            """
-            Don't collect any memory statistics.
-            """
+            """Don't collect any memory statistics."""
             pass
 
         def unproxied_stats(self) -> None:

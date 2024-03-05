@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
-"""
-Various utitlities for building the HTML log file.
-"""
+"""Various utitlities for building the HTML log file."""
 
 # © 2024 National Technology & Engineering Solutions of Sandia, LLC
 # (NTESS).  Under the terms of Contract DE-NA0003525 with NTESS, the
@@ -23,6 +21,8 @@ def nested_simplenamespace_to_dict(
     namespace: Union[str, bytes, tuple, Mapping, Iterable, SimpleNamespace]
 ) -> Union[str, bytes, tuple, dict, list]:  # yapf: disable
     """
+    Convert a ``SimpleNamespace`` to a ``dict``.
+
     Convert a ``SimpleNamespace``, which may include nested namespaces,
     iterables, and mappings, to a ``dict`` containing the equivalent
     items.
@@ -122,6 +122,8 @@ def append_html(*args: Union[str, Iterator[str]], output: Path) -> None:
 
 def fixed_width(text: str) -> str:
     """
+    Convert the text to a fixed-width font.
+
     Wrap the given ``text`` in a ``<pre><code>...</code></pre>`` block
     such that it displays in a fixed-width font.
 
@@ -136,7 +138,7 @@ def fixed_width(text: str) -> str:
 
 def flatten(element: Union[str, bytes, Iterable]) -> Iterator[str]:
     """
-    Takes a tree of lists and turns it into a flat iterable of strings.
+    Turn a tree of lists into a flat iterable of strings.
 
     Parameters:
         element:  An element of a tree.
@@ -159,6 +161,8 @@ def parent_logger_card_html(
     name: str, *args: List[Iterator[str]]
 ) -> Iterator[str]:  # yapf: disable
     """
+    Generate the HTML for a parent logger card.
+
     Generate the HTML for the card corresponding to the parent
     :class:`ShellLogger`.  The HTML elements are yielded one at a time
     to avoid loading *all* the data from the :class:`ShellLogger` into
@@ -184,6 +188,8 @@ def parent_logger_card_html(
 
 def child_logger_card(log) -> Iterator[str]:
     """
+    Generate a child logger card.
+
     Create a card to go in the HTML log file containing everything
     pertaining to a child :class:`ShellLogger`.
 
@@ -210,6 +216,8 @@ def child_logger_card_html(
     name: str, duration: str, *args: Union[Iterator[str], List[Iterator[str]]]
 ) -> Iterator[str]:  # yapf: disable
     """
+    Generate the HTML for a child logger card.
+
     Generate the HTML for a card corresponding to the child
     :class:`ShellLogger`.  The HTML elements are yielded one at a time
     to avoid loading *all* the data from the :class:`ShellLogger` into
@@ -246,6 +254,8 @@ def command_card_html(
     log: dict, *args: Iterator[Union[str, Iterable]]
 ) -> Iterator[str]:  # yapf: disable
     """
+    Generate the HTML for a command card.
+
     Generate the HTML for a card corresponding to a command that was
     run.  The HTML elements are yielded one at a time to avoid loading
     *all* the data into memory at once.
@@ -281,6 +291,8 @@ def command_card_html(
 
 def html_message_card(log: dict) -> Iterator[str]:
     """
+    Generate the HTML for a message card.
+
     Generate the HTML for a card corresponding to a message to only be
     included in the HTML log file (e.g., not printed to ``stdout`` as
     well).
@@ -315,6 +327,8 @@ def html_message_card(log: dict) -> Iterator[str]:
 
 def message_card(log: dict) -> Iterator[str]:
     """
+    Generate a message card.
+
     Generate the HTML for a card corresponding to a message to be both
     printed to ``stdout`` and included in the HTML log file.
 
@@ -336,6 +350,8 @@ def message_card(log: dict) -> Iterator[str]:
 
 def command_detail_list(cmd_id: str, *args: Iterator[str]) -> Iterator[str]:
     """
+    Generate the list of command details.
+
     Generate the HTML for a list of details associated with a command
     that was run.
 
@@ -363,6 +379,8 @@ def command_detail(
     cmd_id: str, name: str, value: str, hidden: bool = False
 ) -> str:
     """
+    Generate the HTML for a command detail.
+
     Create the HTML snippet for a detail associated with a command that
     was run.
 
@@ -387,6 +405,8 @@ def command_detail(
 
 def command_card(log: dict, stream_dir: Path) -> Iterator[str]:
     """
+    Generate a command card.
+
     Create a card in the HTML log file containing the output of a
     command, along with all its corresponding data (environment
     information, trace output, memory/CPU/disk statistics, etc.).
@@ -486,6 +506,8 @@ def disk_time_series_plot(
     cmd_id: str, data_tuples: Tuple[float, float], volume_name: str
 ) -> Iterator[str]:  # yapf: disable
     """
+    Generate a time series plot of disk usage.
+
     Create the HTML for a plot of the disk usage time series data for a
     particular volume.
 
@@ -533,6 +555,8 @@ def output_block_card(
     title: str, output: Union[Path, str], cmd_id: str, collapsed: bool = True
 ) -> Iterator[str]:  # yapf: disable
     """
+    Generate an output block card.
+
     Given the output from a command, generate a corresponding HTML card
     for inclusion in the log file.
 
@@ -565,6 +589,8 @@ def output_block(
     output: Union[Path, str], name: str, cmd_id: str
 ) -> Iterator[str]:  # yapf: disable
     """
+    Generate an output block.
+
     Given the output from a command, generate the HTML equivalent for
     inclusion in the log file.
 
@@ -588,6 +614,8 @@ def output_block(
 
 def diagnostics_card(cmd_id: str, *args: Iterator[str]) -> Iterator[str]:
     """
+    Generate a diagnostics card.
+
     Generate a card containing system diagnostic information associated
     with a command that was run.
 
@@ -618,6 +646,8 @@ def output_block_html(
     lines: Union[TextIO, str], name: str, cmd_id: str
 ) -> Iterator[str]:  # yapf: disable
     """
+    Generate the HTML for an output block.
+
     Given the output of a command, generate its HTML equivalent for
     inclusion in the log file.
 
@@ -648,6 +678,8 @@ def split_template(
     template: str, split_at: str, **kwargs
 ) -> Tuple[str, str, str]:  # yapf: disable
     """
+    Subdivide a HTML template.
+
     Take a templated HTML snippet and split it into a header and footer,
     meaning everything that comes before and after the line containing
     ``split_at``.  Also determine the indentation for the content that
@@ -692,6 +724,8 @@ def split_template(
 
 def output_line_html(line: str, line_no: int) -> str:
     """
+    Generate the HTML for a line of output.
+
     Given a line of output from a command, along with the corresponding
     line number, create the HTML equivalent to be included in the log
     file.
@@ -724,6 +758,8 @@ def html_encode(text: str) -> str:
 
 def sgr_to_html(text: str) -> str:
     """
+    Convert SGR to HTML.
+
     Translate Select Graphic Rendition (SGR, a.k.a. ANSI escape codes)
     to valid HTML/CSS.
 
@@ -820,6 +856,8 @@ def sgr_4bit_color_and_style_to_html(sgr: str) -> str:
 
 def sgr_8bit_color_to_html(sgr_params: List[str]) -> str:
     """
+    Convert 8-bit SGR colors to HTML.
+
     Convert an 8-bit Select Graphic Rendition (SGR) code to valid
     HTML/CSS.
 
@@ -857,6 +895,8 @@ def sgr_8bit_color_to_html(sgr_params: List[str]) -> str:
 
 def sgr_24bit_color_to_html(sgr_params: List[str]) -> str:
     """
+    Convert 24-bit SGR colors to HTML.
+
     Convert a 24-bit Select Graphic Rendition (SGR) code to valid
     HTML/CSS.
 
@@ -907,6 +947,8 @@ def html_header() -> str:
 
 def embed_style(resource: str) -> str:
     """
+    Embed a style in the HTML.
+
     Wrap the given ``resource`` in an appropriate ``<style>...</style>``
     block for embedding in the HTML header.
 
@@ -929,6 +971,8 @@ def embed_style(resource: str) -> str:
 
 def embed_script(resource: str) -> str:
     """
+    Embed a script in the HTML.
+
     Wrap the given ``resource`` in an appropriate
     ``<script>...</script>`` block for embedding in the HTML header.
 
@@ -947,8 +991,10 @@ def embed_script(resource: str) -> str:
 
 def embed_html(resource: str) -> str:
     """
-    Get a HTML ``resource`` froma file for the sake of embedding it into
-    the HTML header.
+    Embed the contents of a file in the HTML.
+
+    Get a HTML ``resource`` from a file for the sake of embedding it
+    into the HTML header.
 
     Parameters:
         resource:  The name of a HTML file to embed.

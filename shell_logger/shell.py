@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
-"""
-Provides the :class:`Shell` class.
-"""
+"""Provides the :class:`Shell` class."""
 
 # © 2024 National Technology & Engineering Solutions of Sandia, LLC
 # (NTESS).  Under the terms of Contract DE-NA0003525 with NTESS, the
@@ -26,6 +24,8 @@ from typing import IO, List, Optional, TextIO, Tuple
 
 class Shell:
     """
+    Manage interactions with the underlying shell.
+
     Spawns a shell subprocess that inherits five unnamed pipes
     (``stdout``, ``stderr``, ``stdin``, ``aux_stdout``, ``aux_stderr``).
 
@@ -103,9 +103,7 @@ class Shell:
         self.cd(pwd)
 
     def __del__(self) -> None:
-        """
-        Close all the open file descriptors.
-        """
+        """Close all the open file descriptors."""
         for fd in [
             self.aux_stdin_rfd,
             self.aux_stdin_wfd,
@@ -155,6 +153,8 @@ class Shell:
 
     def run(self, command: str, **kwargs) -> SimpleNamespace:
         """
+        Run a command in the underlying shell.
+
         Write a ``command`` to the :class:`Shell` class' shell
         subprocess' ``stdin``, and pull the ``stdout`` and ``stderr``.
 
@@ -232,6 +232,8 @@ class Shell:
         stdout: Optional[IO[bytes]], stderr: Optional[IO[bytes]], **kwargs
     ) -> SimpleNamespace:
         """
+        Write output/error streams to multiple files.
+
         Split ``stdout`` and ``stderr`` file objects to write to
         multiple files.
 
@@ -257,6 +259,8 @@ class Shell:
 
         def write(input_file: TextIO, output_files: List[TextIO]) -> None:
             """
+            Write an input to multiple outputs.
+
             Take the data from an input file object and write it to
             multiple output file objects.
 
@@ -264,7 +268,6 @@ class Shell:
                 input_file:  The file object from which to read.
                 output_files:  A list of file objects to write to.
             """
-
             # Read chunks from the input file.
             chunk_size = 4096  # 4 KB
             chunk = os.read(input_file.fileno(), chunk_size)

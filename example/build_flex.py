@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
-"""
-An example of cloning, configuring, building, and installing software.
-"""
+"""An example of cloning, configuring, building, and installing software."""
 
 # © 2024 National Technology & Engineering Solutions of Sandia, LLC
 # (NTESS).  Under the terms of Contract DE-NA0003525 with NTESS, the

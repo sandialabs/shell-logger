@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
-"""
-A simple example, capturing various system statistics.
-"""
+"""A simple example, capturing various system statistics."""
 
 # © 2024 National Technology & Engineering Solutions of Sandia, LLC
 # (NTESS).  Under the terms of Contract DE-NA0003525 with NTESS, the
