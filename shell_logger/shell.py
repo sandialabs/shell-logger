@@ -10,16 +10,17 @@ Provides the :class:`Shell` class.
 # SPDX-License-Identifier: BSD-3-Clause
 
 from __future__ import annotations
+
+import _thread
 import fcntl
-from io import StringIO
 import os
-from pathlib import Path
 import subprocess
 import sys
-import _thread
+from io import StringIO
+from pathlib import Path
 from threading import Thread
-from types import SimpleNamespace
 from time import time
+from types import SimpleNamespace
 from typing import IO, List, Optional, TextIO, Tuple
 
 

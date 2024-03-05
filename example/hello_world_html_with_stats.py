@@ -10,6 +10,7 @@ A simple example, capturing various system statistics.
 # SPDX-License-Identifier: BSD-3-Clause
 
 from pathlib import Path
+
 from shell_logger import ShellLogger
 
 sl = ShellLogger(

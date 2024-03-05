@@ -10,9 +10,11 @@ Provides the means of collecting various trace data.
 # SPDX-License-Identifier: BSD-3-Clause
 
 from __future__ import annotations
-from .abstract_method import AbstractMethod
+
 from abc import abstractmethod
 from pathlib import Path
+
+from .abstract_method import AbstractMethod
 
 
 def trace_collector(**kwargs) -> Trace:

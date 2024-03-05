@@ -10,6 +10,7 @@ An example of cloning, configuring, building, and installing software.
 # SPDX-License-Identifier: BSD-3-Clause
 
 from pathlib import Path
+
 from shell_logger import ShellLogger
 
 sl = ShellLogger("Build Flex", Path.cwd() / f"log_{Path(__file__).stem}")

@@ -9,12 +9,12 @@ Various utitlities for building the HTML log file.
 
 # SPDX-License-Identifier: BSD-3-Clause
 
-from collections.abc import Iterable, Mapping
-from datetime import datetime
 import pkgutil
-from pathlib import Path
 import re
 import textwrap
+from collections.abc import Iterable, Mapping
+from datetime import datetime
+from pathlib import Path
 from types import SimpleNamespace
 from typing import Iterator, List, TextIO, Tuple, Union
 

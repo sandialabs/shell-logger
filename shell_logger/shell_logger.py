@@ -10,32 +10,34 @@ Provides the :class:`ShellLogger` class, along with some helpers.
 # SPDX-License-Identifier: BSD-3-Clause
 
 from __future__ import annotations
-from .shell import Shell
-from .stats_collector import stats_collectors
-from .trace import trace_collector
-from .html_utilities import (
-    nested_simplenamespace_to_dict,
-    opening_html_text,
-    closing_html_text,
-    append_html,
-    html_message_card,
-    message_card,
-    command_card,
-    child_logger_card,
-    parent_logger_card_html,
-)
-from collections.abc import Iterable, Mapping
-from datetime import datetime, timedelta
-from typing import Iterator, List, Optional, Union
-from distutils import dir_util
+
 import json
 import os
-from pathlib import Path
 import random
 import shutil
 import string
 import tempfile
+from collections.abc import Iterable, Mapping
+from datetime import datetime, timedelta
+from distutils import dir_util
+from pathlib import Path
 from types import SimpleNamespace
+from typing import Iterator, List, Optional, Union
+
+from .html_utilities import (
+    append_html,
+    child_logger_card,
+    closing_html_text,
+    command_card,
+    html_message_card,
+    message_card,
+    nested_simplenamespace_to_dict,
+    opening_html_text,
+    parent_logger_card_html,
+)
+from .shell import Shell
+from .stats_collector import stats_collectors
+from .trace import trace_collector
 
 
 class ShellLogger:

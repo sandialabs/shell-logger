@@ -8,14 +8,16 @@ The unit test suite for the ``shell_logger`` package.
 
 # SPDX-License-Identifier: BSD-3-Clause
 
-from _pytest.capture import CaptureFixture
-from _pytest.monkeypatch import MonkeyPatch
-from inspect import stack
 import json
 import os
-from pathlib import Path
-import pytest
 import re
+from inspect import stack
+from pathlib import Path
+
+import pytest
+from _pytest.capture import CaptureFixture
+from _pytest.monkeypatch import MonkeyPatch
+
 from shell_logger import ShellLogger, ShellLoggerDecoder
 
 try:

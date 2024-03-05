@@ -10,6 +10,7 @@ A simple example, sending output to the log file and console.
 # SPDX-License-Identifier: BSD-3-Clause
 
 from pathlib import Path
+
 from shell_logger import ShellLogger
 
 sl = ShellLogger(

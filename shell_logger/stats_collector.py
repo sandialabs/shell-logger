@@ -10,15 +10,16 @@ Provides the various means of collecting machine statistics.
 # SPDX-License-Identifier: BSD-3-Clause
 
 from __future__ import annotations
-from .abstract_method import AbstractMethod
-from abc import abstractmethod
-from multiprocessing import Process
-from multiprocessing.managers import SyncManager
-from multiprocessing import Manager
+
 import os
+from abc import abstractmethod
+from multiprocessing import Manager, Process
+from multiprocessing.managers import SyncManager
 from pathlib import Path
 from time import sleep, time
 from typing import List, Tuple
+
+from .abstract_method import AbstractMethod
 
 try:
     import psutil

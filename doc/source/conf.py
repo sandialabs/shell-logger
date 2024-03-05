@@ -5,8 +5,8 @@ For the full list of built-in configuration values, see the documentation:
 https://www.sphinx-doc.org/en/master/usage/configuration.html
 """
 
-from pathlib import Path
 import sys
+from pathlib import Path
 
 sys.path.append(str(Path.cwd().parent.parent.resolve() / "shell_logger"))
 

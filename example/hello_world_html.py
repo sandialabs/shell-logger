@@ -10,6 +10,7 @@ A simple example.
 # SPDX-License-Identifier: BSD-3-Clause
 
 from pathlib import Path
+
 from shell_logger import ShellLogger
 
 sl = ShellLogger("Hello World HTML", Path.cwd() / f"log_{Path(__file__).stem}")
