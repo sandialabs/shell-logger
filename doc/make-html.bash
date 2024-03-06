@@ -7,5 +7,5 @@ python3 -m pip uninstall -y shell-logger
 cd ..
 python3 -m pip install .
 cd "${SCRIPT_DIR}" || exit 1
-make html
+make html SPHINXOPTS="-W --keep-going"
 cd "${ORIG_DIR}" || exit 1

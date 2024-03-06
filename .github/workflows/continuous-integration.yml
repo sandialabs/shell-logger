@@ -48,11 +48,11 @@ jobs:
       #     CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
 
       - name: Check documentation spelling
-        run: make spelling
+        run: make spelling SPHINXOPTS="-W --keep-going"
         working-directory: ./doc
 
       - name: Check documentation coverage
-        run: make coverage
+        run: make coverage SPHINXOPTS="-W --keep-going"
         working-directory: ./doc
 
       - name: Archive documentation coverage results
