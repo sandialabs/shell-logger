@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Various utitlities for building the HTML log file."""
+"""Various utilities for building the HTML log file."""
 
 # © 2024 National Technology & Engineering Solutions of Sandia, LLC
 # (NTESS).  Under the terms of Contract DE-NA0003525 with NTESS, the
