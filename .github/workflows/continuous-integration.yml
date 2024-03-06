@@ -1,0 +1,74 @@
+name: Continuous Integration
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+  workflow_dispatch:
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        version: ["3.8", "3.9", "3.10", "3.11"]
+    steps:
+
+      - name: Check out the commit
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ~${{ matrix.version }}
+
+      - name: Install development dependencies
+        run: |
+          python3 -m pip install --upgrade pip
+          python3 -m pip install \
+            -r requirements.txt \
+            -r doc/requirements.txt \
+            -r example/requirements.txt \
+            -r test/requirements.txt
+
+      - name: Test install
+        run: python3 -m pip install .
+
+      # - name: Test with pytest
+      #   run: python3 -m pytest --cov=shell_logger example/ test/
+
+      # - name: Upload coverage reports to Codecov
+      #   uses: codecov/codecov-action@v3
+      #   env:
+      #     CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+
+      - name: Check documentation spelling
+        run: make spelling
+        working-directory: ./doc
+
+      - name: Check documentation coverage
+        run: make coverage
+        working-directory: ./doc
+
+      - name: Archive documentation coverage results
+        uses: actions/upload-artifact@v3
+        with:
+          name: docs-coverage-report
+          path: doc/build/coverage/python.txt
+
+      - name: Test uninstall
+        run: python3 -m pip uninstall -y shell-logger
+
+  commits:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Conventional Commits
+        uses: taskmedia/action-conventional-commits@v1.1.14
+        with:
+          types: >
+            build|chore|ci|docs|feat|fix|minor|patch|perf|style|refactor|test
