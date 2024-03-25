@@ -89,4 +89,4 @@ Special thanks to the EMPIRE project for investing in the initial development
 of this tool, and [the GMS project][gms] for serving as a second user and
 contributing to its clean-up.
 
-[gms]: https://github.com/SNL-GMS/GMS-PI21-OPEN/
+[gms]: https://github.com/SNL-GMS/GMS-PI25
