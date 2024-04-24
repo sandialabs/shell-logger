@@ -257,8 +257,8 @@ class Shell:
         sys_stderr = None if kwargs.get("quiet_stderr") else sys.stderr
         stdout_io = StringIO() if kwargs.get("stdout_str") else None
         stderr_io = StringIO() if kwargs.get("stderr_str") else None
-        stdout_path = open(kwargs.get("stdout_path", os.devnull), "a")
-        stderr_path = open(kwargs.get("stderr_path", os.devnull), "a")
+        stdout_path = kwargs.get("stdout_path", Path(os.devnull)).open("a")
+        stderr_path = kwargs.get("stderr_path", Path(os.devnull)).open("a")
         stdout_tee = [sys_stdout, stdout_io, stdout_path]
         stderr_tee = [sys_stderr, stderr_io, stderr_path]
 

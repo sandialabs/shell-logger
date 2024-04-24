@@ -127,7 +127,7 @@ class ShellLogger:
             path = path.parent / (path.name[:-5] + ".json")
 
         # Deserialize the corresponding JSON object into a ShellLogger.
-        with open(path, "r") as jf:
+        with path.open("r") as jf:
             loaded_logger = json.load(jf, cls=ShellLoggerDecoder)
         return loaded_logger
 
@@ -218,7 +218,7 @@ class ShellLogger:
             self.html_file = html_file.resolve()
         if self.is_parent():
             if self.html_file.exists():
-                with open(self.html_file, "a") as f:
+                with self.html_file.open("a") as f:
                     f.write(
                         f"<!-- {self.init_time:} Append to log started -->"
                     )
@@ -455,14 +455,14 @@ class ShellLogger:
         """
         if self.is_parent():
             html_text = opening_html_text() + "\n"
-            with open(self.html_file, "w") as f:
+            with self.html_file.open("w") as f:
                 f.write(html_text)
 
         for element in self.to_html():
             append_html(element, output=self.html_file)
 
         if self.is_parent():
-            with open(self.html_file, "a") as html:
+            with self.html_file.open("a") as html:
                 html.write(closing_html_text())
                 html.write("\n")
 
@@ -479,7 +479,7 @@ class ShellLogger:
             json_file = self.stream_dir / (
                 self.name.replace(" ", "_") + ".json"
             )
-            with open(json_file, "w") as jf:
+            with json_file.open("w") as jf:
                 json.dump(
                     self, jf, cls=ShellLoggerEncoder, sort_keys=True, indent=4
                 )
@@ -558,7 +558,7 @@ class ShellLogger:
         )
 
         # Print the command to be executed.
-        with open(stdout_path, "a"), open(stderr_path, "a"):
+        with stdout_path.open("a"), stderr_path.open("a"):
             if verbose:
                 print(cmd)
 
@@ -626,7 +626,7 @@ class ShellLogger:
                 kwargs[key] = True
 
         # Change to the directory in which to execute the command.
-        old_pwd = Path(os.getcwd())
+        old_pwd = Path.cwd()
         if kwargs.get("pwd"):
             self.shell.cd(kwargs.get("pwd"))
         aux_info = self.auxiliary_information()
@@ -664,7 +664,7 @@ class ShellLogger:
         completed_process.trace_path = trace_output
         completed_process.stats = stats
         if kwargs.get("trace_str") and trace_output:
-            with open(trace_output) as f:
+            with trace_output.open() as f:
                 completed_process.trace = f.read()
         else:
             completed_process.trace = None

@@ -135,7 +135,7 @@ def test_log_method_creates_tmp_stdout_stderr_files(
     print(f"{stderr_file}")
 
     # Make sure the information written to these files is correct.
-    with open(stdout_file, "r") as out, open(stderr_file, "r") as err:
+    with stdout_file.open("r") as out, stderr_file.open("r") as err:
         out_txt = out.readline()
         err_txt = err.readline()
         assert "Hello world out" in out_txt
@@ -236,7 +236,7 @@ def test_child_logger_duration_displayed_correctly_in_html(
     child3 = shell_logger.add_child("Child 3")
     child3.log("Wait 0.006s", "sleep 0.006")
     shell_logger.finalize()
-    with open(shell_logger.html_file, "r") as hf:
+    with shell_logger.html_file.open("r") as hf:
         html_text = hf.read()
     assert child2.duration is not None
     assert f"Duration: {child2.duration}" in html_text
@@ -258,7 +258,7 @@ def test_finalize_creates_json_with_correct_information(
     # Load from JSON.
     json_file = shell_logger.stream_dir / "Parent.json"
     assert json_file.exists()
-    with open(json_file, "r") as jf:
+    with json_file.open("r") as jf:
         loaded_logger = json.load(jf, cls=ShellLoggerDecoder)
 
     # Parent `ShellLogger`.
@@ -298,7 +298,7 @@ def test_finalize_creates_html_with_correct_information(
     # Load the HTML file.
     html_file = shell_logger.stream_dir / "Parent.html"
     assert html_file.exists()
-    with open(html_file, "r") as hf:
+    with html_file.open("r") as hf:
         html_text = hf.read()
 
     # Ensure the command information is present.
@@ -379,7 +379,7 @@ def test_json_file_can_reproduce_html_file(
     # Load the original HTML file's contents.
     html_file = shell_logger.log_dir / "Parent.html"
     assert html_file.exists()
-    with open(html_file, "r") as hf:
+    with html_file.open("r") as hf:
         original_html = hf.read()
 
     # Delete the HTML file.
@@ -388,7 +388,7 @@ def test_json_file_can_reproduce_html_file(
     # Load the JSON data.
     json_file = shell_logger.stream_dir / "Parent.json"
     assert json_file.exists()
-    with open(json_file, "r") as jf:
+    with json_file.open("r") as jf:
         loaded_logger = json.load(jf, cls=ShellLoggerDecoder)
 
     # Finalize the loaded `ShellLogger` object.
@@ -396,7 +396,7 @@ def test_json_file_can_reproduce_html_file(
 
     # Load the new HTML file's contents and compare.
     assert html_file.exists()
-    with open(html_file, "r") as hf:
+    with html_file.open("r") as hf:
         new_html = hf.read()
     print(f"New Read: {html_file.resolve()}")
     assert original_html == new_html
@@ -810,7 +810,7 @@ def test_sgr_gets_converted_to_html() -> None:
     # Load the HTML file and make sure it checks out.
     html_file = logger.stream_dir / f"{logger.name}.html"
     assert html_file.exists()
-    with open(html_file, "r") as hf:
+    with html_file.open("r") as hf:
         html_text = hf.read()
     assert "\x1B" not in html_text
     assert ">Hello</span>" in html_text
@@ -845,7 +845,7 @@ def test_html_print(capsys: CaptureFixture) -> None:
     # Load the HTML file and make sure it checks out.
     html_file = logger.stream_dir / f"{logger.name}.html"
     assert html_file.exists()
-    with open(html_file, "r") as hf:
+    with html_file.open("r") as hf:
         html_text = hf.read()
     assert "brown fox" not in out
     assert "brown fox" not in err
@@ -893,7 +893,7 @@ def test_append_mode() -> None:
     # Load the HTML file and ensure it checks out.
     html_file = logger1.stream_dir / f"{logger1.name}.html"
     assert html_file.exists()
-    with open(html_file, "r") as hf:
+    with html_file.open("r") as hf:
         html_text = hf.read()
     assert "once" in html_text
     assert "ONCE" in html_text

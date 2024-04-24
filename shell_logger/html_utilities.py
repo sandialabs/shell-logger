@@ -116,7 +116,7 @@ def append_html(*args: Union[str, Iterator[str]], output: Path) -> None:
                 message = f"Unsupported type: {type(arg)}"
                 raise RuntimeError(message)
 
-    with open(output, "a") as output_file:
+    with output.open("a") as output_file:
         _append_html(output_file, *args)
 
 
@@ -608,7 +608,7 @@ def output_block(
         The HTML equivalent of each line of the output in turn.
     """
     if isinstance(output, Path):
-        with open(output) as f:
+        with output.open() as f:
             for string in output_block_html(f, name, cmd_id):
                 yield string
     if isinstance(output, str):
