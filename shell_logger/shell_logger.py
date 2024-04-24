@@ -120,9 +120,8 @@ class ShellLogger:
             try:
                 path = next(path.glob("*.html"))
             except StopIteration as error:
-                raise RuntimeError(
-                    f"{path} does not have an html file."
-                ) from error
+                message = f"{path} does not have an html file."
+                raise RuntimeError(message) from error
         if path.is_symlink():
             path = path.resolve(strict=True)
         if path.is_file() and path.name[-5:] == ".html":
@@ -290,10 +289,11 @@ class ShellLogger:
                 :class:`ShellLogger`.
         """
         if not self.is_parent():
-            raise RuntimeError(
+            message = (
                 "You should not change the log directory of a child "
                 "`ShellLogger`; only that of the parent."
             )
+            raise RuntimeError(message)
 
         # This only gets executed once by the top-level parent
         # `ShellLogger` object.
