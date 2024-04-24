@@ -1,9 +1,12 @@
 # Requirements for testing `ShellLogger`.
 
-flake8
 mock >= 4
+mypy
+pre-commit
 psutil
+pyroma
 pytest >= 6.2
 pytest-cov >= 2.12
 pytest-mock >= 3.6
+ruff
 toml

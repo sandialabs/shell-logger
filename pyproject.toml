@@ -3,29 +3,12 @@ requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
 
 
-[pydocstyle]
-convention = "google"
-
-
-[tool.bandit.assert_used]
-skips = ["**/test_*.py"]
-
-
-[tool.black]
-line-length = 79
-
-
 [tool.commitizen]
 name = "cz_customize"
 
 
 [tool.commitizen.customize]
 schema_pattern = "(?s)(build|chore|ci|docs|feat|fix|minor|patch|perf|refactor|style|test|revert)(\\(\\S+\\))?!?:( [^\\n\\r]+)((\\n\\n.*)|(\\s*))?$"
-
-
-[tool.isort]
-profile = "black"
-line_length = 79
 
 
 [tool.poetry]
@@ -76,6 +59,61 @@ python = ">=3.7"
 [tool.poetry.urls]
 CI = "https://github.com/sandialabs/shell-logger/actions"
 Issues = "https://github.com/sandialabs/shell-logger/issues"
+
+
+[tool.ruff]
+line-length = 79
+
+
+[tool.ruff.lint]
+extend-select = [
+    "A",
+    "B",
+    "BLE",
+    "C4",
+    "C90",
+    "D",
+    # "DTZ",
+    "E",
+    "EM",
+    "ERA",
+    "EXE",
+    "FBT",
+    "NPY",
+    "PGH",
+    "PL",
+    "PT",
+    "PTH",
+    "RET",
+    "RSE",
+    "RUF",
+    # "S",
+    "SIM",
+    "TID",
+    "TCH",
+    "TRY",
+    # "UP",
+    "W",
+]
+ignore = [
+    "D212",
+]
+
+
+[tool.ruff.lint.flake8-boolean-trap]
+extend-allowed-calls = [
+    "os.set_inheritable",
+]
+
+
+[tool.ruff.lint.per-file-ignores]
+"**/test_*.py" = ["S101"]
+"html_utilities.py" = ["PLR2004"]
+
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
+
 
 
 [tool.semantic_release]

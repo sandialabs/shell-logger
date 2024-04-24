@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """Provides the :class:`Shell` class."""
 
 # © 2024 National Technology & Engineering Solutions of Sandia, LLC
@@ -22,6 +21,9 @@ from types import SimpleNamespace
 from typing import IO, List, Optional, TextIO, Tuple
 
 
+END_OF_READ = 4
+
+
 class Shell:
     """
     Manage interactions with the underlying shell.
@@ -43,7 +45,7 @@ class Shell:
     """
 
     def __init__(
-        self, pwd: Path = Path.cwd(), login_shell: bool = False
+        self, pwd: Optional[Path] = None, *, login_shell: bool = False
     ) -> None:
         """
         Initialize a :class:`Shell` object.
@@ -100,6 +102,8 @@ class Shell:
         os.set_inheritable(self.aux_stderr_wfd, False)
 
         # Start the shell in the given directory.
+        if pwd is None:
+            pwd = Path.cwd()
         self.cd(pwd)
 
     def __del__(self) -> None:
@@ -116,7 +120,7 @@ class Shell:
                 os.close(fd)
             except OSError as e:
                 if "Bad file descriptor" not in e.strerror:
-                    raise e
+                    raise
 
     def __eq__(self, other: Shell) -> bool:
         """
@@ -202,11 +206,12 @@ class Shell:
         # KeyboardInterrupt.
         except KeyboardInterrupt:
             os.close(self.aux_stdin_wfd)
-            raise RuntimeError(
+            message = (
                 f"There was a problem running the command `{command}`.  "
                 "This is a fatal error and we cannot continue.  Ensure that "
                 "the syntax of the command is correct."
             )
+            raise RuntimeError(message) from None
         finish = round(time() * milliseconds_per_second)
 
         # Pull the return code and return the results.  Note that if the
@@ -228,7 +233,7 @@ class Shell:
         )
 
     @staticmethod
-    def tee(
+    def tee(  # noqa: C901
         stdout: Optional[IO[bytes]], stderr: Optional[IO[bytes]], **kwargs
     ) -> SimpleNamespace:
         """
@@ -252,8 +257,8 @@ class Shell:
         sys_stderr = None if kwargs.get("quiet_stderr") else sys.stderr
         stdout_io = StringIO() if kwargs.get("stdout_str") else None
         stderr_io = StringIO() if kwargs.get("stderr_str") else None
-        stdout_path = open(kwargs.get("stdout_path", os.devnull), "a")
-        stderr_path = open(kwargs.get("stderr_path", os.devnull), "a")
+        stdout_path = kwargs.get("stdout_path", Path(os.devnull)).open("a")
+        stderr_path = kwargs.get("stderr_path", Path(os.devnull)).open("a")
         stdout_tee = [sys_stdout, stdout_io, stdout_path]
         stderr_tee = [sys_stderr, stderr_io, stderr_path]
 
@@ -271,7 +276,7 @@ class Shell:
             # Read chunks from the input file.
             chunk_size = 4096  # 4 KB
             chunk = os.read(input_file.fileno(), chunk_size)
-            while chunk and chunk[-1] != 4:
+            while chunk and chunk[-1] != END_OF_READ:
                 for output_file in output_files:
                     if output_file is not None:
                         output_file.write(chunk.decode(errors="ignore"))
@@ -347,7 +352,7 @@ class Shell:
 
             max_anonymous_pipe_buffer_size = 65536
             aux = os.read(self.aux_stdout_rfd, max_anonymous_pipe_buffer_size)
-            while aux[-1] != 4:
+            while aux[-1] != END_OF_READ:
                 stdout += aux.decode()
                 aux = os.read(
                     self.aux_stdout_rfd, max_anonymous_pipe_buffer_size
@@ -355,7 +360,7 @@ class Shell:
             aux = aux[:-1]
             stdout += aux.decode()
             aux = os.read(self.aux_stderr_rfd, max_anonymous_pipe_buffer_size)
-            while aux[-1] != 4:
+            while aux[-1] != END_OF_READ:
                 stderr += aux.decode()
                 aux = os.read(
                     self.aux_stderr_rfd, max_anonymous_pipe_buffer_size

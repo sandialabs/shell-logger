@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """Provides the means of collecting various trace data."""
 
 # © 2024 National Technology & Engineering Solutions of Sandia, LLC
@@ -34,10 +33,11 @@ def trace_collector(**kwargs) -> Trace:
     if len(collectors) == 1:
         collector = collectors[0]
         return collector(**kwargs)
-    elif len(collectors) == 0:
-        raise RuntimeError(f"Unsupported trace type:  {trace_name}")
-    else:
-        raise RuntimeError(f"Multiple trace types match '{trace_name}'.")
+    if len(collectors) == 0:
+        message = f"Unsupported trace type:  {trace_name}"
+        raise RuntimeError(message)
+    message = f"Multiple trace types match '{trace_name}'."
+    raise RuntimeError(message)
 
 
 class Trace:
@@ -49,7 +49,7 @@ class Trace:
     """
 
     trace_name = "undefined"  # Should be defined by subclasses.
-    subclasses = []
+    subclasses = []  # noqa: RUF012
 
     @staticmethod
     def subclass(trace_subclass: type):
@@ -88,7 +88,7 @@ class Trace:
         Raises:
             AbstractMethod:  This needs to be overridden by subclasses.
         """
-        raise AbstractMethod()
+        raise AbstractMethod
 
     def command(self, command: str):
         """
@@ -118,7 +118,7 @@ class STrace(Trace):
     def __init__(self, **kwargs) -> None:
         """Initialize the :class:`STrace` instance."""
         super().__init__(**kwargs)
-        self.summary = True if kwargs.get("summary") else False
+        self.summary = bool(kwargs.get("summary"))
         self.expression = kwargs.get("expression")
 
     @property
@@ -146,7 +146,7 @@ class LTrace(Trace):
     def __init__(self, **kwargs):
         """Initialize the :class:`LTrace` instance."""
         super().__init__(**kwargs)
-        self.summary = True if kwargs.get("summary") else False
+        self.summary = bool(kwargs.get("summary"))
         self.expression = kwargs.get("expression")
 
     @property

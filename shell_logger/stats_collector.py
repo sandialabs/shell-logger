@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """Provides the various means of collecting machine statistics."""
 
 # © 2024 National Technology & Engineering Solutions of Sandia, LLC
@@ -12,12 +11,14 @@ from __future__ import annotations
 import os
 from abc import abstractmethod
 from multiprocessing import Manager, Process
-from multiprocessing.managers import SyncManager
 from pathlib import Path
 from time import sleep, time
-from typing import List, Tuple
+from typing import List, Tuple, TYPE_CHECKING
 
 from .abstract_method import AbstractMethod
+
+if TYPE_CHECKING:
+    from multiprocessing.managers import SyncManager
 
 try:
     import psutil
@@ -42,7 +43,7 @@ def stats_collectors(**kwargs) -> List[StatsCollector]:
     """
     collectors = []
     if "measure" in kwargs:
-        interval = kwargs["interval"] if "interval" in kwargs else 1.0
+        interval = kwargs.get("interval", 1.0)
         manager = Manager()
         for collector in StatsCollector.subclasses:
             if collector.stat_name in kwargs["measure"]:
@@ -59,7 +60,7 @@ class StatsCollector:
     """
 
     stat_name = "undefined"  # Should be defined by subclasses.
-    subclasses = []
+    subclasses = []  # noqa: RUF012
 
     @staticmethod
     def subclass(stats_collector_subclass: type):
@@ -120,7 +121,7 @@ class StatsCollector:
         Raises:
             AbstractMethod:  This must be overridden by subclasses.
         """
-        raise AbstractMethod()
+        raise AbstractMethod
 
     @abstractmethod
     def unproxied_stats(self):
@@ -133,7 +134,7 @@ class StatsCollector:
         Raises:
             AbstractMethod:  This must be overridden by subclasses.
         """
-        raise AbstractMethod()
+        raise AbstractMethod
 
     def finish(self):
         """
@@ -325,7 +326,7 @@ else:
             Returns:
                 None
             """
-            return None
+            return
 
     @StatsCollector.subclass
     class CPUStatsCollector(StatsCollector):
@@ -360,7 +361,7 @@ else:
             Returns:
                 None
             """
-            return None
+            return
 
     @StatsCollector.subclass
     class MemoryStatsCollector(StatsCollector):
@@ -395,4 +396,4 @@ else:
             Returns:
                 None
             """
-            return None
+            return

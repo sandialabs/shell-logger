@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """Provides the :class:`ShellLogger` class, along with some helpers."""
 
 # © 2024 National Technology & Engineering Solutions of Sandia, LLC
@@ -119,22 +118,23 @@ class ShellLogger:
         if path.is_dir():
             try:
                 path = next(path.glob("*.html"))
-            except StopIteration:
-                raise RuntimeError(f"{path} does not have an html file.")
+            except StopIteration as error:
+                message = f"{path} does not have an html file."
+                raise RuntimeError(message) from error
         if path.is_symlink():
             path = path.resolve(strict=True)
         if path.is_file() and path.name[-5:] == ".html":
             path = path.parent / (path.name[:-5] + ".json")
 
         # Deserialize the corresponding JSON object into a ShellLogger.
-        with open(path, "r") as jf:
-            loaded_logger = json.load(jf, cls=ShellLoggerDecoder)
-        return loaded_logger
+        with path.open("r") as jf:
+            return json.load(jf, cls=ShellLoggerDecoder)
 
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         name: str,
-        log_dir: Path = Path.cwd(),
+        *,
+        log_dir: Optional[Path] = None,
         stream_dir: Optional[Path] = None,
         html_file: Optional[Path] = None,
         indent: int = 0,
@@ -187,9 +187,11 @@ class ShellLogger:
         self.duration = duration
         self.indent = indent
         self.login_shell = login_shell
-        self.shell = Shell(Path.cwd(), self.login_shell)
+        self.shell = Shell(Path.cwd(), login_shell=self.login_shell)
 
         # Create the log directory, if needed.
+        if log_dir is None:
+            log_dir = Path.cwd()
         self.log_dir = log_dir.resolve()
         if not self.log_dir.exists():
             self.log_dir.mkdir(parents=True, exist_ok=True)
@@ -215,7 +217,7 @@ class ShellLogger:
             self.html_file = html_file.resolve()
         if self.is_parent():
             if self.html_file.exists():
-                with open(self.html_file, "a") as f:
+                with self.html_file.open("a") as f:
                     f.write(
                         f"<!-- {self.init_time:} Append to log started -->"
                     )
@@ -286,10 +288,11 @@ class ShellLogger:
                 :class:`ShellLogger`.
         """
         if not self.is_parent():
-            raise RuntimeError(
+            message = (
                 "You should not change the log directory of a child "
                 "`ShellLogger`; only that of the parent."
             )
+            raise RuntimeError(message)
 
         # This only gets executed once by the top-level parent
         # `ShellLogger` object.
@@ -328,11 +331,11 @@ class ShellLogger:
         # Create the child object and add it to the list of children.
         child = ShellLogger(
             child_name,
-            self.log_dir,
-            self.stream_dir,
-            self.html_file,
-            self.indent + 1,
-            self.login_shell,
+            log_dir=self.log_dir,
+            stream_dir=self.stream_dir,
+            html_file=self.html_file,
+            indent=(self.indent + 1),
+            login_shell=self.login_shell,
         )
         self.log_book.append(child)
         return child
@@ -419,10 +422,8 @@ class ShellLogger:
         """
         html = []
         for log in self.log_book:
-
             # If this is a child ShellLogger...
             if isinstance(log, ShellLogger):
-
                 # Update the duration of this ShellLogger's commands.
                 if log.duration is None:
                     log.__update_duration()
@@ -440,8 +441,7 @@ class ShellLogger:
                 html.append(command_card(log, self.stream_dir))
         if self.is_parent():
             return parent_logger_card_html(self.name, html)
-        else:
-            return html
+        return html
 
     def finalize(self) -> None:
         """
@@ -451,14 +451,14 @@ class ShellLogger:
         """
         if self.is_parent():
             html_text = opening_html_text() + "\n"
-            with open(self.html_file, "w") as f:
+            with self.html_file.open("w") as f:
                 f.write(html_text)
 
         for element in self.to_html():
             append_html(element, output=self.html_file)
 
         if self.is_parent():
-            with open(self.html_file, "a") as html:
+            with self.html_file.open("a") as html:
                 html.write(closing_html_text())
                 html.write("\n")
 
@@ -475,15 +475,16 @@ class ShellLogger:
             json_file = self.stream_dir / (
                 self.name.replace(" ", "_") + ".json"
             )
-            with open(json_file, "w") as jf:
+            with json_file.open("w") as jf:
                 json.dump(
                     self, jf, cls=ShellLoggerEncoder, sort_keys=True, indent=4
                 )
 
-    def log(
+    def log(  # noqa: PLR0913
         self,
         msg: str,
         cmd: str,
+        *,
         cwd: Optional[Path] = None,
         live_stdout: bool = False,
         live_stderr: bool = False,
@@ -553,7 +554,7 @@ class ShellLogger:
         )
 
         # Print the command to be executed.
-        with open(stdout_path, "a"), open(stderr_path, "a"):
+        with stdout_path.open("a"), stderr_path.open("a"):
             if verbose:
                 print(cmd)
 
@@ -621,7 +622,7 @@ class ShellLogger:
                 kwargs[key] = True
 
         # Change to the directory in which to execute the command.
-        old_pwd = Path(os.getcwd())
+        old_pwd = Path.cwd()
         if kwargs.get("pwd"):
             self.shell.cd(kwargs.get("pwd"))
         aux_info = self.auxiliary_information()
@@ -656,13 +657,13 @@ class ShellLogger:
         completed_process = self.shell.run(command, **kwargs)
         for collector in collectors:
             stats[collector.stat_name] = collector.finish()
-        setattr(completed_process, "trace_path", trace_output)
-        setattr(completed_process, "stats", stats)
+        completed_process.trace_path = trace_output
+        completed_process.stats = stats
         if kwargs.get("trace_str") and trace_output:
-            with open(trace_output) as f:
-                setattr(completed_process, "trace", f.read())
+            with trace_output.open() as f:
+                completed_process.trace = f.read()
         else:
-            setattr(completed_process, "trace", None)
+            completed_process.trace = None
 
         # Change back to the original directory and return the results.
         if kwargs.get("pwd"):
@@ -721,7 +722,7 @@ class ShellLoggerEncoder(json.JSONEncoder):
             json.dump(data, jf, cls=ShellLoggerEncoder)
     """
 
-    def default(self, obj: object) -> object:
+    def default(self, obj: object) -> object:  # noqa: PLR0911
         """
         Serialize an object; that is, encode it in a string format.
 
@@ -736,32 +737,31 @@ class ShellLoggerEncoder(json.JSONEncoder):
                 **{"__type__": "ShellLogger"},
                 **{k: self.default(v) for k, v in obj.__dict__.items()},
             }
-        elif isinstance(obj, (int, float, str, bytes)):
+        if isinstance(obj, (int, float, str, bytes)):
             return obj
-        elif isinstance(obj, Mapping):
+        if isinstance(obj, Mapping):
             return {k: self.default(v) for k, v in obj.items()}
-        elif isinstance(obj, tuple):
+        if isinstance(obj, tuple):
             return {"__type__": "tuple", "items": obj}
-        elif isinstance(obj, Iterable):
+        if isinstance(obj, Iterable):
             return [self.default(x) for x in obj]
-        elif isinstance(obj, datetime):
+        if isinstance(obj, datetime):
             return {
                 "__type__": "datetime",
                 "value": obj.strftime("%Y-%m-%d_%H:%M:%S:%f"),
                 "format": "%Y-%m-%d_%H:%M:%S:%f",
             }
-        elif isinstance(obj, Path):
+        if isinstance(obj, Path):
             return {"__type__": "Path", "value": str(obj)}
-        elif obj is None:
+        if obj is None:
             return None
-        elif isinstance(obj, Shell):
+        if isinstance(obj, Shell):
             return {
                 "__type__": "Shell",
                 "pwd": obj.pwd(),
                 "login_shell": obj.login_shell,
             }
-        else:
-            return json.JSONEncoder.default(self, obj)
+        return json.JSONEncoder.default(self, obj)
 
 
 class ShellLoggerDecoder(json.JSONDecoder):
@@ -784,7 +784,7 @@ class ShellLoggerDecoder(json.JSONDecoder):
         json.JSONDecoder.__init__(self, object_hook=self.dict_to_object)
 
     @staticmethod
-    def dict_to_object(obj: dict) -> object:
+    def dict_to_object(obj: dict) -> object:  # noqa: PLR0911
         """
         Convert a ``dict`` to a corresponding object.
 
@@ -799,27 +799,25 @@ class ShellLoggerDecoder(json.JSONDecoder):
         """
         if "__type__" not in obj:
             return obj
-        elif obj["__type__"] == "ShellLogger":
-            logger = ShellLogger(
+        if obj["__type__"] == "ShellLogger":
+            return ShellLogger(
                 obj["name"],
-                obj["log_dir"],
-                obj["stream_dir"],
-                obj["html_file"],
-                obj["indent"],
-                obj["login_shell"],
-                obj["log_book"],
-                obj["init_time"],
-                obj["done_time"],
-                obj["duration"],
+                log_dir=obj["log_dir"],
+                stream_dir=obj["stream_dir"],
+                html_file=obj["html_file"],
+                indent=obj["indent"],
+                login_shell=obj["login_shell"],
+                log=obj["log_book"],
+                init_time=obj["init_time"],
+                done_time=obj["done_time"],
+                duration=obj["duration"],
             )
-            return logger
-        elif obj["__type__"] == "datetime":
+        if obj["__type__"] == "datetime":
             return datetime.strptime(obj["value"], obj["format"])
-        elif obj["__type__"] == "Path":
+        if obj["__type__"] == "Path":
             return Path(obj["value"])
-        elif obj["__type__"] == "tuple":
+        if obj["__type__"] == "tuple":
             return tuple(obj["items"])
-        elif obj["__type__"] == "Shell":
-            return Shell(Path(obj["pwd"]), obj["login_shell"])
-        else:
-            return None
+        if obj["__type__"] == "Shell":
+            return Shell(Path(obj["pwd"]), login_shell=obj["login_shell"])
+        return None

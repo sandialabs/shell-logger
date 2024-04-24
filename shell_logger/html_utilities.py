@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """Various utilities for building the HTML log file."""
 
 # © 2024 National Technology & Engineering Solutions of Sandia, LLC
@@ -18,7 +17,7 @@ from typing import Iterator, List, TextIO, Tuple, Union
 
 
 def nested_simplenamespace_to_dict(
-    namespace: Union[str, bytes, tuple, Mapping, Iterable, SimpleNamespace]
+    namespace: Union[str, bytes, tuple, Mapping, Iterable, SimpleNamespace],
 ) -> Union[str, bytes, tuple, dict, list]:
     """
     Convert a ``SimpleNamespace`` to a ``dict``.
@@ -38,18 +37,17 @@ def nested_simplenamespace_to_dict(
     if "_asdict" in dir(namespace):
         # noinspection PyProtectedMember
         return nested_simplenamespace_to_dict(namespace._asdict())
-    elif isinstance(namespace, (str, bytes, tuple)):
+    if isinstance(namespace, (str, bytes, tuple)):
         return namespace
-    elif isinstance(namespace, Mapping):
+    if isinstance(namespace, Mapping):
         return {
             k: nested_simplenamespace_to_dict(v) for k, v in namespace.items()
         }
-    elif isinstance(namespace, Iterable):
+    if isinstance(namespace, Iterable):
         return [nested_simplenamespace_to_dict(x) for x in namespace]
-    elif isinstance(namespace, SimpleNamespace):
+    if isinstance(namespace, SimpleNamespace):
         return nested_simplenamespace_to_dict(namespace.__dict__)
-    else:
-        return namespace
+    return namespace
 
 
 def get_human_time(milliseconds: float) -> str:
@@ -114,9 +112,10 @@ def append_html(*args: Union[str, Iterator[str]], output: Path) -> None:
             elif isinstance(arg, Iterable):
                 _append_html(f, *arg)
             else:
-                raise RuntimeError(f"Unsupported type: {type(arg)}")
+                message = f"Unsupported type: {type(arg)}"
+                raise TypeError(message)
 
-    with open(output, "a") as output_file:
+    with output.open("a") as output_file:
         _append_html(output_file, *args)
 
 
@@ -376,7 +375,7 @@ def command_detail_list(cmd_id: str, *args: Iterator[str]) -> Iterator[str]:
 
 
 def command_detail(
-    cmd_id: str, name: str, value: str, hidden: bool = False
+    cmd_id: str, name: str, value: str, *, hidden: bool = False
 ) -> str:
     """
     Generate the HTML for a command detail.
@@ -399,8 +398,7 @@ def command_detail(
         return hidden_command_detail_template.format(
             cmd_id=cmd_id, name=name, value=value
         )
-    else:
-        return command_detail_template.format(name=name, value=value)
+    return command_detail_template.format(name=name, value=value)
 
 
 def command_card(log: dict, stream_dir: Path) -> Iterator[str]:
@@ -552,7 +550,11 @@ def stat_chart_card(
 
 
 def output_block_card(
-    title: str, output: Union[Path, str], cmd_id: str, collapsed: bool = True
+    title: str,
+    output: Union[Path, str],
+    cmd_id: str,
+    *,
+    collapsed: bool = True,
 ) -> Iterator[str]:
     """
     Generate an output block card.
@@ -604,7 +606,7 @@ def output_block(
         The HTML equivalent of each line of the output in turn.
     """
     if isinstance(output, Path):
-        with open(output) as f:
+        with output.open() as f:
             for string in output_block_html(f, name, cmd_id):
                 yield string
     if isinstance(output, str):
@@ -667,9 +669,7 @@ def output_block_html(
         output_block_template, "table_contents", name=name, cmd_id=cmd_id
     )
     yield header
-    line_no = 0
-    for line in lines:
-        line_no += 1
+    for line_no, line in enumerate(lines):
         yield textwrap.indent(output_line_html(line, line_no), indent)
     yield footer
 
@@ -854,7 +854,7 @@ def sgr_4bit_color_and_style_to_html(sgr: str) -> str:
     return f'<span style="{sgr_to_css.get(sgr) or str()}">'
 
 
-def sgr_8bit_color_to_html(sgr_params: List[str]) -> str:
+def sgr_8bit_color_to_html(sgr_params: List[str]) -> str:  # noqa: PLR0911
     """
     Convert 8-bit SGR colors to HTML.
 
@@ -878,19 +878,20 @@ def sgr_8bit_color_to_html(sgr_params: List[str]) -> str:
         green = str(51 * green_6cube)
         blue = str(51 * blue_6cube)
         return sgr_24bit_color_to_html([sgr_params[0], "2", red, green, blue])
-    elif 231 < sgr_256 < 256:
+    if 231 < sgr_256 < 256:
         gray = str(8 + (sgr_256 - 232) * 10)
         return sgr_24bit_color_to_html([sgr_params[0], "2", gray, gray, gray])
-    elif sgr_params[0] == "38":
+    if sgr_params[0] == "38":
         if sgr_256 < 8:
             return sgr_4bit_color_and_style_to_html(str(30 + sgr_256))
-        elif sgr_256 < 16:
+        if sgr_256 < 16:
             return sgr_4bit_color_and_style_to_html(str(82 + sgr_256))
-    elif sgr_params[0] == "48":
+    if sgr_params[0] == "48":
         if sgr_256 < 8:
             return sgr_4bit_color_and_style_to_html(str(40 + sgr_256))
-        elif sgr_256 < 16:
+        if sgr_256 < 16:
             return sgr_4bit_color_and_style_to_html(str(92 + sgr_256))
+    return "THIS SHOULD NEVER HAPPEN"
 
 
 def sgr_24bit_color_to_html(sgr_params: List[str]) -> str:
@@ -909,10 +910,9 @@ def sgr_24bit_color_to_html(sgr_params: List[str]) -> str:
     r, g, b = sgr_params[2:5] if len(sgr_params) == 5 else ("0", "0", "0")
     if len(sgr_params) > 1 and sgr_params[:2] == ["38", "2"]:
         return f'<span style="color: rgb({r}, {g}, {b})">'
-    elif len(sgr_params) > 1 and sgr_params[:2] == ["48", "2"]:
+    if len(sgr_params) > 1 and sgr_params[:2] == ["48", "2"]:
         return f'<span style="background-color: rgb({r}, {g}, {b})">'
-    else:
-        return "<span>"
+    return "<span>"
 
 
 def html_header() -> str:

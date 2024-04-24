@@ -237,7 +237,7 @@ highlighted lines below.
    :language: python
    :linenos:
    :lines: 10-
-   :emphasize-lines: 15-16, 22-23
+   :emphasize-lines: 16-17, 23-24
    :caption: ``example/hello_world_html_and_console.py``
 
 Example 3:  Collecting Statistics
@@ -251,7 +251,7 @@ and **Example 1** are the highlighted lines below.
    :language: python
    :linenos:
    :lines: 10-
-   :emphasize-lines: 16, 22
+   :emphasize-lines: 17, 23
    :caption: ``example/hello_world_html_with_stats.py``
 
 Example 4:  Building a Code
