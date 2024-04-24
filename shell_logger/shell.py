@@ -42,7 +42,7 @@ class Shell:
     """
 
     def __init__(
-        self, pwd: Optional[Path] = None, login_shell: bool = False
+        self, pwd: Optional[Path] = None, *, login_shell: bool = False
     ) -> None:
         """
         Initialize a :class:`Shell` object.

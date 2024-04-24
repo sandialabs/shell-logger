@@ -70,7 +70,7 @@ def shell_logger() -> ShellLogger:
         print(
             f"Warning: uname is not 'Linux': {os.uname()}; ltrace not tested."
         )
-    parent.log("test cmd", cmd, Path.cwd(), **kwargs)
+    parent.log("test cmd", cmd, cwd=Path.cwd(), **kwargs)
     parent.print("This is a message")
 
     # Add a child and run some commands.
@@ -143,7 +143,9 @@ def test_log_method_creates_tmp_stdout_stderr_files(
 
 
 @pytest.mark.parametrize("return_info", [True, False])
-def test_log_method_return_info_works_correctly(return_info: bool) -> None:
+def test_log_method_return_info_works_correctly(
+    return_info: bool,  # noqa: FBT001
+) -> None:
     """
     Ensure ``stdout``/``stderr`` are returned when requested.
 
@@ -160,7 +162,12 @@ def test_log_method_return_info_works_correctly(return_info: bool) -> None:
 
     #           `stdout`         ;      `stderr`
     cmd = "echo 'Hello world out'; echo 'Hello world error' 1>&2"
-    result = logger.log("test cmd", cmd, Path.cwd(), return_info=return_info)
+    result = logger.log(
+        "test cmd",
+        cmd,
+        cwd=Path.cwd(),
+        return_info=return_info,
+    )
     if return_info:
         assert "Hello world out" in result["stdout"]
         assert "Hello world error" in result["stderr"]
@@ -174,7 +181,9 @@ def test_log_method_return_info_works_correctly(return_info: bool) -> None:
 @pytest.mark.parametrize("live_stdout", [True, False])
 @pytest.mark.parametrize("live_stderr", [True, False])
 def test_log_method_live_stdout_stderr_works_correctly(
-    capsys: CaptureFixture, live_stdout: bool, live_stderr: bool
+    capsys: CaptureFixture,
+    live_stdout: bool,  # noqa: FBT001
+    live_stderr: bool,  # noqa: FBT001
 ) -> None:
     """
     Ensure live streaming of ``stdout``/``stderr`` works.
@@ -191,7 +200,13 @@ def test_log_method_live_stdout_stderr_works_correctly(
     """
     logger = ShellLogger(stack()[0][3], Path.cwd())
     cmd = "echo 'Hello world out'; echo 'Hello world error' 1>&2"
-    logger.log("test cmd", cmd, Path.cwd(), live_stdout, live_stderr)
+    logger.log(
+        "test cmd",
+        cmd,
+        cwd=Path.cwd(),
+        live_stdout=live_stdout,
+        live_stderr=live_stderr,
+    )
     out, err = capsys.readouterr()
     if live_stdout:
         assert re.search(r"^Hello world out(\r)?\n", out) is not None
@@ -451,12 +466,12 @@ def test_logger_does_not_store_stdout_string_by_default() -> None:
 def test_logger_does_not_store_trace_string_by_default() -> None:
     """Ensure we don't keep trace output in memory by default."""
     logger = ShellLogger(stack()[0][3], Path.cwd())
-    logger.log("echo hello", "echo hello", Path.cwd(), trace="ltrace")
+    logger.log("echo hello", "echo hello", cwd=Path.cwd(), trace="ltrace")
     assert logger.log_book[0]["trace"] is None
     logger.log(
         "echo hello",
         "echo hello",
-        Path.cwd(),
+        cwd=Path.cwd(),
         return_info=True,
         trace="ltrace",
     )

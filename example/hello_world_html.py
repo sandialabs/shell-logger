@@ -11,7 +11,10 @@ from pathlib import Path
 
 from shell_logger import ShellLogger
 
-sl = ShellLogger("Hello World HTML", Path.cwd() / f"log_{Path(__file__).stem}")
+sl = ShellLogger(
+    "Hello World HTML",
+    log_dir=(Path.cwd() / f"log_{Path(__file__).stem}"),
+)
 sl.print(
     "This example demonstrates logging information solely to the HTML log "
     "file."

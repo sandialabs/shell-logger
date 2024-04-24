@@ -376,7 +376,7 @@ def command_detail_list(cmd_id: str, *args: Iterator[str]) -> Iterator[str]:
 
 
 def command_detail(
-    cmd_id: str, name: str, value: str, hidden: bool = False
+    cmd_id: str, name: str, value: str, *, hidden: bool = False
 ) -> str:
     """
     Generate the HTML for a command detail.
@@ -552,7 +552,11 @@ def stat_chart_card(
 
 
 def output_block_card(
-    title: str, output: Union[Path, str], cmd_id: str, collapsed: bool = True
+    title: str,
+    output: Union[Path, str],
+    cmd_id: str,
+    *,
+    collapsed: bool = True,
 ) -> Iterator[str]:
     """
     Generate an output block card.

@@ -11,7 +11,10 @@ from pathlib import Path
 
 from shell_logger import ShellLogger
 
-sl = ShellLogger("Build Flex", Path.cwd() / f"log_{Path(__file__).stem}")
+sl = ShellLogger(
+    "Build Flex",
+    log_dir=(Path.cwd() / f"log_{Path(__file__).stem}"),
+)
 sl.print(
     "This example demonstrates cloning, configuring, and building the Flex "
     "tool."

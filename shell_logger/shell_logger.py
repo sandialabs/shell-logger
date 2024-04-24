@@ -134,6 +134,7 @@ class ShellLogger:
     def __init__(
         self,
         name: str,
+        *,
         log_dir: Optional[Path] = None,
         stream_dir: Optional[Path] = None,
         html_file: Optional[Path] = None,
@@ -187,7 +188,7 @@ class ShellLogger:
         self.duration = duration
         self.indent = indent
         self.login_shell = login_shell
-        self.shell = Shell(Path.cwd(), self.login_shell)
+        self.shell = Shell(Path.cwd(), login_shell=self.login_shell)
 
         # Create the log directory, if needed.
         if log_dir is None:
@@ -331,11 +332,11 @@ class ShellLogger:
         # Create the child object and add it to the list of children.
         child = ShellLogger(
             child_name,
-            self.log_dir,
-            self.stream_dir,
-            self.html_file,
-            self.indent + 1,
-            self.login_shell,
+            log_dir=self.log_dir,
+            stream_dir=self.stream_dir,
+            html_file=self.html_file,
+            indent=(self.indent + 1),
+            login_shell=self.login_shell,
         )
         self.log_book.append(child)
         return child
@@ -487,6 +488,7 @@ class ShellLogger:
         self,
         msg: str,
         cmd: str,
+        *,
         cwd: Optional[Path] = None,
         live_stdout: bool = False,
         live_stderr: bool = False,
@@ -805,15 +807,15 @@ class ShellLoggerDecoder(json.JSONDecoder):
         elif obj["__type__"] == "ShellLogger":
             logger = ShellLogger(
                 obj["name"],
-                obj["log_dir"],
-                obj["stream_dir"],
-                obj["html_file"],
-                obj["indent"],
-                obj["login_shell"],
-                obj["log_book"],
-                obj["init_time"],
-                obj["done_time"],
-                obj["duration"],
+                log_dir=obj["log_dir"],
+                stream_dir=obj["stream_dir"],
+                html_file=obj["html_file"],
+                indent=obj["indent"],
+                login_shell=obj["login_shell"],
+                log=obj["log_book"],
+                init_time=obj["init_time"],
+                done_time=obj["done_time"],
+                duration=obj["duration"],
             )
             return logger
         elif obj["__type__"] == "datetime":
@@ -823,6 +825,6 @@ class ShellLoggerDecoder(json.JSONDecoder):
         elif obj["__type__"] == "tuple":
             return tuple(obj["items"])
         elif obj["__type__"] == "Shell":
-            return Shell(Path(obj["pwd"]), obj["login_shell"])
+            return Shell(Path(obj["pwd"]), login_shell=obj["login_shell"])
         else:
             return None

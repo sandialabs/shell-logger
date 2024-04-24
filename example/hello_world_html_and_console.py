@@ -12,7 +12,8 @@ from pathlib import Path
 from shell_logger import ShellLogger
 
 sl = ShellLogger(
-    "Hello World HTML and Console", Path.cwd() / f"log_{Path(__file__).stem}"
+    "Hello World HTML and Console",
+    log_dir=(Path.cwd() / f"log_{Path(__file__).stem}"),
 )
 sl.print(
     "This example demonstrates logging information both to the HTML log file "
