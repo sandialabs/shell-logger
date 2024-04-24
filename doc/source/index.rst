@@ -13,6 +13,66 @@ shell-logger
    trace
    html_utilities
 
+|Code lines|
+|codecov|
+|CodeFactor|
+|CodeQL|
+|conda-forge Version|
+|conda-forge Downloads|
+|Continuous Integration|
+|Contributor Covenant|
+|GitHub Contributors|
+|Documentation Status|
+|License|
+|Merged PRs|
+|OpenSSF Best Practices|
+|OpenSSF Scorecard|
+|Platforms|
+|pre-commit|
+|pre-commit.ci Status|
+|PyPI Version|
+|PyPI Downloads|
+|Python Version|
+|Ruff|
+
+.. |Code lines| image:: https://sloc.xyz/github/sandialabs/shell-logger/?category=code
+.. |codecov| image:: https://codecov.io/gh/sandialabs/shell-logger/branch/master/graph/badge.svg?token=FmDStZ6FVR
+   :target: https://codecov.io/gh/sandialabs/shell-logger
+.. |CodeFactor| image:: https://www.codefactor.io/repository/github/sandialabs/shell-logger/badge/master
+   :target: https://www.codefactor.io/repository/github/sandialabs/shell-logger/overview/master
+.. |CodeQL| image:: https://github.com/sandialabs/shell-logger/actions/workflows/github-code-scanning/codeql/badge.svg
+   :target: https://github.com/sandialabs/shell-logger/actions/workflows/github-code-scanning/codeql
+.. |conda-forge Version| image:: https://img.shields.io/conda/v/conda-forge/shell-logger?label=conda-forge
+   :target: https://anaconda.org/conda-forge/shell-logger
+.. |conda-forge Downloads| image:: https://img.shields.io/conda/d/conda-forge/shell-logger?label=conda-forge%20downloads
+.. |Continuous Integration| image:: https://github.com/sandialabs/shell-logger/actions/workflows/continuous-integration.yml/badge.svg
+   :target: https://github.com/sandialabs/shell-logger/actions/workflows/continuous-integration.yml
+.. |Contributor Covenant| image:: https://img.shields.io/badge/Contributor%20Covenant-2.1-4baaaa.svg
+   :target: https://github.com/sandialabs/shell-logger/blob/master/CODE_OF_CONDUCT.md
+.. |GitHub Contributors| image:: https://img.shields.io/github/contributors/sandialabs/shell-logger.svg
+   :target: https://github.com/sandialabs/shell-logger/graphs/contributors
+.. |Documentation Status| image:: https://readthedocs.org/projects/shell-logger/badge/?version=latest
+   :target: https://shell-logger.readthedocs.io/en/latest/?badge=latest
+.. |License| image:: https://anaconda.org/conda-forge/shell-logger/badges/license.svg
+   :target: https://github.com/sandialabs/shell-logger/blob/master/LICENSE.md
+.. |Merged PRs| image:: https://img.shields.io/github/issues-pr-closed-raw/sandialabs/shell-logger.svg?label=merged+PRs
+   :target: https://github.com/sandialabs/shell-logger/pulls?q=is:pr+is:merged
+.. |OpenSSF Best Practices| image:: https://bestpractices.coreinfrastructure.org/projects/7632/badge
+   :target: https://bestpractices.coreinfrastructure.org/projects/7632
+.. |OpenSSF Scorecard| image:: https://api.securityscorecards.dev/projects/github.com/sandialabs/shell-logger/badge
+   :target: https://securityscorecards.dev/viewer/?uri=github.com/sandialabs/shell-logger
+.. |Platforms| image:: https://anaconda.org/conda-forge/shell-logger/badges/platforms.svg
+.. |pre-commit| image:: https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit
+   :target: https://github.com/pre-commit/pre-commit
+.. |pre-commit.ci Status| image:: https://results.pre-commit.ci/badge/github/sandialabs/shell-logger/master.svg
+   :target: https://results.pre-commit.ci/latest/github/sandialabs/shell-logger/master
+.. |PyPI Version| image:: https://img.shields.io/pypi/v/shell-logger?label=PyPI
+   :target: https://pypi.org/project/shell-logger/
+.. |PyPI Downloads| image:: https://img.shields.io/pypi/dm/shell-logger?label=PyPI%20downloads
+.. |Python Version| image:: https://img.shields.io/badge/Python-3.8|3.9|3.10|3.11|3.12-blue.svg
+.. |Ruff| image:: https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json
+   :target: https://github.com/astral-sh/ruff
+
 The ``shell-logger`` Python package allows you to interact with the shell,
 while logging various metadata, statistics, and trace information.  Any time
 you're tempted to write your own wrapper around things like
