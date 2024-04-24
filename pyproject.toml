@@ -92,7 +92,7 @@ extend-select = [
     "TID",
     "TCH",
     "TRY",
-    "UP",
+    # "UP",
     "W",
 ]
 ignore = [
