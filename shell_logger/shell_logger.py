@@ -131,7 +131,7 @@ class ShellLogger:
             loaded_logger = json.load(jf, cls=ShellLoggerDecoder)
         return loaded_logger
 
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         name: str,
         *,
@@ -484,7 +484,7 @@ class ShellLogger:
                     self, jf, cls=ShellLoggerEncoder, sort_keys=True, indent=4
                 )
 
-    def log(
+    def log(  # noqa: PLR0913
         self,
         msg: str,
         cmd: str,
@@ -726,7 +726,7 @@ class ShellLoggerEncoder(json.JSONEncoder):
             json.dump(data, jf, cls=ShellLoggerEncoder)
     """
 
-    def default(self, obj: object) -> object:
+    def default(self, obj: object) -> object:  # noqa: PLR0911
         """
         Serialize an object; that is, encode it in a string format.
 
@@ -789,7 +789,7 @@ class ShellLoggerDecoder(json.JSONDecoder):
         json.JSONDecoder.__init__(self, object_hook=self.dict_to_object)
 
     @staticmethod
-    def dict_to_object(obj: dict) -> object:
+    def dict_to_object(obj: dict) -> object:  # noqa: PLR0911
         """
         Convert a ``dict`` to a corresponding object.
 

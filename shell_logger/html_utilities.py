@@ -858,7 +858,7 @@ def sgr_4bit_color_and_style_to_html(sgr: str) -> str:
     return f'<span style="{sgr_to_css.get(sgr) or str()}">'
 
 
-def sgr_8bit_color_to_html(sgr_params: List[str]) -> str:
+def sgr_8bit_color_to_html(sgr_params: List[str]) -> str:  # noqa: PLR0911
     """
     Convert 8-bit SGR colors to HTML.
 
