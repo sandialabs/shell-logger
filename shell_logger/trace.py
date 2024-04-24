@@ -88,7 +88,7 @@ class Trace:
         Raises:
             AbstractMethod:  This needs to be overridden by subclasses.
         """
-        raise AbstractMethod()
+        raise AbstractMethod
 
     def command(self, command: str):
         """

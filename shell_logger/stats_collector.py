@@ -119,7 +119,7 @@ class StatsCollector:
         Raises:
             AbstractMethod:  This must be overridden by subclasses.
         """
-        raise AbstractMethod()
+        raise AbstractMethod
 
     @abstractmethod
     def unproxied_stats(self):
@@ -132,7 +132,7 @@ class StatsCollector:
         Raises:
             AbstractMethod:  This must be overridden by subclasses.
         """
-        raise AbstractMethod()
+        raise AbstractMethod
 
     def finish(self):
         """
