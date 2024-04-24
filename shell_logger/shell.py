@@ -208,7 +208,7 @@ class Shell:
                 f"There was a problem running the command `{command}`.  "
                 "This is a fatal error and we cannot continue.  Ensure that "
                 "the syntax of the command is correct."
-            )
+            ) from None
         finish = round(time() * milliseconds_per_second)
 
         # Pull the return code and return the results.  Note that if the

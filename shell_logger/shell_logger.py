@@ -119,8 +119,10 @@ class ShellLogger:
         if path.is_dir():
             try:
                 path = next(path.glob("*.html"))
-            except StopIteration:
-                raise RuntimeError(f"{path} does not have an html file.")
+            except StopIteration as error:
+                raise RuntimeError(
+                    f"{path} does not have an html file."
+                ) from error
         if path.is_symlink():
             path = path.resolve(strict=True)
         if path.is_file() and path.name[-5:] == ".html":
