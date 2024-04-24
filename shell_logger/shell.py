@@ -43,7 +43,7 @@ class Shell:
     """
 
     def __init__(
-        self, pwd: Path = Path.cwd(), login_shell: bool = False
+        self, pwd: Optional[Path] = None, login_shell: bool = False
     ) -> None:
         """
         Initialize a :class:`Shell` object.
@@ -100,6 +100,8 @@ class Shell:
         os.set_inheritable(self.aux_stderr_wfd, False)
 
         # Start the shell in the given directory.
+        if pwd is None:
+            pwd = Path.cwd()
         self.cd(pwd)
 
     def __del__(self) -> None:

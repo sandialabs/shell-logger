@@ -134,7 +134,7 @@ class ShellLogger:
     def __init__(
         self,
         name: str,
-        log_dir: Path = Path.cwd(),
+        log_dir: Optional[Path] = None,
         stream_dir: Optional[Path] = None,
         html_file: Optional[Path] = None,
         indent: int = 0,
@@ -190,6 +190,8 @@ class ShellLogger:
         self.shell = Shell(Path.cwd(), self.login_shell)
 
         # Create the log directory, if needed.
+        if log_dir is None:
+            log_dir = Path.cwd()
         self.log_dir = log_dir.resolve()
         if not self.log_dir.exists():
             self.log_dir.mkdir(parents=True, exist_ok=True)
