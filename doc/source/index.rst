@@ -167,7 +167,7 @@ the following:
 .. literalinclude:: ../../example/hello_world_html.py
    :language: python
    :linenos:
-   :lines: 11-
+   :lines: 10-
    :caption: ``example/hello_world_html.py``
 
 Running the script yields
@@ -236,7 +236,7 @@ highlighted lines below.
 .. literalinclude:: ../../example/hello_world_html_and_console.py
    :language: python
    :linenos:
-   :lines: 11-
+   :lines: 10-
    :emphasize-lines: 15-16, 22-23
    :caption: ``example/hello_world_html_and_console.py``
 
@@ -250,7 +250,7 @@ and **Example 1** are the highlighted lines below.
 .. literalinclude:: ../../example/hello_world_html_with_stats.py
    :language: python
    :linenos:
-   :lines: 11-
+   :lines: 10-
    :emphasize-lines: 16, 22
    :caption: ``example/hello_world_html_with_stats.py``
 
@@ -272,7 +272,7 @@ The equivalent Python script using ``shell-logger`` is the following:
 .. literalinclude:: ../../example/build_flex.py
    :language: python
    :linenos:
-   :lines: 11-
+   :lines: 10-
    :caption: ``example/build_flex.py``
 
 More Details
