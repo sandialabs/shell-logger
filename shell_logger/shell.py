@@ -230,7 +230,7 @@ class Shell:
         )
 
     @staticmethod
-    def tee(
+    def tee(  # noqa: C901
         stdout: Optional[IO[bytes]], stderr: Optional[IO[bytes]], **kwargs
     ) -> SimpleNamespace:
         """
