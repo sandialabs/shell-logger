@@ -514,8 +514,9 @@ def test_timing() -> None:
     else:
         print(f"Warning: os.name is unrecognized: {os.name}; test may fail.")
     result = logger._run(command)
-    assert result.wall >= 1000
-    assert result.wall < 2000
+    min_time, max_time = 1000, 2000
+    assert result.wall >= min_time
+    assert result.wall < max_time
     assert result.finish >= result.start
 
 
@@ -534,7 +535,8 @@ def test_auxiliary_data() -> None:
     assert logger._run("hostname").stdout.strip() == result.hostname
     assert logger._run("whoami").stdout.strip() == result.user
     if os.name == "posix":
-        assert len(result.umask) == 3 or len(result.umask) == 4
+        valid_umask_lengths = [3, 4]
+        assert len(result.umask) in valid_umask_lengths
         assert logger._run("id -gn").stdout.strip() == result.group
         assert logger._run("printenv SHELL").stdout.strip() == result.shell
         assert logger._run("ulimit -a").stdout == result.ulimit
@@ -584,7 +586,8 @@ def test_trace_expression() -> None:
     if os.uname().sysname == "Linux":
         result = logger._run("echo hello", trace="ltrace", expression="getenv")
         assert 'getenv("POSIXLY_CORRECT")' in result.trace
-        assert result.trace.count("\n") == 2
+        expected_newlines = 2
+        assert result.trace.count("\n") == expected_newlines
     else:
         print(
             f"Warning: uname is not 'Linux': {os.uname()}; ltrace expression "
@@ -639,13 +642,14 @@ def test_stats() -> None:
     logger = ShellLogger(stack()[0][3], Path.cwd())
     measure = ["cpu", "memory", "disk"]
     result = logger._run("sleep 2", measure=measure, interval=0.1)
-    assert len(result.stats["memory"]) > 1
-    assert len(result.stats["memory"]) < 30
-    assert len(result.stats["cpu"]) > 1
-    assert len(result.stats["cpu"]) < 30
+    min_results, max_results = 1, 30
+    assert len(result.stats["memory"]) > min_results
+    assert len(result.stats["memory"]) < max_results
+    assert len(result.stats["cpu"]) > min_results
+    assert len(result.stats["cpu"]) < max_results
     if os.name == "posix":
-        assert len(result.stats["disk"]["/"]) > 1
-        assert len(result.stats["disk"]["/"]) < 30
+        assert len(result.stats["disk"]["/"]) > min_results
+        assert len(result.stats["disk"]["/"]) < max_results
     else:
         print(
             f"Warning: os.name is not 'posix': {os.name}; disk usage not "
@@ -673,12 +677,13 @@ def test_trace_and_stats() -> None:
         )
         assert "setlocale" in result.trace
         assert "sleep" not in result.trace
-        assert len(result.stats["memory"]) > 5
-        assert len(result.stats["memory"]) < 50
-        assert len(result.stats["cpu"]) > 5
-        assert len(result.stats["cpu"]) < 50
-        assert len(result.stats["disk"]["/"]) > 5
-        assert len(result.stats["disk"]["/"]) < 50
+        min_results, max_results = 5, 50
+        assert len(result.stats["memory"]) > min_results
+        assert len(result.stats["memory"]) < max_results
+        assert len(result.stats["cpu"]) > min_results
+        assert len(result.stats["cpu"]) < max_results
+        assert len(result.stats["disk"]["/"]) > min_results
+        assert len(result.stats["disk"]["/"]) < max_results
     else:
         print(
             f"Warning: uname is not 'Linux': {os.uname()}; ltrace not tested."
@@ -744,12 +749,13 @@ def test_log_book_trace_and_stats() -> None:
         )
         assert "setlocale" in logger.log_book[0]["trace"]
         assert "sleep" not in logger.log_book[0]["trace"]
-        assert len(logger.log_book[0]["stats"]["memory"]) > 5
-        assert len(logger.log_book[0]["stats"]["memory"]) < 50
-        assert len(logger.log_book[0]["stats"]["cpu"]) > 5
-        assert len(logger.log_book[0]["stats"]["cpu"]) < 50
-        assert len(logger.log_book[0]["stats"]["disk"]["/"]) > 5
-        assert len(logger.log_book[0]["stats"]["disk"]["/"]) < 50
+        min_results, max_results = 5, 50
+        assert len(logger.log_book[0]["stats"]["memory"]) > min_results
+        assert len(logger.log_book[0]["stats"]["memory"]) < max_results
+        assert len(logger.log_book[0]["stats"]["cpu"]) > min_results
+        assert len(logger.log_book[0]["stats"]["cpu"]) < max_results
+        assert len(logger.log_book[0]["stats"]["disk"]["/"]) > min_results
+        assert len(logger.log_book[0]["stats"]["disk"]["/"]) < max_results
     else:
         print(
             f"Warning: uname is not 'Linux': {os.uname()}; ltrace not tested."

@@ -21,6 +21,9 @@ from types import SimpleNamespace
 from typing import IO, List, Optional, TextIO, Tuple
 
 
+END_OF_READ = 4
+
+
 class Shell:
     """
     Manage interactions with the underlying shell.
@@ -273,7 +276,7 @@ class Shell:
             # Read chunks from the input file.
             chunk_size = 4096  # 4 KB
             chunk = os.read(input_file.fileno(), chunk_size)
-            while chunk and chunk[-1] != 4:
+            while chunk and chunk[-1] != END_OF_READ:
                 for output_file in output_files:
                     if output_file is not None:
                         output_file.write(chunk.decode(errors="ignore"))
@@ -349,7 +352,7 @@ class Shell:
 
             max_anonymous_pipe_buffer_size = 65536
             aux = os.read(self.aux_stdout_rfd, max_anonymous_pipe_buffer_size)
-            while aux[-1] != 4:
+            while aux[-1] != END_OF_READ:
                 stdout += aux.decode()
                 aux = os.read(
                     self.aux_stdout_rfd, max_anonymous_pipe_buffer_size
@@ -357,7 +360,7 @@ class Shell:
             aux = aux[:-1]
             stdout += aux.decode()
             aux = os.read(self.aux_stderr_rfd, max_anonymous_pipe_buffer_size)
-            while aux[-1] != 4:
+            while aux[-1] != END_OF_READ:
                 stderr += aux.decode()
                 aux = os.read(
                     self.aux_stderr_rfd, max_anonymous_pipe_buffer_size
