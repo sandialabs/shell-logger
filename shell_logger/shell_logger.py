@@ -660,13 +660,13 @@ class ShellLogger:
         completed_process = self.shell.run(command, **kwargs)
         for collector in collectors:
             stats[collector.stat_name] = collector.finish()
-        setattr(completed_process, "trace_path", trace_output)
-        setattr(completed_process, "stats", stats)
+        completed_process.trace_path = trace_output
+        completed_process.stats = stats
         if kwargs.get("trace_str") and trace_output:
             with open(trace_output) as f:
-                setattr(completed_process, "trace", f.read())
+                completed_process.trace = f.read()
         else:
-            setattr(completed_process, "trace", None)
+            completed_process.trace = None
 
         # Change back to the original directory and return the results.
         if kwargs.get("pwd"):
