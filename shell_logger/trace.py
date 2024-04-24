@@ -118,7 +118,7 @@ class STrace(Trace):
     def __init__(self, **kwargs) -> None:
         """Initialize the :class:`STrace` instance."""
         super().__init__(**kwargs)
-        self.summary = True if kwargs.get("summary") else False
+        self.summary = bool(kwargs.get("summary"))
         self.expression = kwargs.get("expression")
 
     @property
@@ -146,7 +146,7 @@ class LTrace(Trace):
     def __init__(self, **kwargs):
         """Initialize the :class:`LTrace` instance."""
         super().__init__(**kwargs)
-        self.summary = True if kwargs.get("summary") else False
+        self.summary = bool(kwargs.get("summary"))
         self.expression = kwargs.get("expression")
 
     @property

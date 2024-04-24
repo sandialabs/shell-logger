@@ -669,9 +669,7 @@ def output_block_html(
         output_block_template, "table_contents", name=name, cmd_id=cmd_id
     )
     yield header
-    line_no = 0
-    for line in lines:
-        line_no += 1
+    for line_no, line in enumerate(lines):
         yield textwrap.indent(output_line_html(line, line_no), indent)
     yield footer
 

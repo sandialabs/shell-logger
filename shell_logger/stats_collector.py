@@ -41,7 +41,7 @@ def stats_collectors(**kwargs) -> List[StatsCollector]:
     """
     collectors = []
     if "measure" in kwargs:
-        interval = kwargs["interval"] if "interval" in kwargs else 1.0
+        interval = kwargs.get("interval", 1.0)
         manager = Manager()
         for collector in StatsCollector.subclasses:
             if collector.stat_name in kwargs["measure"]:
