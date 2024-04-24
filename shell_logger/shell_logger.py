@@ -422,10 +422,8 @@ class ShellLogger:
         """
         html = []
         for log in self.log_book:
-
             # If this is a child ShellLogger...
             if isinstance(log, ShellLogger):
-
                 # Update the duration of this ShellLogger's commands.
                 if log.duration is None:
                     log.__update_duration()

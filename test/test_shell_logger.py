@@ -799,11 +799,11 @@ def test_sgr_gets_converted_to_html() -> None:
     translated to valid HTML/CSS.
     """
     logger = ShellLogger(stack()[0][3], Path.cwd())
-    logger.print("\x1B[31mHello\x1B[0m")
-    logger.print("\x1B[31;43m\x1B[4mthere\x1B[0m")
-    logger.print("\x1B[38;5;196m\x1B[48;5;232m\x1B[4mmr.\x1B[0m logger")
+    logger.print("\x1b[31mHello\x1b[0m")
+    logger.print("\x1b[31;43m\x1b[4mthere\x1b[0m")
+    logger.print("\x1b[38;5;196m\x1b[48;5;232m\x1b[4mmr.\x1b[0m logger")
     logger.print(
-        "\x1B[38;2;96;140;240m\x1B[48;2;240;140;10mmrs.\x1B[0m logger"
+        "\x1b[38;2;96;140;240m\x1b[48;2;240;140;10mmrs.\x1b[0m logger"
     )
     logger.finalize()
 
@@ -812,7 +812,7 @@ def test_sgr_gets_converted_to_html() -> None:
     assert html_file.exists()
     with html_file.open("r") as hf:
         html_text = hf.read()
-    assert "\x1B" not in html_text
+    assert "\x1b" not in html_text
     assert ">Hello</span>" in html_text
     assert ">there</span>" in html_text
     assert ">mr.</span></span></span> logger" in html_text

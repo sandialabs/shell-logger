@@ -17,7 +17,7 @@ from typing import Iterator, List, TextIO, Tuple, Union
 
 
 def nested_simplenamespace_to_dict(
-    namespace: Union[str, bytes, tuple, Mapping, Iterable, SimpleNamespace]
+    namespace: Union[str, bytes, tuple, Mapping, Iterable, SimpleNamespace],
 ) -> Union[str, bytes, tuple, dict, list]:
     """
     Convert a ``SimpleNamespace`` to a ``dict``.
