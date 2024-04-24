@@ -1,6 +1,4 @@
-"""
-The unit test suite for the ``shell_logger`` package.
-"""
+"""The unit test suite for the ``shell_logger`` package."""
 
 # © 2024 National Technology & Engineering Solutions of Sandia, LLC
 # (NTESS).  Under the terms of Contract DE-NA0003525 with NTESS, the
@@ -29,10 +27,7 @@ except ModuleNotFoundError:
 @pytest.fixture(autouse=True)
 def use_tmpdir(monkeypatch: MonkeyPatch, tmpdir: Path) -> None:
     """
-    **@pytest.fixture(autouse=True)**
-
-    Automatically use a temporary directory as the current working
-    directory for all tests.
+    Use a temporary directory for all tests.
 
     Parameters:
         monkeypatch:  The ``MonkeyPatch`` fixture.
@@ -44,7 +39,7 @@ def use_tmpdir(monkeypatch: MonkeyPatch, tmpdir: Path) -> None:
 @pytest.fixture()
 def shell_logger() -> ShellLogger:
     """
-    **@pytest.fixture()**
+    Pre-populate a :class:`ShellLogger` for use in the tests.
 
     This fixture creates a :class:`ShellLogger` object with some sample
     data to be used in tests.  It first creates a sample
@@ -56,7 +51,6 @@ def shell_logger() -> ShellLogger:
     Returns:
         The parent :class:`ShellLogger` object described above.
     """
-
     # Initialize a parent `ShellLogger`.
     parent = ShellLogger("Parent", Path.cwd())
 
@@ -93,6 +87,8 @@ def shell_logger() -> ShellLogger:
 
 def test_initialization_creates_stream_dir() -> None:
     """
+    Ensure the stream directory is created.
+
     Verify the initialization of a parent :class:`ShellLogger` object
     creates a temporary directory
     (``log_dir/%Y-%m-%d_%H%M%S``<random string>) if not already created.
@@ -104,6 +100,8 @@ def test_initialization_creates_stream_dir() -> None:
 
 def test_initialization_creates_html_file() -> None:
     """
+    Ensure the HTML file is created.
+
     Verify the initialization of a parent :class:`ShellLogger` object
     creates a starting HTML file in the :attr:`log_dir`.
     """
@@ -117,6 +115,8 @@ def test_log_method_creates_tmp_stdout_stderr_files(
     shell_logger: ShellLogger,
 ) -> None:
     """
+    Ensure output files are created.
+
     Verify that logging a command will create files in the
     :class:`ShellLogger` object's :attr:`stream_dir` corresponding to
     the ``stdout`` and ``stderr`` of the command.
@@ -124,7 +124,6 @@ def test_log_method_creates_tmp_stdout_stderr_files(
     Parameters:
         shell_logger:  A pre-populated :class:`ShellLogger` object.
     """
-
     # Get the paths for the `stdout`/`stderr` files.
     cmd_id = shell_logger.log_book[0]["cmd_id"]
     cmd_ts = shell_logger.log_book[0]["timestamp"]
@@ -146,7 +145,7 @@ def test_log_method_creates_tmp_stdout_stderr_files(
 @pytest.mark.parametrize("return_info", [True, False])
 def test_log_method_return_info_works_correctly(return_info: bool) -> None:
     """
-    **@pytest.mark.parametrize('return_info', [True, False])**
+    Ensure ``stdout``/``stderr`` are returned when requested.
 
     Verify that when ``return_info=True``, we receive a dictionary that
     contains the ``stdout`` and ``stderr`` of the command, as well as
@@ -178,6 +177,8 @@ def test_log_method_live_stdout_stderr_works_correctly(
     capsys: CaptureFixture, live_stdout: bool, live_stderr: bool
 ) -> None:
     """
+    Ensure live streaming of ``stdout``/``stderr`` works.
+
     Verify that the ``live_stdout`` and ``live_stdout`` flags work as
     expected for the :func:`log` method.
 
@@ -206,6 +207,8 @@ def test_child_logger_duration_displayed_correctly_in_html(
     shell_logger: ShellLogger,
 ) -> None:
     """
+    Ensure child logger durations displays correctly.
+
     Verify that the overview of child loggers in the HTML file displays
     the correct child :class:`ShellLogger` duration, not the entire
     log's duration.
@@ -230,8 +233,7 @@ def test_finalize_creates_json_with_correct_information(
     shell_logger: ShellLogger,
 ) -> None:
     """
-    Verify that the :func:`finalize` method creates a JSON file with the
-    proper data.
+    Ensure :func:`finalize` creates a JSON file with the proper data.
 
     Parameters:
         shell_logger:  A pre-populated :class:`ShellLogger` object.
@@ -271,8 +273,7 @@ def test_finalize_creates_html_with_correct_information(
     shell_logger: ShellLogger,
 ) -> None:
     """
-    Verify that the :func:`finalize` method creates an HTML file with
-    the proper data.
+    Ensure :func:`finalize` creates a HTML file with the proper data.
 
     Parameters:
         shell_logger:  A pre-populated :class:`ShellLogger` object.
@@ -328,6 +329,8 @@ def test_log_dir_html_symlinks_to_stream_dir_html(
     shell_logger: ShellLogger,
 ) -> None:
     """
+    Ensure :func:`finalize` creates the appropriate symlink.
+
     Verify that the :func:`finalize` method symlinks
     ``log_dir/html_file`` to ``streamm_dir/html_file``.
 
@@ -348,6 +351,8 @@ def test_json_file_can_reproduce_html_file(
     shell_logger: ShellLogger,
 ) -> None:
     """
+    Ensure the JSON file can regenerate the HTML.
+
     Verify that a JSON file can properly recreate the original HTML file
     created when :func:`finalize` is called.
 
@@ -383,9 +388,7 @@ def test_json_file_can_reproduce_html_file(
 
 
 def test_under_stress() -> None:
-    """
-    Test that all is well when handling lots of output.
-    """
+    """Test that all is well when handling lots of output."""
     logger = ShellLogger(stack()[0][3], Path.cwd())
     cmd = (
         "dd if=/dev/urandom bs=1024 count=262144 | "
@@ -397,10 +400,7 @@ def test_under_stress() -> None:
 
 
 def test_heredoc() -> None:
-    """
-    Ensure that heredocs in the command to be executed don't break
-    things.
-    """
+    """Ensure that heredocs in the command to be executed work."""
     logger = ShellLogger(stack()[0][3], Path.cwd())
     cmd = "bash << EOF\necho hello\nEOF"
     msg = "Test out a heredoc"
@@ -409,9 +409,7 @@ def test_heredoc() -> None:
 
 
 def test_devnull_stdin() -> None:
-    """
-    Ensure ``stdin`` is redirected to ``/dev/null`` by default.
-    """
+    """Ensure ``stdin`` is redirected to ``/dev/null`` by default."""
     logger = ShellLogger(stack()[0][3], Path.cwd())
     cmd = "cat"
     msg = "Make sure stdin is redirected to /dev/null by default"
@@ -420,9 +418,7 @@ def test_devnull_stdin() -> None:
 
 
 def test_syntax_error() -> None:
-    """
-    Ensure syntax errors are handled appropriately.
-    """
+    """Ensure syntax errors are handled appropriately."""
     logger = ShellLogger(stack()[0][3], Path.cwd())
     cmd = "echo (this is a syntax error"
     msg = "Test out a syntax error"
@@ -433,9 +429,7 @@ def test_syntax_error() -> None:
 
 @pytest.mark.skipif(psutil is None, reason="`psutil` is unavailable")
 def test_logger_does_not_store_stdout_string_by_default() -> None:
-    """
-    Ensure we don't hold a commands ``stdout`` in memory by default.
-    """
+    """Ensure we don't hold a commands ``stdout`` in memory by default."""
     logger = ShellLogger(stack()[0][3], Path.cwd())
     cmd = (
         "dd if=/dev/urandom bs=1024 count=262144 | "
@@ -455,9 +449,7 @@ def test_logger_does_not_store_stdout_string_by_default() -> None:
     os.uname().sysname == "Darwin", reason="`ltrace` doesn't exist for Darwin"
 )
 def test_logger_does_not_store_trace_string_by_default() -> None:
-    """
-    Ensure we don't keep trace output in memory by default.
-    """
+    """Ensure we don't keep trace output in memory by default."""
     logger = ShellLogger(stack()[0][3], Path.cwd())
     logger.log("echo hello", "echo hello", Path.cwd(), trace="ltrace")
     assert logger.log_book[0]["trace"] is None
@@ -472,34 +464,26 @@ def test_logger_does_not_store_trace_string_by_default() -> None:
 
 
 def test_stdout() -> None:
-    """
-    Ensure printing to ``stdout`` works.
-    """
+    """Ensure printing to ``stdout`` works."""
     logger = ShellLogger(stack()[0][3], Path.cwd())
     assert logger._run(":").stdout == ""
     assert logger._run("echo hello").stdout == "hello\n"
 
 
 def test_returncode_no_op() -> None:
-    """
-    Ensure the return code for the `:` command is 0.
-    """
+    """Ensure the return code for the `:` command is 0."""
     logger = ShellLogger(stack()[0][3], Path.cwd())
     assert logger._run(":").returncode == 0
 
 
 def test_args() -> None:
-    """
-    Ensure we accurately capture the command that was run.
-    """
+    """Ensure we accurately capture the command that was run."""
     logger = ShellLogger(stack()[0][3], Path.cwd())
     assert logger._run("echo hello").args == "echo hello"
 
 
 def test_stderr() -> None:
-    """
-    Ensure we accurately capture ``stderr``.
-    """
+    """Ensure we accurately capture ``stderr``."""
     logger = ShellLogger(stack()[0][3], Path.cwd())
     command = "echo hello 1>&2"
     assert logger._run(command).stderr == "hello\n"
@@ -507,9 +491,7 @@ def test_stderr() -> None:
 
 
 def test_timing() -> None:
-    """
-    Ensure we accurately capture the wall clock time of a command.
-    """
+    """Ensure we accurately capture the wall clock time of a command."""
     logger = ShellLogger(stack()[0][3], Path.cwd())
     command = "sleep 1"
     if os.name == "posix":
@@ -524,6 +506,8 @@ def test_timing() -> None:
 
 def test_auxiliary_data() -> None:
     """
+    Ensure auxiliary data is captured.
+
     Ensure we accurately capture all the auxiliary data when executing a
     command.
     """
@@ -548,6 +532,8 @@ def test_auxiliary_data() -> None:
 
 def test_working_directory() -> None:
     """
+    Ensure the working directory is captured.
+
     Ensure we accurately capture the working directory when executing a
     command.
     """
@@ -562,9 +548,7 @@ def test_working_directory() -> None:
 
 
 def test_trace() -> None:
-    """
-    Ensure we accurately capture trace output.
-    """
+    """Ensure we accurately capture trace output."""
     logger = ShellLogger(stack()[0][3], Path.cwd())
     if os.uname().sysname == "Linux":
         result = logger._run("echo letter", trace="ltrace")
@@ -580,9 +564,7 @@ def test_trace() -> None:
 
 
 def test_trace_expression() -> None:
-    """
-    Ensure specifying a trace expression works correctly.
-    """
+    """Ensure specifying a trace expression works correctly."""
     logger = ShellLogger(stack()[0][3], Path.cwd())
     if os.uname().sysname == "Linux":
         result = logger._run("echo hello", trace="ltrace", expression="getenv")
@@ -596,9 +578,7 @@ def test_trace_expression() -> None:
 
 
 def test_trace_summary() -> None:
-    """
-    Ensure requesting a trace summary works correctly.
-    """
+    """Ensure requesting a trace summary works correctly."""
     logger = ShellLogger(stack()[0][3], Path.cwd())
     if os.uname().sysname == "Linux":
         result = logger._run("echo hello", trace="ltrace", summary=True)
@@ -616,10 +596,7 @@ def test_trace_summary() -> None:
 
 
 def test_trace_expression_and_summary() -> None:
-    """
-    Ensure specifying a trace expression and requesting a summary works
-    correctly.
-    """
+    """Ensure specifying a trace expression and requesting a summary works."""
     logger = ShellLogger(stack()[0][3], Path.cwd())
     if os.uname().sysname == "Linux":
         echo_location = logger._run("which echo").stdout.strip()
@@ -643,9 +620,7 @@ def test_trace_expression_and_summary() -> None:
 
 
 def test_stats() -> None:
-    """
-    Ensure capturing CPU, memory, and disk statistics works correctly.
-    """
+    """Ensure capturing CPU, memory, and disk statistics works correctly."""
     logger = ShellLogger(stack()[0][3], Path.cwd())
     measure = ["cpu", "memory", "disk"]
     result = logger._run("sleep 2", measure=measure, interval=0.1)
@@ -665,6 +640,8 @@ def test_stats() -> None:
 
 def test_trace_and_stats() -> None:
     """
+    Ensure trace and multiple statistics work together.
+
     Ensure both tracing a command and capturing multiple statistics work
     together.
     """
@@ -695,6 +672,8 @@ def test_trace_and_stats() -> None:
 
 def test_trace_and_stat() -> None:
     """
+    Ensure trace and a single statistic work together.
+
     Ensure both tracing a command and capturing a single statistic work
     together.
     """
@@ -725,10 +704,7 @@ def test_trace_and_stat() -> None:
 )
 @pytest.mark.skip(reason="Not sure it's worth it to fix this or not")
 def test_set_env_trace() -> None:
-    """
-    Ensure setting an environment variable while tracing a command
-    works.
-    """
+    """Ensure environment variables work with trace."""
     logger = ShellLogger(stack()[0][3], Path.cwd())
     result = logger._run("TEST_ENV=abdc env | grep TEST_ENV", trace="ltrace")
     assert "TEST_ENV=abdc" in result.stdout
@@ -737,9 +713,7 @@ def test_set_env_trace() -> None:
 
 
 def test_log_book_trace_and_stats() -> None:
-    """
-    Ensure trace and statistics are accurately captured in the log book.
-    """
+    """Ensure trace and statistics are accurately captured in the log book."""
     if os.uname().sysname == "Linux":
         logger = ShellLogger(stack()[0][3], Path.cwd())
         measure = ["cpu", "memory", "disk"]
@@ -768,9 +742,7 @@ def test_log_book_trace_and_stats() -> None:
 
 
 def test_change_pwd() -> None:
-    """
-    Ensure changing directories affects subsequent calls.
-    """
+    """Ensure changing directories affects subsequent calls."""
     logger = ShellLogger(stack()[0][3], Path.cwd())
     pwd_command = "pwd"
     directory1 = "/"
@@ -788,9 +760,7 @@ def test_change_pwd() -> None:
 
 
 def test_returncode() -> None:
-    """
-    Ensure we get the expected return code when a command fails.
-    """
+    """Ensure we get the expected return code when a command fails."""
     logger = ShellLogger(stack()[0][3], Path.cwd())
     command = "false"
     expected_returncode = 1
@@ -802,6 +772,8 @@ def test_returncode() -> None:
 
 def test_sgr_gets_converted_to_html() -> None:
     """
+    Ensure SGR to HTML translation works.
+
     Ensure Select Graphic Rendition (SGR) codes get accurately
     translated to valid HTML/CSS.
     """
@@ -832,6 +804,8 @@ def test_sgr_gets_converted_to_html() -> None:
 
 def test_html_print(capsys: CaptureFixture) -> None:
     """
+    Ensure :func:`html_print` doesn't print to the console.
+
     Ensure the :func:`print` method prints to both the HTML log and the
     console, but the :func:`html_print` method only prints to the log
     file.
@@ -864,9 +838,7 @@ def test_html_print(capsys: CaptureFixture) -> None:
 
 
 def test_append_mode() -> None:
-    """
-    Ensure we're able to append to a previously generated log file.
-    """
+    """Ensure we're able to append to a previously generated log file."""
     logger1 = ShellLogger(stack()[0][3] + "_1", Path.cwd())
     logger1.log("Print HELLO to stdout", "echo HELLO")
     logger1.print("Printed once to stdout")
@@ -920,9 +892,7 @@ def test_append_mode() -> None:
 
 
 def test_invalid_decodings() -> None:
-    """
-    Ensure we appropriately handle invalid bytes when decoding output.
-    """
+    """Ensure we appropriately handle invalid bytes when decoding output."""
     logger = ShellLogger(stack()[0][3], Path.cwd())
     result = logger.log(
         "Print invalid start byte for bytes decode()",
