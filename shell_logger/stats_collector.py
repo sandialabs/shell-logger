@@ -58,7 +58,7 @@ class StatsCollector:
     """
 
     stat_name = "undefined"  # Should be defined by subclasses.
-    subclasses = []
+    subclasses = []  # noqa: RUF012
 
     @staticmethod
     def subclass(stats_collector_subclass: type):

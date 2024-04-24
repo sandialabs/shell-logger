@@ -49,7 +49,7 @@ class Trace:
     """
 
     trace_name = "undefined"  # Should be defined by subclasses.
-    subclasses = []
+    subclasses = []  # noqa: RUF012
 
     @staticmethod
     def subclass(trace_subclass: type):
