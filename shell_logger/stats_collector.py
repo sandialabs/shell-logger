@@ -11,12 +11,14 @@ from __future__ import annotations
 import os
 from abc import abstractmethod
 from multiprocessing import Manager, Process
-from multiprocessing.managers import SyncManager
 from pathlib import Path
 from time import sleep, time
-from typing import List, Tuple
+from typing import List, Tuple, TYPE_CHECKING
 
 from .abstract_method import AbstractMethod
+
+if TYPE_CHECKING:
+    from multiprocessing.managers import SyncManager
 
 try:
     import psutil
