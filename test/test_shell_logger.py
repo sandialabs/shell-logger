@@ -25,7 +25,7 @@ except ModuleNotFoundError:
 
 
 @pytest.fixture(autouse=True)
-def use_tmpdir(monkeypatch: MonkeyPatch, tmpdir: Path) -> None:
+def _use_tmpdir(monkeypatch: MonkeyPatch, tmpdir: Path) -> None:
     """
     Use a temporary directory for all tests.
 
