@@ -113,7 +113,7 @@ def append_html(*args: Union[str, Iterator[str]], output: Path) -> None:
                 _append_html(f, *arg)
             else:
                 message = f"Unsupported type: {type(arg)}"
-                raise RuntimeError(message)
+                raise TypeError(message)
 
     with output.open("a") as output_file:
         _append_html(output_file, *args)

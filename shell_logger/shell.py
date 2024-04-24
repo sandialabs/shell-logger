@@ -120,7 +120,7 @@ class Shell:
                 os.close(fd)
             except OSError as e:
                 if "Bad file descriptor" not in e.strerror:
-                    raise e
+                    raise
 
     def __eq__(self, other: Shell) -> bool:
         """
