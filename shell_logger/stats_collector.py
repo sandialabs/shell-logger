@@ -324,7 +324,7 @@ else:
             Returns:
                 None
             """
-            return None
+            return
 
     @StatsCollector.subclass
     class CPUStatsCollector(StatsCollector):
@@ -359,7 +359,7 @@ else:
             Returns:
                 None
             """
-            return None
+            return
 
     @StatsCollector.subclass
     class MemoryStatsCollector(StatsCollector):
@@ -394,4 +394,4 @@ else:
             Returns:
                 None
             """
-            return None
+            return

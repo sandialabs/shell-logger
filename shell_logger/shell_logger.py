@@ -128,8 +128,7 @@ class ShellLogger:
 
         # Deserialize the corresponding JSON object into a ShellLogger.
         with path.open("r") as jf:
-            loaded_logger = json.load(jf, cls=ShellLoggerDecoder)
-        return loaded_logger
+            return json.load(jf, cls=ShellLoggerDecoder)
 
     def __init__(  # noqa: PLR0913
         self,
@@ -444,8 +443,7 @@ class ShellLogger:
                 html.append(command_card(log, self.stream_dir))
         if self.is_parent():
             return parent_logger_card_html(self.name, html)
-        else:
-            return html
+        return html
 
     def finalize(self) -> None:
         """
@@ -741,32 +739,31 @@ class ShellLoggerEncoder(json.JSONEncoder):
                 **{"__type__": "ShellLogger"},
                 **{k: self.default(v) for k, v in obj.__dict__.items()},
             }
-        elif isinstance(obj, (int, float, str, bytes)):
+        if isinstance(obj, (int, float, str, bytes)):
             return obj
-        elif isinstance(obj, Mapping):
+        if isinstance(obj, Mapping):
             return {k: self.default(v) for k, v in obj.items()}
-        elif isinstance(obj, tuple):
+        if isinstance(obj, tuple):
             return {"__type__": "tuple", "items": obj}
-        elif isinstance(obj, Iterable):
+        if isinstance(obj, Iterable):
             return [self.default(x) for x in obj]
-        elif isinstance(obj, datetime):
+        if isinstance(obj, datetime):
             return {
                 "__type__": "datetime",
                 "value": obj.strftime("%Y-%m-%d_%H:%M:%S:%f"),
                 "format": "%Y-%m-%d_%H:%M:%S:%f",
             }
-        elif isinstance(obj, Path):
+        if isinstance(obj, Path):
             return {"__type__": "Path", "value": str(obj)}
-        elif obj is None:
+        if obj is None:
             return None
-        elif isinstance(obj, Shell):
+        if isinstance(obj, Shell):
             return {
                 "__type__": "Shell",
                 "pwd": obj.pwd(),
                 "login_shell": obj.login_shell,
             }
-        else:
-            return json.JSONEncoder.default(self, obj)
+        return json.JSONEncoder.default(self, obj)
 
 
 class ShellLoggerDecoder(json.JSONDecoder):
@@ -804,8 +801,8 @@ class ShellLoggerDecoder(json.JSONDecoder):
         """
         if "__type__" not in obj:
             return obj
-        elif obj["__type__"] == "ShellLogger":
-            logger = ShellLogger(
+        if obj["__type__"] == "ShellLogger":
+            return ShellLogger(
                 obj["name"],
                 log_dir=obj["log_dir"],
                 stream_dir=obj["stream_dir"],
@@ -817,14 +814,12 @@ class ShellLoggerDecoder(json.JSONDecoder):
                 done_time=obj["done_time"],
                 duration=obj["duration"],
             )
-            return logger
-        elif obj["__type__"] == "datetime":
+        if obj["__type__"] == "datetime":
             return datetime.strptime(obj["value"], obj["format"])
-        elif obj["__type__"] == "Path":
+        if obj["__type__"] == "Path":
             return Path(obj["value"])
-        elif obj["__type__"] == "tuple":
+        if obj["__type__"] == "tuple":
             return tuple(obj["items"])
-        elif obj["__type__"] == "Shell":
+        if obj["__type__"] == "Shell":
             return Shell(Path(obj["pwd"]), login_shell=obj["login_shell"])
-        else:
-            return None
+        return None

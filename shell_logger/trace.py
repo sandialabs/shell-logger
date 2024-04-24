@@ -33,12 +33,11 @@ def trace_collector(**kwargs) -> Trace:
     if len(collectors) == 1:
         collector = collectors[0]
         return collector(**kwargs)
-    elif len(collectors) == 0:
+    if len(collectors) == 0:
         message = f"Unsupported trace type:  {trace_name}"
         raise RuntimeError(message)
-    else:
-        message = f"Multiple trace types match '{trace_name}'."
-        raise RuntimeError(message)
+    message = f"Multiple trace types match '{trace_name}'."
+    raise RuntimeError(message)
 
 
 class Trace:

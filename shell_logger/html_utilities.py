@@ -37,18 +37,17 @@ def nested_simplenamespace_to_dict(
     if "_asdict" in dir(namespace):
         # noinspection PyProtectedMember
         return nested_simplenamespace_to_dict(namespace._asdict())
-    elif isinstance(namespace, (str, bytes, tuple)):
+    if isinstance(namespace, (str, bytes, tuple)):
         return namespace
-    elif isinstance(namespace, Mapping):
+    if isinstance(namespace, Mapping):
         return {
             k: nested_simplenamespace_to_dict(v) for k, v in namespace.items()
         }
-    elif isinstance(namespace, Iterable):
+    if isinstance(namespace, Iterable):
         return [nested_simplenamespace_to_dict(x) for x in namespace]
-    elif isinstance(namespace, SimpleNamespace):
+    if isinstance(namespace, SimpleNamespace):
         return nested_simplenamespace_to_dict(namespace.__dict__)
-    else:
-        return namespace
+    return namespace
 
 
 def get_human_time(milliseconds: float) -> str:
@@ -399,8 +398,7 @@ def command_detail(
         return hidden_command_detail_template.format(
             cmd_id=cmd_id, name=name, value=value
         )
-    else:
-        return command_detail_template.format(name=name, value=value)
+    return command_detail_template.format(name=name, value=value)
 
 
 def command_card(log: dict, stream_dir: Path) -> Iterator[str]:
@@ -882,19 +880,20 @@ def sgr_8bit_color_to_html(sgr_params: List[str]) -> str:  # noqa: PLR0911
         green = str(51 * green_6cube)
         blue = str(51 * blue_6cube)
         return sgr_24bit_color_to_html([sgr_params[0], "2", red, green, blue])
-    elif 231 < sgr_256 < 256:
+    if 231 < sgr_256 < 256:
         gray = str(8 + (sgr_256 - 232) * 10)
         return sgr_24bit_color_to_html([sgr_params[0], "2", gray, gray, gray])
-    elif sgr_params[0] == "38":
+    if sgr_params[0] == "38":
         if sgr_256 < 8:
             return sgr_4bit_color_and_style_to_html(str(30 + sgr_256))
-        elif sgr_256 < 16:
+        if sgr_256 < 16:
             return sgr_4bit_color_and_style_to_html(str(82 + sgr_256))
-    elif sgr_params[0] == "48":
+    if sgr_params[0] == "48":
         if sgr_256 < 8:
             return sgr_4bit_color_and_style_to_html(str(40 + sgr_256))
-        elif sgr_256 < 16:
+        if sgr_256 < 16:
             return sgr_4bit_color_and_style_to_html(str(92 + sgr_256))
+    return "THIS SHOULD NEVER HAPPEN"
 
 
 def sgr_24bit_color_to_html(sgr_params: List[str]) -> str:
@@ -913,10 +912,9 @@ def sgr_24bit_color_to_html(sgr_params: List[str]) -> str:
     r, g, b = sgr_params[2:5] if len(sgr_params) == 5 else ("0", "0", "0")
     if len(sgr_params) > 1 and sgr_params[:2] == ["38", "2"]:
         return f'<span style="color: rgb({r}, {g}, {b})">'
-    elif len(sgr_params) > 1 and sgr_params[:2] == ["48", "2"]:
+    if len(sgr_params) > 1 and sgr_params[:2] == ["48", "2"]:
         return f'<span style="background-color: rgb({r}, {g}, {b})">'
-    else:
-        return "<span>"
+    return "<span>"
 
 
 def html_header() -> str:
