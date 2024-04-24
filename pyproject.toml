@@ -73,7 +73,7 @@ extend-select = [
     "C4",
     "C90",
     "D",
-    "DTZ",
+    # "DTZ",
     "E",
     "EM",
     "ERA",
