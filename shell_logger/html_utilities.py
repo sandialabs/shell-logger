@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """Various utilities for building the HTML log file."""
 
 # © 2024 National Technology & Engineering Solutions of Sandia, LLC

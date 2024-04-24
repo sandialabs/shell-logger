@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """Provides the various means of collecting machine statistics."""
 
 # © 2024 National Technology & Engineering Solutions of Sandia, LLC
