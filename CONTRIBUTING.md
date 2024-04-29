@@ -86,7 +86,6 @@ The checks we perform are the following:
   of the Python packaging ecosystem.
 
 [ruff]: https://docs.astral.sh/ruff/
-[commitizen]: https://github.com/commitizen-tools/commitizen
 [mypy]: https://github.com/python/mypy
 [typing]: https://docs.python.org/3/library/typing.html
 [rest]: https://www.sphinx-doc.org/en/master/usage/restructuredtext/basics.html
