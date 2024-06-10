@@ -16,7 +16,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        version: ["3.8", "3.9", "3.10", "3.11"]
+        version: ["3.8", "3.9", "3.10", "3.11", "3.12"]
     steps:
 
       - name: Check out the commit
@@ -39,13 +39,14 @@ jobs:
       - name: Test install
         run: python3 -m pip install .
 
-      # - name: Test with pytest
-      #   run: python3 -m pytest --cov=shell_logger example/ test/
+      - name: Test with pytest
+        run: python3 -m pytest --cov=shell_logger test/
 
-      # - name: Upload coverage reports to Codecov
-      #   uses: codecov/codecov-action@v3
-      #   env:
-      #     CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+      - name: Upload coverage reports to Codecov
+        uses: codecov/codecov-action@v4.0.1
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          slug: sandialabs/shell-logger
 
       - name: Check documentation spelling
         run: make spelling SPHINXOPTS="-W --keep-going"
