@@ -36,6 +36,11 @@ except ModuleNotFoundError:
 #     monkeypatch.chdir(tmpdir)
 
 
+def test_no_shell_logger() -> None:
+    """Ensure pytest can simply run."""
+    assert True
+
+
 # @pytest.fixture()
 # def shell_logger() -> ShellLogger:
 #     """
