@@ -1,5 +1,6 @@
 .coverage
 .pytest_cache
+.vscode
 __pycache__
 test/coverage.json
 test/coverage.xml
