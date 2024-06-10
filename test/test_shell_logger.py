@@ -41,6 +41,12 @@ def test_no_shell_logger() -> None:
     assert True
 
 
+def test___init__() -> None:
+    """Ensure we can construct an instance."""
+    ShellLogger("Basic")
+    assert True
+
+
 # @pytest.fixture()
 # def shell_logger() -> ShellLogger:
 #     """
