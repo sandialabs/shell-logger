@@ -322,6 +322,7 @@ class Shell:
                 file.close()
         return SimpleNamespace(stdout_str=stdout_str, stderr_str=stderr_str)
 
+    @snoop
     def auxiliary_command(
         self, **kwargs
     ) -> Tuple[Optional[str], Optional[str]]:
