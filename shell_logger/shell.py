@@ -20,6 +20,8 @@ from time import time
 from types import SimpleNamespace
 from typing import IO, List, Optional, TextIO, Tuple
 
+import snoop
+
 
 END_OF_READ = 4
 
@@ -44,6 +46,7 @@ class Shell:
             with the shell.
     """
 
+    @snoop
     def __init__(
         self, pwd: Optional[Path] = None, *, login_shell: bool = False
     ) -> None:
