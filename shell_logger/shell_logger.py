@@ -36,6 +36,8 @@ from .shell import Shell
 from .stats_collector import stats_collectors
 from .trace import trace_collector
 
+import snoop
+
 
 class ShellLogger:
     """
@@ -130,6 +132,7 @@ class ShellLogger:
         with path.open("r") as jf:
             return json.load(jf, cls=ShellLoggerDecoder)
 
+    @snoop
     def __init__(  # noqa: PLR0913
         self,
         name: str,
