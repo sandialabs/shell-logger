@@ -85,17 +85,17 @@ except ModuleNotFoundError:
 #     return parent
 
 
-# def test_initialization_creates_stream_dir() -> None:
-#     """
-#     Ensure the stream directory is created.
+def test_initialization_creates_stream_dir() -> None:
+    """
+    Ensure the stream directory is created.
 
-#     Verify the initialization of a parent :class:`ShellLogger` object
-#     creates a temporary directory
-#     (``log_dir/%Y-%m-%d_%H%M%S``<random string>) if not already created.
-#     """
-#     logger = ShellLogger(stack()[0][3], log_dir=Path.cwd())
-#     timestamp = logger.init_time.strftime("%Y-%m-%d_%H.%M.%S.%f")
-#     assert len(list(Path.cwd().glob(f"{timestamp}_*"))) == 1
+    Verify the initialization of a parent :class:`ShellLogger` object
+    creates a temporary directory
+    (``log_dir/%Y-%m-%d_%H%M%S``<random string>) if not already created.
+    """
+    logger = ShellLogger(stack()[0][3], log_dir=Path.cwd())
+    timestamp = logger.init_time.strftime("%Y-%m-%d_%H.%M.%S.%f")
+    assert len(list(Path.cwd().glob(f"{timestamp}_*"))) == 1
 
 
 # def test_initialization_creates_html_file() -> None:
