@@ -148,6 +148,7 @@ class Shell:
         directory, _ = self.auxiliary_command(posix="pwd", strip=True)
         return directory
 
+    @snoop
     def cd(self, path: Path) -> None:
         """
         Change to the given directory.
