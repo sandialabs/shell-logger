@@ -1,5 +1,6 @@
 # Requirements for testing `ShellLogger`.
 
+distro
 mock >= 4
 mypy
 pre-commit
