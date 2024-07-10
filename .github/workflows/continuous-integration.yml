@@ -60,14 +60,16 @@ jobs:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
 
       - name: Check documentation coverage
-        run: make coverage SPHINXOPTS="-W --keep-going"
+        run: |
+          make coverage SPHINXOPTS="-W --keep-going"
+          mv build/coverage/python.txt ../docs-coverage-report-${{ matrix.version }}.txt
         working-directory: ./doc
 
       - name: Archive documentation coverage results
         uses: actions/upload-artifact@v4
         with:
-          name: docs-coverage-report
-          path: doc/build/coverage/python.txt
+          name: docs-coverage-report-${{ matrix.version }}
+          path: docs-coverage-report-${{ matrix.version }}.txt
 
       - name: Test uninstall
         run: python3 -m pip uninstall -y shell-logger
