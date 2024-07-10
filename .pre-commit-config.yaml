@@ -13,6 +13,11 @@ repos:
           args: [ --fix ]
         - id: ruff-format
 
+    - repo: https://github.com/gitleaks/gitleaks
+      rev: v8.18.4
+      hooks:
+        - id: gitleaks
+
     # - repo: https://github.com/pre-commit/mirrors-mypy
     #   rev: v1.8.0
     #   hooks:
@@ -48,3 +53,8 @@ repos:
       hooks:
           - id: pyroma
             additional_dependencies: ["poetry"]
+
+    - repo: https://github.com/shellcheck-py/shellcheck-py
+      rev: v0.10.0.1
+      hooks:
+        - id: shellcheck
