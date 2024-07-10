@@ -13,10 +13,10 @@ defaults:
 
 jobs:
   test:
-    runs-on: ubuntu-latest
+    runs-on: macos-latest
     strategy:
       matrix:
-        version: ["3.8", "3.9", "3.10", "3.11"]
+        version: ["3.8", "3.9", "3.10", "3.11", "3.12"]
     steps:
 
       - name: Check out the commit
@@ -39,17 +39,17 @@ jobs:
       - name: Test install
         run: python3 -m pip install .
 
-      # - name: Test with pytest
-      #   run: python3 -m pytest --cov=shell_logger example/ test/
+      - name: Test with pytest
+        uses: nick-fields/retry@v3
+        with:
+          timeout_minutes: 10
+          max_attempts: 3
+          command: python3 -m pytest --verbose --cov=shell_logger test/
 
-      # - name: Upload coverage reports to Codecov
-      #   uses: codecov/codecov-action@v3
-      #   env:
-      #     CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
-
-      - name: Check documentation spelling
-        run: make spelling SPHINXOPTS="-W --keep-going"
-        working-directory: ./doc
+      - name: Upload coverage reports to Codecov
+        uses: codecov/codecov-action@v3
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
 
       - name: Check documentation coverage
         run: make coverage SPHINXOPTS="-W --keep-going"

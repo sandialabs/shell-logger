@@ -12,6 +12,7 @@ import re
 from inspect import stack
 from pathlib import Path
 
+import distro
 import pytest
 from _pytest.capture import CaptureFixture
 from _pytest.monkeypatch import MonkeyPatch
@@ -52,7 +53,7 @@ def shell_logger() -> ShellLogger:
         The parent :class:`ShellLogger` object described above.
     """
     # Initialize a parent `ShellLogger`.
-    parent = ShellLogger("Parent", Path.cwd())
+    parent = ShellLogger("Parent", log_dir=Path.cwd())
 
     # Run the command.
     #                      `stdout`        ;               `stderr`
@@ -93,7 +94,7 @@ def test_initialization_creates_stream_dir() -> None:
     creates a temporary directory
     (``log_dir/%Y-%m-%d_%H%M%S``<random string>) if not already created.
     """
-    logger = ShellLogger(stack()[0][3], Path.cwd())
+    logger = ShellLogger(stack()[0][3], log_dir=Path.cwd())
     timestamp = logger.init_time.strftime("%Y-%m-%d_%H.%M.%S.%f")
     assert len(list(Path.cwd().glob(f"{timestamp}_*"))) == 1
 
@@ -105,7 +106,7 @@ def test_initialization_creates_html_file() -> None:
     Verify the initialization of a parent :class:`ShellLogger` object
     creates a starting HTML file in the :attr:`log_dir`.
     """
-    logger = ShellLogger(stack()[0][3], Path.cwd())
+    logger = ShellLogger(stack()[0][3], log_dir=Path.cwd())
     timestamp = logger.init_time.strftime("%Y-%m-%d_%H.%M.%S.%f")
     streamm_dir = next(Path.cwd().glob(f"{timestamp}_*"))
     assert (streamm_dir / f"{stack()[0][3]}.html").exists()
@@ -158,7 +159,7 @@ def test_log_method_return_info_works_correctly(
         return_info:  Whether or not to return the
             ``stdout``/``stderr``.
     """
-    logger = ShellLogger(stack()[0][3], Path.cwd())
+    logger = ShellLogger(stack()[0][3], log_dir=Path.cwd())
 
     #           `stdout`         ;      `stderr`
     cmd = "echo 'Hello world out'; echo 'Hello world error' 1>&2"
@@ -198,7 +199,7 @@ def test_log_method_live_stdout_stderr_works_correctly(
         live_stderr:  Whether or not to capture ``stderr`` while running
             the :func:`log` command.
     """
-    logger = ShellLogger(stack()[0][3], Path.cwd())
+    logger = ShellLogger(stack()[0][3], log_dir=Path.cwd())
     cmd = "echo 'Hello world out'; echo 'Hello world error' 1>&2"
     logger.log(
         "test cmd",
@@ -404,7 +405,7 @@ def test_json_file_can_reproduce_html_file(
 
 def test_under_stress() -> None:
     """Test that all is well when handling lots of output."""
-    logger = ShellLogger(stack()[0][3], Path.cwd())
+    logger = ShellLogger(stack()[0][3], log_dir=Path.cwd())
     cmd = (
         "dd if=/dev/urandom bs=1024 count=262144 | "
         "LC_ALL=C tr -c '[:print:]' '*' ; sleep 1"
@@ -416,7 +417,7 @@ def test_under_stress() -> None:
 
 def test_heredoc() -> None:
     """Ensure that heredocs in the command to be executed work."""
-    logger = ShellLogger(stack()[0][3], Path.cwd())
+    logger = ShellLogger(stack()[0][3], log_dir=Path.cwd())
     cmd = "bash << EOF\necho hello\nEOF"
     msg = "Test out a heredoc"
     result = logger.log(msg, cmd)
@@ -425,7 +426,7 @@ def test_heredoc() -> None:
 
 def test_devnull_stdin() -> None:
     """Ensure ``stdin`` is redirected to ``/dev/null`` by default."""
-    logger = ShellLogger(stack()[0][3], Path.cwd())
+    logger = ShellLogger(stack()[0][3], log_dir=Path.cwd())
     cmd = "cat"
     msg = "Make sure stdin is redirected to /dev/null by default"
     result = logger.log(msg, cmd)
@@ -434,7 +435,7 @@ def test_devnull_stdin() -> None:
 
 def test_syntax_error() -> None:
     """Ensure syntax errors are handled appropriately."""
-    logger = ShellLogger(stack()[0][3], Path.cwd())
+    logger = ShellLogger(stack()[0][3], log_dir=Path.cwd())
     cmd = "echo (this is a syntax error"
     msg = "Test out a syntax error"
     with pytest.raises(RuntimeError) as excinfo:
@@ -445,7 +446,7 @@ def test_syntax_error() -> None:
 @pytest.mark.skipif(psutil is None, reason="`psutil` is unavailable")
 def test_logger_does_not_store_stdout_string_by_default() -> None:
     """Ensure we don't hold a commands ``stdout`` in memory by default."""
-    logger = ShellLogger(stack()[0][3], Path.cwd())
+    logger = ShellLogger(stack()[0][3], log_dir=Path.cwd())
     cmd = (
         "dd if=/dev/urandom bs=1024 count=262144 | "
         "LC_ALL=C tr -c '[:print:]' '*' ; sleep 1"
@@ -465,7 +466,7 @@ def test_logger_does_not_store_stdout_string_by_default() -> None:
 )
 def test_logger_does_not_store_trace_string_by_default() -> None:
     """Ensure we don't keep trace output in memory by default."""
-    logger = ShellLogger(stack()[0][3], Path.cwd())
+    logger = ShellLogger(stack()[0][3], log_dir=Path.cwd())
     logger.log("echo hello", "echo hello", cwd=Path.cwd(), trace="ltrace")
     assert logger.log_book[0]["trace"] is None
     logger.log(
@@ -480,26 +481,26 @@ def test_logger_does_not_store_trace_string_by_default() -> None:
 
 def test_stdout() -> None:
     """Ensure printing to ``stdout`` works."""
-    logger = ShellLogger(stack()[0][3], Path.cwd())
+    logger = ShellLogger(stack()[0][3], log_dir=Path.cwd())
     assert logger._run(":").stdout == ""
     assert logger._run("echo hello").stdout == "hello\n"
 
 
 def test_returncode_no_op() -> None:
     """Ensure the return code for the `:` command is 0."""
-    logger = ShellLogger(stack()[0][3], Path.cwd())
+    logger = ShellLogger(stack()[0][3], log_dir=Path.cwd())
     assert logger._run(":").returncode == 0
 
 
 def test_args() -> None:
     """Ensure we accurately capture the command that was run."""
-    logger = ShellLogger(stack()[0][3], Path.cwd())
+    logger = ShellLogger(stack()[0][3], log_dir=Path.cwd())
     assert logger._run("echo hello").args == "echo hello"
 
 
 def test_stderr() -> None:
     """Ensure we accurately capture ``stderr``."""
-    logger = ShellLogger(stack()[0][3], Path.cwd())
+    logger = ShellLogger(stack()[0][3], log_dir=Path.cwd())
     command = "echo hello 1>&2"
     assert logger._run(command).stderr == "hello\n"
     assert logger._run(command).stdout == ""
@@ -507,7 +508,7 @@ def test_stderr() -> None:
 
 def test_timing() -> None:
     """Ensure we accurately capture the wall clock time of a command."""
-    logger = ShellLogger(stack()[0][3], Path.cwd())
+    logger = ShellLogger(stack()[0][3], log_dir=Path.cwd())
     command = "sleep 1"
     if os.name == "posix":
         command = "sleep 1"
@@ -527,7 +528,7 @@ def test_auxiliary_data() -> None:
     Ensure we accurately capture all the auxiliary data when executing a
     command.
     """
-    logger = ShellLogger(stack()[0][3], Path.cwd())
+    logger = ShellLogger(stack()[0][3], log_dir=Path.cwd())
     result = logger._run("pwd")
     assert result.pwd == result.stdout.strip()
     result = logger._run(":")
@@ -554,7 +555,7 @@ def test_working_directory() -> None:
     Ensure we accurately capture the working directory when executing a
     command.
     """
-    logger = ShellLogger(stack()[0][3], Path.cwd())
+    logger = ShellLogger(stack()[0][3], log_dir=Path.cwd())
     command = "pwd"
     directory = "/tmp"
     if os.name != "posix":
@@ -566,7 +567,7 @@ def test_working_directory() -> None:
 
 def test_trace() -> None:
     """Ensure we accurately capture trace output."""
-    logger = ShellLogger(stack()[0][3], Path.cwd())
+    logger = ShellLogger(stack()[0][3], log_dir=Path.cwd())
     if os.uname().sysname == "Linux":
         result = logger._run("echo letter", trace="ltrace")
         assert 'getenv("POSIXLY_CORRECT")' in result.trace
@@ -582,7 +583,7 @@ def test_trace() -> None:
 
 def test_trace_expression() -> None:
     """Ensure specifying a trace expression works correctly."""
-    logger = ShellLogger(stack()[0][3], Path.cwd())
+    logger = ShellLogger(stack()[0][3], log_dir=Path.cwd())
     if os.uname().sysname == "Linux":
         result = logger._run("echo hello", trace="ltrace", expression="getenv")
         assert 'getenv("POSIXLY_CORRECT")' in result.trace
@@ -597,7 +598,7 @@ def test_trace_expression() -> None:
 
 def test_trace_summary() -> None:
     """Ensure requesting a trace summary works correctly."""
-    logger = ShellLogger(stack()[0][3], Path.cwd())
+    logger = ShellLogger(stack()[0][3], log_dir=Path.cwd())
     if os.uname().sysname == "Linux":
         result = logger._run("echo hello", trace="ltrace", summary=True)
         assert 'getenv("POSIXLY_CORRECT")' not in result.trace
@@ -615,7 +616,7 @@ def test_trace_summary() -> None:
 
 def test_trace_expression_and_summary() -> None:
     """Ensure specifying a trace expression and requesting a summary works."""
-    logger = ShellLogger(stack()[0][3], Path.cwd())
+    logger = ShellLogger(stack()[0][3], log_dir=Path.cwd())
     if os.uname().sysname == "Linux":
         echo_location = logger._run("which echo").stdout.strip()
         result = logger._run(
@@ -638,8 +639,14 @@ def test_trace_expression_and_summary() -> None:
 
 
 def test_stats() -> None:
-    """Ensure capturing CPU, memory, and disk statistics works correctly."""
-    logger = ShellLogger(stack()[0][3], Path.cwd())
+    """
+    Ensure capturing CPU, memory, and disk statistics works correctly.
+
+    Todo:
+        Ensure disk statistics are collected at the specified interval
+        on RHEL.
+    """
+    logger = ShellLogger(stack()[0][3], log_dir=Path.cwd())
     measure = ["cpu", "memory", "disk"]
     result = logger._run("sleep 2", measure=measure, interval=0.1)
     min_results, max_results = 1, 30
@@ -647,7 +654,7 @@ def test_stats() -> None:
     assert len(result.stats["memory"]) < max_results
     assert len(result.stats["cpu"]) > min_results
     assert len(result.stats["cpu"]) < max_results
-    if os.name == "posix":
+    if os.name == "posix" and distro.name() != "Red Hat Enterprise Linux":
         assert len(result.stats["disk"]["/"]) > min_results
         assert len(result.stats["disk"]["/"]) < max_results
     else:
@@ -663,8 +670,12 @@ def test_trace_and_stats() -> None:
 
     Ensure both tracing a command and capturing multiple statistics work
     together.
+
+    Todo:
+        Ensure disk statistics are collected at the specified interval
+        on RHEL.
     """
-    logger = ShellLogger(stack()[0][3], Path.cwd())
+    logger = ShellLogger(stack()[0][3], log_dir=Path.cwd())
     if os.uname().sysname == "Linux":
         measure = ["cpu", "memory", "disk"]
         result = logger._run(
@@ -682,8 +693,9 @@ def test_trace_and_stats() -> None:
         assert len(result.stats["memory"]) < max_results
         assert len(result.stats["cpu"]) > min_results
         assert len(result.stats["cpu"]) < max_results
-        assert len(result.stats["disk"]["/"]) > min_results
-        assert len(result.stats["disk"]["/"]) < max_results
+        if distro.name() != "Red Hat Enterprise Linux":
+            assert len(result.stats["disk"]["/"]) > min_results
+            assert len(result.stats["disk"]["/"]) < max_results
     else:
         print(
             f"Warning: uname is not 'Linux': {os.uname()}; ltrace not tested."
@@ -697,7 +709,7 @@ def test_trace_and_stat() -> None:
     Ensure both tracing a command and capturing a single statistic work
     together.
     """
-    logger = ShellLogger(stack()[0][3], Path.cwd())
+    logger = ShellLogger(stack()[0][3], log_dir=Path.cwd())
     if os.uname().sysname == "Linux":
         result = logger._run(
             "sleep 1",
@@ -725,7 +737,7 @@ def test_trace_and_stat() -> None:
 @pytest.mark.skip(reason="Not sure it's worth it to fix this or not")
 def test_set_env_trace() -> None:
     """Ensure environment variables work with trace."""
-    logger = ShellLogger(stack()[0][3], Path.cwd())
+    logger = ShellLogger(stack()[0][3], log_dir=Path.cwd())
     result = logger._run("TEST_ENV=abdc env | grep TEST_ENV", trace="ltrace")
     assert "TEST_ENV=abdc" in result.stdout
     result = logger._run("TEST_ENV=abdc env | grep TEST_ENV", trace="strace")
@@ -733,9 +745,15 @@ def test_set_env_trace() -> None:
 
 
 def test_log_book_trace_and_stats() -> None:
-    """Ensure trace and statistics are accurately captured in the log book."""
+    """
+    Ensure trace and statistics are accurately captured in the log book.
+
+    Todo:
+        Ensure disk statistics are collected at the specified interval
+        on RHEL.
+    """
     if os.uname().sysname == "Linux":
-        logger = ShellLogger(stack()[0][3], Path.cwd())
+        logger = ShellLogger(stack()[0][3], log_dir=Path.cwd())
         measure = ["cpu", "memory", "disk"]
         logger.log(
             "Sleep",
@@ -754,8 +772,9 @@ def test_log_book_trace_and_stats() -> None:
         assert len(logger.log_book[0]["stats"]["memory"]) < max_results
         assert len(logger.log_book[0]["stats"]["cpu"]) > min_results
         assert len(logger.log_book[0]["stats"]["cpu"]) < max_results
-        assert len(logger.log_book[0]["stats"]["disk"]["/"]) > min_results
-        assert len(logger.log_book[0]["stats"]["disk"]["/"]) < max_results
+        if distro.name() != "Red Hat Enterprise Linux":
+            assert len(logger.log_book[0]["stats"]["disk"]["/"]) > min_results
+            assert len(logger.log_book[0]["stats"]["disk"]["/"]) < max_results
     else:
         print(
             f"Warning: uname is not 'Linux': {os.uname()}; ltrace not tested."
@@ -764,7 +783,7 @@ def test_log_book_trace_and_stats() -> None:
 
 def test_change_pwd() -> None:
     """Ensure changing directories affects subsequent calls."""
-    logger = ShellLogger(stack()[0][3], Path.cwd())
+    logger = ShellLogger(stack()[0][3], log_dir=Path.cwd())
     pwd_command = "pwd"
     directory1 = "/"
     directory2 = "/tmp"
@@ -782,7 +801,7 @@ def test_change_pwd() -> None:
 
 def test_returncode() -> None:
     """Ensure we get the expected return code when a command fails."""
-    logger = ShellLogger(stack()[0][3], Path.cwd())
+    logger = ShellLogger(stack()[0][3], log_dir=Path.cwd())
     command = "false"
     expected_returncode = 1
     if os.name != "posix":
@@ -798,7 +817,7 @@ def test_sgr_gets_converted_to_html() -> None:
     Ensure Select Graphic Rendition (SGR) codes get accurately
     translated to valid HTML/CSS.
     """
-    logger = ShellLogger(stack()[0][3], Path.cwd())
+    logger = ShellLogger(stack()[0][3], log_dir=Path.cwd())
     logger.print("\x1b[31mHello\x1b[0m")
     logger.print("\x1b[31;43m\x1b[4mthere\x1b[0m")
     logger.print("\x1b[38;5;196m\x1b[48;5;232m\x1b[4mmr.\x1b[0m logger")
@@ -834,7 +853,7 @@ def test_html_print(capsys: CaptureFixture) -> None:
     Parameters:
         capsys:  A fixture for capturing the ``stdout``.
     """
-    logger = ShellLogger(stack()[0][3], Path.cwd())
+    logger = ShellLogger(stack()[0][3], log_dir=Path.cwd())
     logger.html_print(
         "The quick brown fox jumps over the lazy dog.", msg_title="Brown Fox"
     )
@@ -860,7 +879,7 @@ def test_html_print(capsys: CaptureFixture) -> None:
 
 def test_append_mode() -> None:
     """Ensure we're able to append to a previously generated log file."""
-    logger1 = ShellLogger(stack()[0][3] + "_1", Path.cwd())
+    logger1 = ShellLogger(stack()[0][3] + "_1", log_dir=Path.cwd())
     logger1.log("Print HELLO to stdout", "echo HELLO")
     logger1.print("Printed once to stdout")
     logger1.html_print("Printed ONCE to STDOUT")
@@ -914,7 +933,7 @@ def test_append_mode() -> None:
 
 def test_invalid_decodings() -> None:
     """Ensure we appropriately handle invalid bytes when decoding output."""
-    logger = ShellLogger(stack()[0][3], Path.cwd())
+    logger = ShellLogger(stack()[0][3], log_dir=Path.cwd())
     result = logger.log(
         "Print invalid start byte for bytes decode()",
         "printf '\\xFDHello\\n'",

@@ -28,7 +28,11 @@ classifiers = [
     "Operating System :: POSIX",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3 :: Only",
-    "Programming Language :: Python :: 3.7",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
     "Topic :: Software Development",
     "Topic :: Software Development :: Debuggers",
     "Topic :: Software Development :: Documentation",
@@ -40,7 +44,7 @@ classifiers = [
 
 
 [tool.poetry.dependencies]
-python = ">=3.7"
+python = ">=3.8"
 
 
 [tool.poetry.dev-dependencies]
