@@ -38,7 +38,7 @@ to capture what's happening *in the shell* rather than in Python itself.
 
 To get up and running with `shell-logger`, simply:
 ```bash
-python3 -m pip install shell-logger
+python3 -m pip install shell-logger-sandialabs
 ```
 
 ## Usage
@@ -48,6 +48,7 @@ Once the package is installed, you can simply
 from shell_logger import ShellLogger
 sl = ShellLogger("Title of Log File")
 sl.log("Execute my first command in the shell.", "echo 'Hello World'")
+sl.finalize()
 ```
 
 For more detailed usage and API information, please see
