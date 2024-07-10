@@ -1,7 +1,3 @@
-> **WARNING:**  *This package is still in the process of being open sourced.
-> Until that work is done and this banner is removed, don't expect anything
-> documented here to be accurate.*
-
 ![Lines of code](https://sloc.xyz/github/sandialabs/shell-logger/?category=code)
 [![codecov](https://codecov.io/gh/sandialabs/shell-logger/branch/master/graph/badge.svg?token=FmDStZ6FVR)](https://codecov.io/gh/sandialabs/shell-logger)
 [![CodeFactor](https://www.codefactor.io/repository/github/sandialabs/shell-logger/badge/master)](https://www.codefactor.io/repository/github/sandialabs/shell-logger/overview/master)
@@ -81,9 +77,9 @@ love to have your help :grinning:  Check out our
 
 [contributors]:  https://github.com/sandialabs/shell-logger/graphs/contributors
 
-## License
+## License & Copyright
 
-See [LICENSE.md](LICENSE.md).
+See [LICENSE.md](LICENSE.md) and [COPYRIGHT.md](COPYRIGHT.md).
 
 ## Credits
 

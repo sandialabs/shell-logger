@@ -77,7 +77,6 @@ The checks we perform are the following:
 * Ensure files don't contain merge conflict strings.
 * Ensure files end with a single blank line.
 * Ensure we only use Unix line endings.
-* Ensure test files are correctly named.
 * Trim trailing whitespace.
 * Ensure we use [type-hinting][typing].
 * Check for common mistakes in [reStructuredText][rest] in our documentation.
@@ -133,8 +132,6 @@ search for and install them.  These are the ones we recommend:
 * **Conventional Commits:**  Adhere to the [Conventional Commits][conventional]
   specification for commit messages.
 * **Coverage Gutters:**  Display test coverage in the editor.
-* **GitLab Workflow:**  Integrate GitLab issues, merge requests, and pipelines
-  into VS Code.
 * **GitLens — Git supercharged:**  Integrate some of the powerful features of
   [GitKraken][kraken] into VS Code.
 * **IntelliCode:**  AI-assisted development features.
@@ -472,10 +469,10 @@ Feel free to commit and push small chunks early and often and then use `git
 rebase -i` to reorganize your commits before sharing.
 
 > **Note:**  If you rebase a branch that's already been pushed to a remote,
-> you'll wind up changing the history, which will require a force push with
-> `git push origin +<branch-name>`.  That is permissible (even encouraged), but
-> if you've had one or more reviewers or collaborators working with you on the
-> branch, *get their buy-in first* before doing a force push.
+> you'll wind up changing the history, which will require a force push.  That
+> is permissible (even encouraged), but if you've had one or more reviewers or
+> collaborators working with you on the branch, *get their buy-in first* before
+> doing a force push.
 
 ### When Work is Complete
 

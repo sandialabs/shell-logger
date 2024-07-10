@@ -11,6 +11,9 @@ defaults:
   run:
     shell: bash
 
+permissions:
+  contents: read
+
 jobs:
   test:
     runs-on: macos-latest
@@ -18,6 +21,11 @@ jobs:
       matrix:
         version: ["3.8", "3.9", "3.10", "3.11", "3.12"]
     steps:
+
+      - name: Harden Runner
+        uses: step-security/harden-runner@17d0e2bd7d51742c71671bd19fa12bdc9d40a3d6 # v2.8.1
+        with:
+          egress-policy: audit
 
       - name: Check out the commit
         uses: actions/checkout@v4
@@ -67,6 +75,11 @@ jobs:
   commits:
     runs-on: ubuntu-latest
     steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@17d0e2bd7d51742c71671bd19fa12bdc9d40a3d6 # v2.8.1
+        with:
+          egress-policy: audit
+
       - name: Conventional Commits
         uses: taskmedia/action-conventional-commits@v1.1.14
         with:

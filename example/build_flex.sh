@@ -8,14 +8,14 @@ git clone \
   flex-2.5.39
 
 # Run `autogen`.
-cd flex-2.5.39
+cd flex-2.5.39 || exit
 ./autogen.sh
 
 # Configure flex.
-./configure --prefix=$(dirname $(pwd))/flex
+./configure --prefix="$(dirname "$(pwd)")/flex"
 
 # Build `libcompat.la`.
-cd lib
+cd lib || exit
 make libcompat.la
 
 # Build & install flex.
