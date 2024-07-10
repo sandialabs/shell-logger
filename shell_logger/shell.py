@@ -20,6 +20,8 @@ from time import time
 from types import SimpleNamespace
 from typing import IO, List, Optional, TextIO, Tuple
 
+import snoop
+
 
 END_OF_READ = 4
 
@@ -44,6 +46,7 @@ class Shell:
             with the shell.
     """
 
+    @snoop
     def __init__(
         self, pwd: Optional[Path] = None, *, login_shell: bool = False
     ) -> None:
@@ -145,6 +148,7 @@ class Shell:
         directory, _ = self.auxiliary_command(posix="pwd", strip=True)
         return directory
 
+    @snoop
     def cd(self, path: Path) -> None:
         """
         Change to the given directory.
@@ -318,6 +322,7 @@ class Shell:
                 file.close()
         return SimpleNamespace(stdout_str=stdout_str, stderr_str=stderr_str)
 
+    @snoop
     def auxiliary_command(
         self, **kwargs
     ) -> Tuple[Optional[str], Optional[str]]:
@@ -351,6 +356,8 @@ class Shell:
             stderr = ""
 
             max_anonymous_pipe_buffer_size = 65536
+
+            # This next line is where the hang occurs.
             aux = os.read(self.aux_stdout_rfd, max_anonymous_pipe_buffer_size)
             while aux[-1] != END_OF_READ:
                 stdout += aux.decode()

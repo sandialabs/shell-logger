@@ -35,6 +35,7 @@ jobs:
             -r doc/requirements.txt \
             -r example/requirements.txt \
             -r test/requirements.txt
+          python3 -m pip install snoop
 
       - name: Test install
         run: python3 -m pip install .
