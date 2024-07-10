@@ -15,8 +15,8 @@
 ![Platforms](https://anaconda.org/conda-forge/shell-logger/badges/platforms.svg)
 [![pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit)](https://github.com/pre-commit/pre-commit)
 [![pre-commit.ci Status](https://results.pre-commit.ci/badge/github/sandialabs/shell-logger/master.svg)](https://results.pre-commit.ci/latest/github/sandialabs/shell-logger/master)
-[![PyPI - Version](https://img.shields.io/pypi/v/shell-logger?label=PyPI)](https://pypi.org/project/shell-logger/)
-![PyPI - Downloads](https://img.shields.io/pypi/dm/shell-logger?label=PyPI%20downloads)
+[![PyPI - Version](https://img.shields.io/pypi/v/shell-logger-sandialabs?label=PyPI)](https://pypi.org/project/shell-logger-sandialabs/)
+![PyPI - Downloads](https://img.shields.io/pypi/dm/shell-logger-sandialabs?label=PyPI%20downloads)
 ![Python Version](https://img.shields.io/badge/Python-3.8|3.9|3.10|3.11|3.12-blue.svg)
 [![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
 

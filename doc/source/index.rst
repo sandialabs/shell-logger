@@ -66,9 +66,9 @@ shell-logger
    :target: https://github.com/pre-commit/pre-commit
 .. |pre-commit.ci Status| image:: https://results.pre-commit.ci/badge/github/sandialabs/shell-logger/master.svg
    :target: https://results.pre-commit.ci/latest/github/sandialabs/shell-logger/master
-.. |PyPI Version| image:: https://img.shields.io/pypi/v/shell-logger?label=PyPI
-   :target: https://pypi.org/project/shell-logger/
-.. |PyPI Downloads| image:: https://img.shields.io/pypi/dm/shell-logger?label=PyPI%20downloads
+.. |PyPI Version| image:: https://img.shields.io/pypi/v/shell-logger-sandialabs?label=PyPI
+   :target: https://pypi.org/project/shell-logger-sandialabs/
+.. |PyPI Downloads| image:: https://img.shields.io/pypi/dm/shell-logger-sandialabs?label=PyPI%20downloads
 .. |Python Version| image:: https://img.shields.io/badge/Python-3.8|3.9|3.10|3.11|3.12-blue.svg
 .. |Ruff| image:: https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json
    :target: https://github.com/astral-sh/ruff
