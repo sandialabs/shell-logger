@@ -20,6 +20,21 @@
 ![Python Version](https://img.shields.io/badge/Python-3.8|3.9|3.10|3.11|3.12-blue.svg)
 [![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
 
+> **NOTICE:**  After using this package for a few years, we realized we'd
+> attempted to do too many things at once with it.  It still provides
+> tremendous functionality for a wide variety of use cases, but for particular
+> corner cases, it became apparent that design decisions made early on were
+> hampering forward progress, and we wouldn't recommend doing things the same
+> way today.  Certain aspects of its functionality have inspired more focused
+> packages ([reverse-argparse][reverse-argparse],
+> [staged-script][staged-script]), and we hope to do the same with more
+> functionality in the future.  For the time being, though, don't expect much
+> development and maintenance here.  That said, if you use `shell-logger` and
+> are eager to contribute to its longevity, let us know.
+
+[reverse-argparse]:  https://github.com/sandialabs/reverse_argparse
+[staged-script]:  https://github.com/sandialabs/staged-script
+
 # shell-logger
 
 The `shell-logger` Python package allows you to interact with the shell, while
