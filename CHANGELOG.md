@@ -2,6 +2,17 @@
 
 
 
+## v1.0.3 (2024-07-10)
+
+### Chore
+* chore: Remove build artifacts ([`98768ab`](https://github.com/sandialabs/shell-logger/commit/98768ab79253214e48d91dfc610afb6d7b1dc8a8))
+
+  These were accidentally committed in
+  0cbf0dfd410dd01e84eece340ac7f42c8cf24da9.
+
+### Patch
+* patch: Maintenance mode release ([`fcc6b4b`](https://github.com/sandialabs/shell-logger/commit/fcc6b4b08514af9d4351dd2eb7ff5e4908152ea3))
+
 ## v1.0.2 (2024-07-10)
 
 ### Continuous Integration
