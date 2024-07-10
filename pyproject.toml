@@ -4,8 +4,8 @@ build-backend = "poetry.core.masonry.api"
 
 
 [tool.poetry]
-name = "shell-logger"
-version = "1.0.0"
+name = "shell-logger-sandialabs"
+version = "1.0.1"
 license = "LICENSE.md"
 readme = "README.md"
 keywords = ["shell", "logging"]
@@ -40,6 +40,9 @@ classifiers = [
     "Topic :: System :: Shells",
     "Topic :: System :: System Shells",
     "Typing :: Typed"
+]
+packages = [
+    { include = "shell_logger" },
 ]
 
 
