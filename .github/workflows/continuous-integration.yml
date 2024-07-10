@@ -45,7 +45,7 @@ jobs:
         with:
           timeout_minutes: 10
           max_attempts: 3
-          command: python3 -m pytest --verbose --cov=shell_logger test/
+          command: python3 -m pytest -s --verbose --cov=shell_logger test/
 
       - name: Upload coverage reports to Codecov
         uses: codecov/codecov-action@v3
