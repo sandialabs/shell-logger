@@ -81,7 +81,7 @@ jobs:
           egress-policy: audit
 
       - name: Conventional Commits
-        uses: taskmedia/action-conventional-commits@v1.1.14
+        uses: taskmedia/action-conventional-commits@v1.1.17
         with:
           types: >
             build|chore|ci|docs|feat|fix|minor|patch|perf|style|refactor|test
