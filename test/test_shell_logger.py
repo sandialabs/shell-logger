@@ -25,6 +25,10 @@ except ModuleNotFoundError:
     psutil = None
 
 
+def test_hello_world() -> None:
+    print("Hello World")
+
+
 # @pytest.fixture(autouse=True)
 # def _use_tmpdir(monkeypatch: MonkeyPatch, tmpdir: Path) -> None:
 #     """
