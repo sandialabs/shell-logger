@@ -17,8 +17,6 @@ shell-logger
 |codecov|
 |CodeFactor|
 |CodeQL|
-|conda-forge Version|
-|conda-forge Downloads|
 |Continuous Integration|
 |Contributor Covenant|
 |GitHub Contributors|
@@ -42,9 +40,6 @@ shell-logger
    :target: https://www.codefactor.io/repository/github/sandialabs/shell-logger/overview/master
 .. |CodeQL| image:: https://github.com/sandialabs/shell-logger/actions/workflows/github-code-scanning/codeql/badge.svg
    :target: https://github.com/sandialabs/shell-logger/actions/workflows/github-code-scanning/codeql
-.. |conda-forge Version| image:: https://img.shields.io/conda/v/conda-forge/shell-logger?label=conda-forge
-   :target: https://anaconda.org/conda-forge/shell-logger
-.. |conda-forge Downloads| image:: https://img.shields.io/conda/d/conda-forge/shell-logger?label=conda-forge%20downloads
 .. |Continuous Integration| image:: https://github.com/sandialabs/shell-logger/actions/workflows/continuous-integration.yml/badge.svg
    :target: https://github.com/sandialabs/shell-logger/actions/workflows/continuous-integration.yml
 .. |Contributor Covenant| image:: https://img.shields.io/badge/Contributor%20Covenant-2.1-4baaaa.svg
@@ -53,7 +48,7 @@ shell-logger
    :target: https://github.com/sandialabs/shell-logger/graphs/contributors
 .. |Documentation Status| image:: https://readthedocs.org/projects/shell-logger/badge/?version=latest
    :target: https://shell-logger.readthedocs.io/en/latest/?badge=latest
-.. |License| image:: https://anaconda.org/conda-forge/shell-logger/badges/license.svg
+.. |License| image:: https://img.shields.io/badge/license-BSD_3_Clause-black
    :target: https://github.com/sandialabs/shell-logger/blob/master/LICENSE.md
 .. |Merged PRs| image:: https://img.shields.io/github/issues-pr-closed-raw/sandialabs/shell-logger.svg?label=merged+PRs
    :target: https://github.com/sandialabs/shell-logger/pulls?q=is:pr+is:merged
@@ -61,7 +56,7 @@ shell-logger
    :target: https://bestpractices.coreinfrastructure.org/projects/7632
 .. |OpenSSF Scorecard| image:: https://api.securityscorecards.dev/projects/github.com/sandialabs/shell-logger/badge
    :target: https://securityscorecards.dev/viewer/?uri=github.com/sandialabs/shell-logger
-.. |Platforms| image:: https://anaconda.org/conda-forge/shell-logger/badges/platforms.svg
+.. |Platforms| image:: https://img.shields.io/badge/Platforms-Linux%7CMacOS-orange
 .. |pre-commit| image:: https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit
    :target: https://github.com/pre-commit/pre-commit
 .. |pre-commit.ci Status| image:: https://results.pre-commit.ci/badge/github/sandialabs/shell-logger/master.svg
