@@ -2,6 +2,11 @@
 
 
 
+## v1.0.4 (2024-07-11)
+
+### Patch
+* patch: Remove conda-forge badges ([`120b656`](https://github.com/sandialabs/shell-logger/commit/120b6561fdf8ed19c1603a120daeb020b3910988))
+
 ## v1.0.3 (2024-07-10)
 
 ### Chore

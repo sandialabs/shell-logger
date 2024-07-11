@@ -18,7 +18,7 @@ copyright = (  # noqa: A001
     "(NTESS)"
 )
 author = "Josh Braun, David Collins, Jason M. Gates"
-version = "1.0.3"
+version = "1.0.4"
 release = version
 
 
