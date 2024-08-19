@@ -21,6 +21,8 @@ from pathlib import Path
 from types import SimpleNamespace
 from typing import Iterator, List, Optional, Union
 
+import snoop
+
 from .html_utilities import (
     append_html,
     child_logger_card,
@@ -130,6 +132,7 @@ class ShellLogger:
         with path.open("r") as jf:
             return json.load(jf, cls=ShellLoggerDecoder)
 
+    @snoop
     def __init__(  # noqa: PLR0913
         self,
         name: str,
