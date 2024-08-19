@@ -37,7 +37,7 @@ def _use_tmpdir(monkeypatch: MonkeyPatch, tmpdir: Path) -> None:
     monkeypatch.chdir(tmpdir)
 
 
-@pytest.fixture()
+@pytest.fixture
 def shell_logger() -> ShellLogger:
     """
     Pre-populate a :class:`ShellLogger` for use in the tests.
