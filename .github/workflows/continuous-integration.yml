@@ -28,10 +28,10 @@ jobs:
           egress-policy: audit
 
       - name: Check out the commit
-        uses: actions/checkout@v4
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
 
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@39cd14951b08e74b54015e9e001cdefcf80e669f # v5.1.1
         with:
           python-version: ~${{ matrix.version }}
 
@@ -48,14 +48,14 @@ jobs:
         run: python3 -m pip install .
 
       - name: Test with pytest
-        uses: nick-fields/retry@v3
+        uses: nick-fields/retry@7152eba30c6575329ac0576536151aca5a72780e # v3.0.0
         with:
           timeout_minutes: 10
           max_attempts: 3
           command: python3 -m pytest --verbose --cov=shell_logger test/
 
       - name: Upload coverage reports to Codecov
-        uses: codecov/codecov-action@v4
+        uses: codecov/codecov-action@e28ff129e5465c2c0dcc6f003fc735cb6ae0c673 # v4.5.0
         env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
 
@@ -66,7 +66,7 @@ jobs:
         working-directory: ./doc
 
       - name: Archive documentation coverage results
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@834a144ee995460fba8ed112a2fc961b36a5ec5a # v4.3.6
         with:
           name: docs-coverage-report-${{ matrix.version }}
           path: docs-coverage-report-${{ matrix.version }}.txt
@@ -83,7 +83,7 @@ jobs:
           egress-policy: audit
 
       - name: Conventional Commits
-        uses: taskmedia/action-conventional-commits@v1.1.17
+        uses: taskmedia/action-conventional-commits@866c0e6dba6aaaef9ad0939a40620b27888906c2 # v1.1.17
         with:
           types: >
             build|chore|ci|docs|feat|fix|minor|patch|perf|style|refactor|test
