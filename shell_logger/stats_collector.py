@@ -13,7 +13,7 @@ from abc import abstractmethod
 from multiprocessing import Manager, Process
 from pathlib import Path
 from time import sleep, time
-from typing import List, Tuple, TYPE_CHECKING
+from typing import TYPE_CHECKING
 
 from .abstract_method import AbstractMethod
 
@@ -26,7 +26,7 @@ except ModuleNotFoundError:
     psutil = None
 
 
-def stats_collectors(**kwargs) -> List[StatsCollector]:
+def stats_collectors(**kwargs) -> list[StatsCollector]:
     """
     Generate stats collectors.
 
@@ -236,7 +236,7 @@ if psutil is not None:
             timestamp = round(time() * milliseconds_per_second)
             self.stats.append((timestamp, psutil.cpu_percent(interval=None)))
 
-        def unproxied_stats(self) -> List[Tuple[float, float]]:
+        def unproxied_stats(self) -> list[tuple[float, float]]:
             """
             Convert the statistics to standard Python data types.
 
@@ -277,7 +277,7 @@ if psutil is not None:
             timestamp = round(time() * milliseconds_per_second)
             self.stats.append((timestamp, psutil.virtual_memory().percent))
 
-        def unproxied_stats(self) -> List[Tuple[float, float]]:
+        def unproxied_stats(self) -> list[tuple[float, float]]:
             """
             Convert the statistics to standard Python data types.
 

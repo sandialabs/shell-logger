@@ -64,9 +64,11 @@ def shell_logger() -> ShellLogger:
     measure = ["cpu", "memory", "disk"]
     kwargs = {"measure": measure, "return_info": True, "interval": 0.1}
     if os.uname().sysname == "Linux":
-        kwargs.update(
-            {"trace": "ltrace", "expression": "setlocale", "summary": True}
-        )
+        kwargs |= {
+            "trace": "ltrace",
+            "expression": "setlocale",
+            "summary": True,
+        }
     else:
         print(
             f"Warning: uname is not 'Linux': {os.uname()}; ltrace not tested."

@@ -19,7 +19,7 @@ from datetime import datetime, timedelta
 from distutils import dir_util
 from pathlib import Path
 from types import SimpleNamespace
-from typing import Iterator, List, Optional, Union
+from typing import Iterator, Optional, Union
 
 from .html_utilities import (
     append_html,
@@ -139,7 +139,7 @@ class ShellLogger:
         html_file: Optional[Path] = None,
         indent: int = 0,
         login_shell: bool = False,
-        log: Optional[List[object]] = None,
+        log: Optional[list[object]] = None,
         init_time: Optional[datetime] = None,
         done_time: Optional[datetime] = None,
         duration: Optional[str] = None,
@@ -179,7 +179,7 @@ class ShellLogger:
             generally be omitted.
         """
         self.name = name
-        self.log_book: List[Union[dict, ShellLogger]] = (
+        self.log_book: list[Union[dict, ShellLogger]] = (
             log if log is not None else []
         )
         self.init_time = datetime.now() if init_time is None else init_time
@@ -404,7 +404,7 @@ class ShellLogger:
         }
         self.log_book.append(log)
 
-    def to_html(self) -> Union[Iterator[str], List[Iterator[str]]]:
+    def to_html(self) -> Union[Iterator[str], list[Iterator[str]]]:
         """
         Convert the log entries to HTML.
 
@@ -591,7 +591,7 @@ class ShellLogger:
         s = int(result.wall / 1000) % 60
         log["duration"] = f"{h}h {m}m {s}s"
         log["return_code"] = result.returncode
-        log = {**log, **nested_simplenamespace_to_dict(result)}
+        log |= nested_simplenamespace_to_dict(result)
         self.log_book.append(log)
         return {
             "return_code": log["return_code"],
