@@ -18,7 +18,7 @@ from pathlib import Path
 from threading import Thread
 from time import time
 from types import SimpleNamespace
-from typing import IO, List, Optional, TextIO, Tuple
+from typing import IO, Optional, TextIO
 
 
 END_OF_READ = 4
@@ -262,7 +262,7 @@ class Shell:
         stdout_tee = [sys_stdout, stdout_io, stdout_path]
         stderr_tee = [sys_stderr, stderr_io, stderr_path]
 
-        def write(input_file: TextIO, output_files: List[TextIO]) -> None:
+        def write(input_file: TextIO, output_files: list[TextIO]) -> None:
             """
             Write an input to multiple outputs.
 
@@ -320,7 +320,7 @@ class Shell:
 
     def auxiliary_command(
         self, **kwargs
-    ) -> Tuple[Optional[str], Optional[str]]:
+    ) -> tuple[Optional[str], Optional[str]]:
         """
         Run auxiliary commands like `umask`, `pwd`, `env`, etc.
 

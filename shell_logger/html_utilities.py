@@ -13,7 +13,7 @@ from collections.abc import Iterable, Mapping
 from datetime import datetime
 from pathlib import Path
 from types import SimpleNamespace
-from typing import Iterator, List, TextIO, Tuple, Union
+from typing import Iterator, TextIO, Union
 
 
 def nested_simplenamespace_to_dict(
@@ -157,7 +157,7 @@ def flatten(element: Union[str, bytes, Iterable]) -> Iterator[str]:
 
 
 def parent_logger_card_html(
-    name: str, *args: List[Iterator[str]]
+    name: str, *args: list[Iterator[str]]
 ) -> Iterator[str]:
     """
     Generate the HTML for a parent logger card.
@@ -212,7 +212,7 @@ def child_logger_card(log) -> Iterator[str]:
 
 
 def child_logger_card_html(
-    name: str, duration: str, *args: Union[Iterator[str], List[Iterator[str]]]
+    name: str, duration: str, *args: Union[Iterator[str], list[Iterator[str]]]
 ) -> Iterator[str]:
     """
     Generate the HTML for a child logger card.
@@ -480,7 +480,7 @@ def command_card(log: dict, stream_dir: Path) -> Iterator[str]:
 
 
 def time_series_plot(
-    cmd_id: str, data_tuples: List[Tuple[float, float]], series_title: str
+    cmd_id: str, data_tuples: list[tuple[float, float]], series_title: str
 ) -> Iterator[str]:
     """
     Create the HTML for a plot of time series data.
@@ -501,7 +501,7 @@ def time_series_plot(
 
 
 def disk_time_series_plot(
-    cmd_id: str, data_tuples: Tuple[float, float], volume_name: str
+    cmd_id: str, data_tuples: tuple[float, float], volume_name: str
 ) -> Iterator[str]:
     """
     Generate a time series plot of disk usage.
@@ -530,7 +530,7 @@ def disk_time_series_plot(
 
 
 def stat_chart_card(
-    labels: List[str], data: List[float], title: str, identifier: str
+    labels: list[str], data: list[float], title: str, identifier: str
 ) -> Iterator[str]:
     """
     Create the HTML for a two-dimensional plot.
@@ -676,7 +676,7 @@ def output_block_html(
 
 def split_template(
     template: str, split_at: str, **kwargs
-) -> Tuple[str, str, str]:
+) -> tuple[str, str, str]:
     """
     Subdivide a HTML template.
 
@@ -854,7 +854,7 @@ def sgr_4bit_color_and_style_to_html(sgr: str) -> str:
     return f'<span style="{sgr_to_css.get(sgr) or str()}">'
 
 
-def sgr_8bit_color_to_html(sgr_params: List[str]) -> str:  # noqa: PLR0911
+def sgr_8bit_color_to_html(sgr_params: list[str]) -> str:  # noqa: PLR0911
     """
     Convert 8-bit SGR colors to HTML.
 
@@ -894,7 +894,7 @@ def sgr_8bit_color_to_html(sgr_params: List[str]) -> str:  # noqa: PLR0911
     return "THIS SHOULD NEVER HAPPEN"
 
 
-def sgr_24bit_color_to_html(sgr_params: List[str]) -> str:
+def sgr_24bit_color_to_html(sgr_params: list[str]) -> str:
     """
     Convert 24-bit SGR colors to HTML.
 

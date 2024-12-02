@@ -64,7 +64,7 @@ shell-logger
 .. |PyPI Version| image:: https://img.shields.io/pypi/v/shell-logger-sandialabs?label=PyPI
    :target: https://pypi.org/project/shell-logger-sandialabs/
 .. |PyPI Downloads| image:: https://img.shields.io/pypi/dm/shell-logger-sandialabs?label=PyPI%20downloads
-.. |Python Version| image:: https://img.shields.io/badge/Python-3.8|3.9|3.10|3.11|3.12-blue.svg
+.. |Python Version| image:: https://img.shields.io/badge/Python-3.9|3.10|3.11|3.12-blue.svg
 .. |Ruff| image:: https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json
    :target: https://github.com/astral-sh/ruff
 
