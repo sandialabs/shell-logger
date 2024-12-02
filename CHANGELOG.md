@@ -2,6 +2,13 @@
 
 
 
+## v2.0.1 (2024-12-02)
+
+### Patch
+* patch: Support Python 3.13 ([`bb7f272`](https://github.com/sandialabs/shell-logger/commit/bb7f272149e2beadd7185f2ba4957d9fbc558eaf))
+
+  Bump the patch version to update the README on PyPI.
+
 ## v2.0.0 (2024-12-02)
 
 ### Chores
