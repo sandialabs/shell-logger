@@ -866,6 +866,10 @@ def sgr_8bit_color_to_html(sgr_params: list[str]) -> str:  # noqa: PLR0911
 
     Returns:
         A HTML ``span`` with the appropriate CSS style.
+
+    Raises:
+        RuntimeError:  If the code somehow falls through all the `if`
+            blocks without returning.  This should never happen.
     """
     sgr_256 = int(sgr_params[2]) if len(sgr_params) > 2 else 0
     if sgr_256 < 0 or sgr_256 > 255 or not sgr_params:
@@ -891,7 +895,8 @@ def sgr_8bit_color_to_html(sgr_params: list[str]) -> str:  # noqa: PLR0911
             return sgr_4bit_color_and_style_to_html(str(40 + sgr_256))
         if sgr_256 < 16:
             return sgr_4bit_color_and_style_to_html(str(92 + sgr_256))
-    return "THIS SHOULD NEVER HAPPEN"
+    message = "THIS SHOULD NEVER HAPPEN"
+    raise RuntimeError(message)
 
 
 def sgr_24bit_color_to_html(sgr_params: list[str]) -> str:
