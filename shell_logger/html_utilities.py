@@ -501,7 +501,7 @@ def time_series_plot(
 
 
 def disk_time_series_plot(
-    cmd_id: str, data_tuples: tuple[float, float], volume_name: str
+    cmd_id: str, data_tuples: list[tuple[float, float]], volume_name: str
 ) -> Iterator[str]:
     """
     Generate a time series plot of disk usage.
