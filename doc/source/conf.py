@@ -14,8 +14,7 @@ sys.path.append(str(Path.cwd().parent.parent.resolve() / "shell_logger"))
 
 project = "shell-logger"
 copyright = (  # noqa: A001
-    "2024, National Technology & Engineering Solutions of Sandia, LLC "
-    "(NTESS)"
+    "2024, National Technology & Engineering Solutions of Sandia, LLC (NTESS)"
 )
 author = "Josh Braun, David Collins, Jason M. Gates"
 version = "2.0.1"
