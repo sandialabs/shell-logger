@@ -16,5 +16,5 @@ nan
 NaN
 encodable
 unproxied
-STrace
-LTrace
+STraceCollector
+LTraceCollector

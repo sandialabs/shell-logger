@@ -10,7 +10,7 @@ shell-logger
    shell
    abstract_method
    stats_collector
-   trace
+   trace_collector
    html_utilities
 
 |Code lines|
