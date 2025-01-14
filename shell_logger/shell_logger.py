@@ -34,7 +34,7 @@ from .html_utilities import (
 )
 from .shell import Shell
 from .stats_collector import stats_collectors
-from .trace import trace_collector
+from .trace_collector import trace_collector
 
 
 class ShellLogger:
@@ -606,7 +606,7 @@ class ShellLogger:
         Parameters:
             command:  The command to execute.
             **kwargs:  Additional arguments to be passed on to the
-                :class:`StatsCollector` s, :class:`Trace` s,
+                :class:`StatsCollector` s, :class:`TraceCollector` s,
                 :func:`shell.run`, etc.
 
         Returns:

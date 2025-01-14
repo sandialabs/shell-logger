@@ -14,22 +14,25 @@ from pathlib import Path
 from .abstract_method import AbstractMethod
 
 
-def trace_collector(**kwargs) -> Trace:
+def trace_collector(**kwargs) -> TraceCollector:
     """
     Generate trace collectors.
 
-    A factory method that returns any subclass of :class:`Trace` that
-    has the ``@Trace.subclass`` decorator applied to it.
+    A factory method that returns any subclass of
+    :class:`TraceCollector` that has the ``@TraceCollector.subclass``
+    decorator applied to it.
 
     Parameters:
-        **kwargs:  Any supported arguments of the :class:`Trace`
-            subclass.
+        **kwargs:  Any supported arguments of the
+            :class:`TraceCollector` subclass.
 
     Returns:
-        A single instance of a :class:`Trace` subclass.
+        A single instance of a :class:`TraceCollector` subclass.
     """
     trace_name = kwargs["trace"]
-    collectors = [c for c in Trace.subclasses if c.trace_name == trace_name]
+    collectors = [
+        c for c in TraceCollector.subclasses if c.trace_name == trace_name
+    ]
     if len(collectors) == 1:
         collector = collectors[0]
         return collector(**kwargs)
@@ -40,7 +43,7 @@ def trace_collector(**kwargs) -> Trace:
     raise RuntimeError(message)
 
 
-class Trace:
+class TraceCollector:
     """
     Trace a command run in the underlying shell.
 
@@ -57,16 +60,16 @@ class Trace:
         Mark a class as being a supported trace collector.
 
         This is a class decorator that adds to a list of supported
-        :class:`Trace` classes for the :func:`trace_collector` factory
-        method.
+        :class:`TraceCollector` classes for the :func:`trace_collector`
+        factory method.
         """
-        if issubclass(trace_subclass, Trace):
-            Trace.subclasses.append(trace_subclass)
+        if issubclass(trace_subclass, TraceCollector):
+            TraceCollector.subclasses.append(trace_subclass)
         return trace_subclass
 
     def __init__(self, **kwargs):
         """
-        Initialize the :class:`Trace` object.
+        Initialize the :class:`TraceCollector` object.
 
         Set up the output file where the trace information will be
         written.
@@ -104,8 +107,8 @@ class Trace:
         return f"{self.trace_args} -- {command}"
 
 
-@Trace.subclass
-class STrace(Trace):
+@TraceCollector.subclass
+class STraceCollector(TraceCollector):
     """
     Run ``strace`` on commands.
 
@@ -116,7 +119,7 @@ class STrace(Trace):
     trace_name = "strace"
 
     def __init__(self, **kwargs) -> None:
-        """Initialize the :class:`STrace` instance."""
+        """Initialize the :class:`STraceCollector` instance."""
         super().__init__(**kwargs)
         self.summary = bool(kwargs.get("summary"))
         self.expression = kwargs.get("expression")
@@ -132,8 +135,8 @@ class STrace(Trace):
         return args
 
 
-@Trace.subclass
-class LTrace(Trace):
+@TraceCollector.subclass
+class LTraceCollector(TraceCollector):
     """
     Run ``ltrace`` on commands.
 
@@ -144,7 +147,7 @@ class LTrace(Trace):
     trace_name = "ltrace"
 
     def __init__(self, **kwargs):
-        """Initialize the :class:`LTrace` instance."""
+        """Initialize the :class:`LTraceCollector` instance."""
         super().__init__(**kwargs)
         self.summary = bool(kwargs.get("summary"))
         self.expression = kwargs.get("expression")
