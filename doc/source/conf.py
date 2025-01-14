@@ -17,7 +17,7 @@ copyright = (  # noqa: A001
     "2024, National Technology & Engineering Solutions of Sandia, LLC (NTESS)"
 )
 author = "Josh Braun, David Collins, Jason M. Gates"
-version = "2.0.1"
+version = "3.0.0"
 release = version
 
 
