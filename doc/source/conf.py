@@ -13,7 +13,7 @@ sys.path.append(str(Path.cwd().parent.parent.resolve() / "shell_logger"))
 # -- Project information -----------------------------------------------------
 
 project = "shell-logger"
-copyright = (  # noqa: A001
+project_copyright = (
     "2024, National Technology & Engineering Solutions of Sandia, LLC (NTESS)"
 )
 author = "Josh Braun, David Collins, Jason M. Gates"
