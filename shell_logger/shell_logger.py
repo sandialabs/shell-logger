@@ -18,6 +18,7 @@ from collections.abc import Iterable, Mapping
 from datetime import datetime, timedelta
 from distutils import dir_util
 from pathlib import Path
+from tempfile import NamedTemporaryFile
 from types import SimpleNamespace
 from typing import Iterator, Optional, Union
 
@@ -466,8 +467,10 @@ class ShellLogger:
             # `stream_dir`.
             curr_html_file = self.html_file.name
             new_location = self.log_dir / curr_html_file
-            temp_link_name = Path(tempfile.mktemp(dir=self.log_dir))
-            temp_link_name.symlink_to(self.html_file)
+            with NamedTemporaryFile(delete=False, dir=self.log_dir) as f:
+                temp_link_name = Path(f.name)
+                temp_link_name.unlink()
+                temp_link_name.symlink_to(self.html_file)
             temp_link_name.replace(new_location)
 
             # Save everything to a JSON file in the timestamped
