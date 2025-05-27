@@ -2,213 +2,35 @@
 
 
 
-## v3.0.0 (2025-01-14)
-
-### Chores
-* chore(deps): Bump the github-actions-dependencies group with 4 updates ([`d01c0f2`](https://github.com/sandialabs/shell-logger/commit/d01c0f27ce7f8525f21cbfefeb81a2b2cf3dd685))
-
-  Bumps the github-actions-dependencies group with 4 updates: [step-security/harden-runner](https://github.com/step-security/harden-runner), [github/codeql-action](https://github.com/github/codeql-action), [actions/upload-artifact](https://github.com/actions/upload-artifact) and [python-semantic-release/python-semantic-release](https://github.com/python-semantic-release/python-semantic-release).
-
-
-  Updates `step-security/harden-runner` from 2.10.2 to 2.10.3
-  - [Release notes](https://github.com/step-security/harden-runner/releases)
-  - [Commits](https://github.com/step-security/harden-runner/compare/0080882f6c36860b6ba35c610c98ce87d4e2f26f...c95a14d0e5bab51a9f56296a4eb0e416910cd350)
-
-  Updates `github/codeql-action` from 3.28.0 to 3.28.1
-  - [Release notes](https://github.com/github/codeql-action/releases)
-  - [Changelog](https://github.com/github/codeql-action/blob/main/CHANGELOG.md)
-  - [Commits](https://github.com/github/codeql-action/compare/48ab28a6f5dbc2a99bf1e0131198dd8f1df78169...b6a472f63d85b9c78a3ac5e89422239fc15e9b3c)
-
-  Updates `actions/upload-artifact` from 4.5.0 to 4.6.0
-  - [Release notes](https://github.com/actions/upload-artifact/releases)
-  - [Commits](https://github.com/actions/upload-artifact/compare/6f51ac03b9356f520e9adb1b1b7802705f340c2b...65c4c4a1ddee5b72f698fdd19549f0f0fb45cf08)
-
-  Updates `python-semantic-release/python-semantic-release` from 9.15.2 to 9.16.1
-  - [Release notes](https://github.com/python-semantic-release/python-semantic-release/releases)
-  - [Changelog](https://github.com/python-semantic-release/python-semantic-release/blob/master/CHANGELOG.md)
-  - [Commits](https://github.com/python-semantic-release/python-semantic-release/compare/7b3f71697ccfbaef884e1e754b6364e974b134cf...d6a3be3386441a4f3a73df1bdd57ded251941739)
-
-  ---
-  updated-dependencies:
-  - dependency-name: step-security/harden-runner
-    dependency-type: direct:production
-    update-type: version-update:semver-patch
-    dependency-group: github-actions-dependencies
-  - dependency-name: github/codeql-action
-    dependency-type: direct:production
-    update-type: version-update:semver-patch
-    dependency-group: github-actions-dependencies
-  - dependency-name: actions/upload-artifact
-    dependency-type: direct:production
-    update-type: version-update:semver-minor
-    dependency-group: github-actions-dependencies
-  - dependency-name: python-semantic-release/python-semantic-release
-    dependency-type: direct:production
-    update-type: version-update:semver-minor
-    dependency-group: github-actions-dependencies
-  ...
-
-  Signed-off-by: dependabot[bot] <support@github.com>
-* chore(deps): Bump the github-actions-dependencies group with 3 updates ([`a741d05`](https://github.com/sandialabs/shell-logger/commit/a741d053c4b2cc4b4497ce0335659abf15d98d92))
-
-  Bumps the github-actions-dependencies group with 3 updates: [github/codeql-action](https://github.com/github/codeql-action), [codecov/codecov-action](https://github.com/codecov/codecov-action) and [actions/upload-artifact](https://github.com/actions/upload-artifact).
-
-
-  Updates `github/codeql-action` from 3.27.9 to 3.28.0
-  - [Release notes](https://github.com/github/codeql-action/releases)
-  - [Changelog](https://github.com/github/codeql-action/blob/main/CHANGELOG.md)
-  - [Commits](https://github.com/github/codeql-action/compare/df409f7d9260372bd5f19e5b04e83cb3c43714ae...48ab28a6f5dbc2a99bf1e0131198dd8f1df78169)
-
-  Updates `codecov/codecov-action` from 5.1.1 to 5.1.2
-  - [Release notes](https://github.com/codecov/codecov-action/releases)
-  - [Changelog](https://github.com/codecov/codecov-action/blob/main/CHANGELOG.md)
-  - [Commits](https://github.com/codecov/codecov-action/compare/7f8b4b4bde536c465e797be725718b88c5d95e0e...1e68e06f1dbfde0e4cefc87efeba9e4643565303)
-
-  Updates `actions/upload-artifact` from 4.4.3 to 4.5.0
-  - [Release notes](https://github.com/actions/upload-artifact/releases)
-  - [Commits](https://github.com/actions/upload-artifact/compare/b4b15b8c7c6ac21ea08fcf65892d2ee8f75cf882...6f51ac03b9356f520e9adb1b1b7802705f340c2b)
-
-  ---
-  updated-dependencies:
-  - dependency-name: github/codeql-action
-    dependency-type: direct:production
-    update-type: version-update:semver-minor
-    dependency-group: github-actions-dependencies
-  - dependency-name: codecov/codecov-action
-    dependency-type: direct:production
-    update-type: version-update:semver-patch
-    dependency-group: github-actions-dependencies
-  - dependency-name: actions/upload-artifact
-    dependency-type: direct:production
-    update-type: version-update:semver-minor
-    dependency-group: github-actions-dependencies
-  ...
-
-  Signed-off-by: dependabot[bot] <support@github.com>
-* chore(deps): Bump the github-actions-dependencies group with 2 updates ([`1bd8ed3`](https://github.com/sandialabs/shell-logger/commit/1bd8ed34430391aa8a7186c4658225d0f30b8edd))
-
-  Bumps the github-actions-dependencies group with 2 updates: [github/codeql-action](https://github.com/github/codeql-action) and [python-semantic-release/python-semantic-release](https://github.com/python-semantic-release/python-semantic-release).
-
-
-  Updates `github/codeql-action` from 3.27.6 to 3.27.9
-  - [Release notes](https://github.com/github/codeql-action/releases)
-  - [Changelog](https://github.com/github/codeql-action/blob/main/CHANGELOG.md)
-  - [Commits](https://github.com/github/codeql-action/compare/aa578102511db1f4524ed59b8cc2bae4f6e88195...df409f7d9260372bd5f19e5b04e83cb3c43714ae)
-
-  Updates `python-semantic-release/python-semantic-release` from 9.15.1 to 9.15.2
-  - [Release notes](https://github.com/python-semantic-release/python-semantic-release/releases)
-  - [Changelog](https://github.com/python-semantic-release/python-semantic-release/blob/master/CHANGELOG.md)
-  - [Commits](https://github.com/python-semantic-release/python-semantic-release/compare/a3233795eb26b6d5167192ffd4550947d764a9b0...7b3f71697ccfbaef884e1e754b6364e974b134cf)
-
-  ---
-  updated-dependencies:
-  - dependency-name: github/codeql-action
-    dependency-type: direct:production
-    update-type: version-update:semver-patch
-    dependency-group: github-actions-dependencies
-  - dependency-name: python-semantic-release/python-semantic-release
-    dependency-type: direct:production
-    update-type: version-update:semver-patch
-    dependency-group: github-actions-dependencies
-  ...
-
-  Signed-off-by: dependabot[bot] <support@github.com>
-* chore(deps): Bump the github-actions-dependencies group with 4 updates ([`40bbae7`](https://github.com/sandialabs/shell-logger/commit/40bbae75a7a76d8d22d0d53ca3c9f7ce46d39d3c))
-
-  Bumps the github-actions-dependencies group with 4 updates: [github/codeql-action](https://github.com/github/codeql-action), [codecov/codecov-action](https://github.com/codecov/codecov-action), [python-semantic-release/python-semantic-release](https://github.com/python-semantic-release/python-semantic-release) and [pypa/gh-action-pypi-publish](https://github.com/pypa/gh-action-pypi-publish).
-
-
-  Updates `github/codeql-action` from 3.27.5 to 3.27.6
-  - [Release notes](https://github.com/github/codeql-action/releases)
-  - [Changelog](https://github.com/github/codeql-action/blob/main/CHANGELOG.md)
-  - [Commits](https://github.com/github/codeql-action/compare/f09c1c0a94de965c15400f5634aa42fac8fb8f88...aa578102511db1f4524ed59b8cc2bae4f6e88195)
-
-  Updates `codecov/codecov-action` from 5.0.7 to 5.1.1
-  - [Release notes](https://github.com/codecov/codecov-action/releases)
-  - [Changelog](https://github.com/codecov/codecov-action/blob/main/CHANGELOG.md)
-  - [Commits](https://github.com/codecov/codecov-action/compare/015f24e6818733317a2da2edd6290ab26238649a...7f8b4b4bde536c465e797be725718b88c5d95e0e)
-
-  Updates `python-semantic-release/python-semantic-release` from 9.15.0 to 9.15.1
-  - [Release notes](https://github.com/python-semantic-release/python-semantic-release/releases)
-  - [Changelog](https://github.com/python-semantic-release/python-semantic-release/blob/master/CHANGELOG.md)
-  - [Commits](https://github.com/python-semantic-release/python-semantic-release/compare/2773f6d901a5cefed959c6ccda302ef41fed67dc...a3233795eb26b6d5167192ffd4550947d764a9b0)
-
-  Updates `pypa/gh-action-pypi-publish` from 1.12.2 to 1.12.3
-  - [Release notes](https://github.com/pypa/gh-action-pypi-publish/releases)
-  - [Commits](https://github.com/pypa/gh-action-pypi-publish/compare/15c56dba361d8335944d31a2ecd17d700fc7bcbc...67339c736fd9354cd4f8cb0b744f2b82a74b5c70)
-
-  ---
-  updated-dependencies:
-  - dependency-name: github/codeql-action
-    dependency-type: direct:production
-    update-type: version-update:semver-patch
-    dependency-group: github-actions-dependencies
-  - dependency-name: codecov/codecov-action
-    dependency-type: direct:production
-    update-type: version-update:semver-minor
-    dependency-group: github-actions-dependencies
-  - dependency-name: python-semantic-release/python-semantic-release
-    dependency-type: direct:production
-    update-type: version-update:semver-patch
-    dependency-group: github-actions-dependencies
-  - dependency-name: pypa/gh-action-pypi-publish
-    dependency-type: direct:production
-    update-type: version-update:semver-patch
-    dependency-group: github-actions-dependencies
-  ...
-
-  Signed-off-by: dependabot[bot] <support@github.com>
-* chore(deps): Bump python-semantic-release/python-semantic-release ([`5c005ea`](https://github.com/sandialabs/shell-logger/commit/5c005ea02c7375bf748bc65ab438693ff3e1abfb))
-
-  Bumps the github-actions-dependencies group with 1 update: [python-semantic-release/python-semantic-release](https://github.com/python-semantic-release/python-semantic-release).
-
-
-  Updates `python-semantic-release/python-semantic-release` from 9.14.0 to 9.15.0
-  - [Release notes](https://github.com/python-semantic-release/python-semantic-release/releases)
-  - [Changelog](https://github.com/python-semantic-release/python-semantic-release/blob/master/CHANGELOG.md)
-  - [Commits](https://github.com/python-semantic-release/python-semantic-release/compare/825655a47c9f7496f99ab144d28c424d40333a8a...2773f6d901a5cefed959c6ccda302ef41fed67dc)
-
-  ---
-  updated-dependencies:
-  - dependency-name: python-semantic-release/python-semantic-release
-    dependency-type: direct:production
-    update-type: version-update:semver-minor
-    dependency-group: github-actions-dependencies
-  ...
-
-  Signed-off-by: dependabot[bot] <support@github.com>
+## v3.0.1 (2025-05-27)
 
 ### Continuous integration
-* ci: pre-commit auto-update ([`c73b73b`](https://github.com/sandialabs/shell-logger/commit/c73b73b959100dc48a94ecf7b38d01ca7d72d21b))
+* ci: Replace deprecated GitHub Action ([`0461131`](https://github.com/sandialabs/shell-logger/commit/0461131f3cf53fd26c12f23a11f3cd98589bc74d))
 
-  updates:
-  - [github.com/astral-sh/ruff-pre-commit: v0.8.6 → v0.9.1](https://github.com/astral-sh/ruff-pre-commit/compare/v0.8.6...v0.9.1)
-  - [github.com/gitleaks/gitleaks: v8.22.1 → v8.23.0](https://github.com/gitleaks/gitleaks/compare/v8.22.1...v8.23.0)
-* ci: pre-commit auto-update ([`11e8152`](https://github.com/sandialabs/shell-logger/commit/11e815298b4d2f4cb13299910a66d58e41beed7a))
+### Documentation
+* docs: Switch to `project_copyright` ([`a296c1a`](https://github.com/sandialabs/shell-logger/commit/a296c1a56a8ab635c04c5db12f538e886ff57ae2))
 
-  updates:
-  - [github.com/astral-sh/ruff-pre-commit: v0.8.4 → v0.8.6](https://github.com/astral-sh/ruff-pre-commit/compare/v0.8.4...v0.8.6)
-* ci: pre-commit auto-update ([`c776d35`](https://github.com/sandialabs/shell-logger/commit/c776d35da3ac3f5b7ffb7b3b94d894a7a6aa34f5))
+  Using this alias means we're no longer overshadowing the `copyright`
+  built-in, so we can remove the comment to ignore that Ruff linting rule.
 
-  updates:
-  - [github.com/astral-sh/ruff-pre-commit: v0.8.3 → v0.8.4](https://github.com/astral-sh/ruff-pre-commit/compare/v0.8.3...v0.8.4)
-  - [github.com/gitleaks/gitleaks: v8.21.2 → v8.22.1](https://github.com/gitleaks/gitleaks/compare/v8.21.2...v8.22.1)
-* ci: pre-commit auto-update ([`0e8435a`](https://github.com/sandialabs/shell-logger/commit/0e8435a4696dfb83272b9e49e46d1fd09b4661b8))
+### Patch
+* patch: Omit auto-updates from CHANGELOG ([`c5ad075`](https://github.com/sandialabs/shell-logger/commit/c5ad075148d3551f34f3aec9c72e0e489b043b53))
 
-  updates:
-  - [github.com/astral-sh/ruff-pre-commit: v0.8.1 → v0.8.3](https://github.com/astral-sh/ruff-pre-commit/compare/v0.8.1...v0.8.3)
-* ci: pre-commit auto-update ([`663563a`](https://github.com/sandialabs/shell-logger/commit/663563ae1dab428554e284c0629285f1efc0ceef))
+### Refactoring
+* refactor: Replace deprecated mktemp ([`65b9807`](https://github.com/sandialabs/shell-logger/commit/65b9807edd2ffefc9da19a851e492da3267f106e))
 
-  updates:
-  - [github.com/astral-sh/ruff-pre-commit: v0.8.0 → v0.8.1](https://github.com/astral-sh/ruff-pre-commit/compare/v0.8.0...v0.8.1)
+  With NamedTemporaryFile. See
+  https://github.com/sandialabs/shell-logger/security/code-scanning/2.
+
+## v3.0.0 (2025-01-14)
 
 ### Refactoring
 * refactor!: Rename trace module ([`105318d`](https://github.com/sandialabs/shell-logger/commit/105318d81c88e510bd444e2dccd11b74e351f8f4))
 
-  Ruff A005 detected that the `trace` module was shadowing a built-in.  We
-  should've noticed this years ago.  This commit renames it and the
+  Ruff A005 detected that the `trace` module was shadowing a built-in. We
+  should've noticed this years ago. This commit renames it and the
   classes therein so there's no confusion between what's provided by
-  `shell-logger` vs the standard library.  It also improves the parity
+  `shell-logger` vs the standard library. It also improves the parity
   between this module and `stats_collectors`, which improves readability
   and eases maintainability.
 
@@ -230,213 +52,11 @@
   * Use type-hinting out of the box in 3.9.
   * Use new dictionary update syntax.
   * Update the CI and docs accordingly.
-* chore(deps): Bump the github-actions-dependencies group with 3 updates ([`67a4c07`](https://github.com/sandialabs/shell-logger/commit/67a4c07d8fe174cc7504d729764595393aaa5fcc))
-
-  Bumps the github-actions-dependencies group with 3 updates: [github/codeql-action](https://github.com/github/codeql-action), [codecov/codecov-action](https://github.com/codecov/codecov-action) and [actions/dependency-review-action](https://github.com/actions/dependency-review-action).
-
-
-  Updates `github/codeql-action` from 3.27.4 to 3.27.5
-  - [Release notes](https://github.com/github/codeql-action/releases)
-  - [Changelog](https://github.com/github/codeql-action/blob/main/CHANGELOG.md)
-  - [Commits](https://github.com/github/codeql-action/compare/ea9e4e37992a54ee68a9622e985e60c8e8f12d9f...f09c1c0a94de965c15400f5634aa42fac8fb8f88)
-
-  Updates `codecov/codecov-action` from 5.0.2 to 5.0.7
-  - [Release notes](https://github.com/codecov/codecov-action/releases)
-  - [Changelog](https://github.com/codecov/codecov-action/blob/main/CHANGELOG.md)
-  - [Commits](https://github.com/codecov/codecov-action/compare/5c47607acb93fed5485fdbf7232e8a31425f672a...015f24e6818733317a2da2edd6290ab26238649a)
-
-  Updates `actions/dependency-review-action` from 4.4.0 to 4.5.0
-  - [Release notes](https://github.com/actions/dependency-review-action/releases)
-  - [Commits](https://github.com/actions/dependency-review-action/compare/4081bf99e2866ebe428fc0477b69eb4fcda7220a...3b139cfc5fae8b618d3eae3675e383bb1769c019)
-
-  ---
-  updated-dependencies:
-  - dependency-name: github/codeql-action
-    dependency-type: direct:production
-    update-type: version-update:semver-patch
-    dependency-group: github-actions-dependencies
-  - dependency-name: codecov/codecov-action
-    dependency-type: direct:production
-    update-type: version-update:semver-patch
-    dependency-group: github-actions-dependencies
-  - dependency-name: actions/dependency-review-action
-    dependency-type: direct:production
-    update-type: version-update:semver-minor
-    dependency-group: github-actions-dependencies
-  ...
-
-  Signed-off-by: dependabot[bot] <support@github.com>
-* chore(deps): Bump the github-actions-dependencies group with 3 updates ([`0ce6b73`](https://github.com/sandialabs/shell-logger/commit/0ce6b73296bafca21b02abd4add63709fb947a61))
-
-  Bumps the github-actions-dependencies group with 3 updates: [step-security/harden-runner](https://github.com/step-security/harden-runner), [github/codeql-action](https://github.com/github/codeql-action) and [codecov/codecov-action](https://github.com/codecov/codecov-action).
-
-
-  Updates `step-security/harden-runner` from 2.10.1 to 2.10.2
-  - [Release notes](https://github.com/step-security/harden-runner/releases)
-  - [Commits](https://github.com/step-security/harden-runner/compare/91182cccc01eb5e619899d80e4e971d6181294a7...0080882f6c36860b6ba35c610c98ce87d4e2f26f)
-
-  Updates `github/codeql-action` from 3.27.1 to 3.27.4
-  - [Release notes](https://github.com/github/codeql-action/releases)
-  - [Changelog](https://github.com/github/codeql-action/blob/main/CHANGELOG.md)
-  - [Commits](https://github.com/github/codeql-action/compare/4f3212b61783c3c68e8309a0f18a699764811cda...ea9e4e37992a54ee68a9622e985e60c8e8f12d9f)
-
-  Updates `codecov/codecov-action` from 4.6.0 to 5.0.2
-  - [Release notes](https://github.com/codecov/codecov-action/releases)
-  - [Changelog](https://github.com/codecov/codecov-action/blob/main/CHANGELOG.md)
-  - [Commits](https://github.com/codecov/codecov-action/compare/b9fd7d16f6d7d1b5d2bec1a2887e65ceed900238...5c47607acb93fed5485fdbf7232e8a31425f672a)
-
-  ---
-  updated-dependencies:
-  - dependency-name: step-security/harden-runner
-    dependency-type: direct:production
-    update-type: version-update:semver-patch
-    dependency-group: github-actions-dependencies
-  - dependency-name: github/codeql-action
-    dependency-type: direct:production
-    update-type: version-update:semver-patch
-    dependency-group: github-actions-dependencies
-  - dependency-name: codecov/codecov-action
-    dependency-type: direct:production
-    update-type: version-update:semver-major
-    dependency-group: github-actions-dependencies
-  ...
-
-  Signed-off-by: dependabot[bot] <support@github.com>
-* chore(deps): Bump the github-actions-dependencies group with 3 updates ([`58b0cdf`](https://github.com/sandialabs/shell-logger/commit/58b0cdf83a8deb0068a0b54963aaf6922a6fe06c))
-
-  Bumps the github-actions-dependencies group with 3 updates: [github/codeql-action](https://github.com/github/codeql-action), [python-semantic-release/python-semantic-release](https://github.com/python-semantic-release/python-semantic-release) and [pypa/gh-action-pypi-publish](https://github.com/pypa/gh-action-pypi-publish).
-
-
-  Updates `github/codeql-action` from 3.27.0 to 3.27.1
-  - [Release notes](https://github.com/github/codeql-action/releases)
-  - [Changelog](https://github.com/github/codeql-action/blob/main/CHANGELOG.md)
-  - [Commits](https://github.com/github/codeql-action/compare/662472033e021d55d94146f66f6058822b0b39fd...4f3212b61783c3c68e8309a0f18a699764811cda)
-
-  Updates `python-semantic-release/python-semantic-release` from 9.12.0 to 9.14.0
-  - [Release notes](https://github.com/python-semantic-release/python-semantic-release/releases)
-  - [Changelog](https://github.com/python-semantic-release/python-semantic-release/blob/master/CHANGELOG.md)
-  - [Commits](https://github.com/python-semantic-release/python-semantic-release/compare/c1bcfdbb994243ac7cf419365d5894d6bfb2950e...825655a47c9f7496f99ab144d28c424d40333a8a)
-
-  Updates `pypa/gh-action-pypi-publish` from 1.11.0 to 1.12.2
-  - [Release notes](https://github.com/pypa/gh-action-pypi-publish/releases)
-  - [Commits](https://github.com/pypa/gh-action-pypi-publish/compare/fb13cb306901256ace3dab689990e13a5550ffaa...15c56dba361d8335944d31a2ecd17d700fc7bcbc)
-
-  ---
-  updated-dependencies:
-  - dependency-name: github/codeql-action
-    dependency-type: direct:production
-    update-type: version-update:semver-patch
-    dependency-group: github-actions-dependencies
-  - dependency-name: python-semantic-release/python-semantic-release
-    dependency-type: direct:production
-    update-type: version-update:semver-minor
-    dependency-group: github-actions-dependencies
-  - dependency-name: pypa/gh-action-pypi-publish
-    dependency-type: direct:production
-    update-type: version-update:semver-minor
-    dependency-group: github-actions-dependencies
-  ...
-
-  Signed-off-by: dependabot[bot] <support@github.com>
-* chore(deps): Bump pypa/gh-action-pypi-publish ([`96d6117`](https://github.com/sandialabs/shell-logger/commit/96d611770cc55fe01b7f1c32592d1397c743b9ba))
-
-  Bumps the github-actions-dependencies group with 1 update: [pypa/gh-action-pypi-publish](https://github.com/pypa/gh-action-pypi-publish).
-
-
-  Updates `pypa/gh-action-pypi-publish` from 1.10.3 to 1.11.0
-  - [Release notes](https://github.com/pypa/gh-action-pypi-publish/releases)
-  - [Commits](https://github.com/pypa/gh-action-pypi-publish/compare/f7600683efdcb7656dec5b29656edb7bc586e597...fb13cb306901256ace3dab689990e13a5550ffaa)
-
-  ---
-  updated-dependencies:
-  - dependency-name: pypa/gh-action-pypi-publish
-    dependency-type: direct:production
-    update-type: version-update:semver-minor
-    dependency-group: github-actions-dependencies
-  ...
-
-  Signed-off-by: dependabot[bot] <support@github.com>
-* chore(deps): Bump actions/dependency-review-action ([`555de84`](https://github.com/sandialabs/shell-logger/commit/555de84266d0ff18717ec46fe1c5ede898191f07))
-
-  Bumps the github-actions-dependencies group with 1 update: [actions/dependency-review-action](https://github.com/actions/dependency-review-action).
-
-
-  Updates `actions/dependency-review-action` from 4.3.5 to 4.4.0
-  - [Release notes](https://github.com/actions/dependency-review-action/releases)
-  - [Commits](https://github.com/actions/dependency-review-action/compare/a6993e2c61fd5dc440b409aa1d6904921c5e1894...4081bf99e2866ebe428fc0477b69eb4fcda7220a)
-
-  ---
-  updated-dependencies:
-  - dependency-name: actions/dependency-review-action
-    dependency-type: direct:production
-    update-type: version-update:semver-minor
-    dependency-group: github-actions-dependencies
-  ...
-
-  Signed-off-by: dependabot[bot] <support@github.com>
 * chore: Group dependabot updates ([`b2514ba`](https://github.com/sandialabs/shell-logger/commit/b2514bad93518a767a85f4af467ca624b96663c3))
 
   Run dependabot updates weekly instead of daily, and group them together
   for the different providers (GitHub Actions and pip), to reduce the
   amount of noise in the repository history.
-* chore(deps): Bump actions/setup-python from 5.2.0 to 5.3.0 ([`ccd49b9`](https://github.com/sandialabs/shell-logger/commit/ccd49b9b4023fb538c488789958c4509b16b51f4))
-
-  Bumps [actions/setup-python](https://github.com/actions/setup-python) from 5.2.0 to 5.3.0.
-  - [Release notes](https://github.com/actions/setup-python/releases)
-  - [Commits](https://github.com/actions/setup-python/compare/f677139bbe7f9c59b41e40162b753c062f5d49a3...0b93645e9fea7318ecaed2b359559ac225c90a2b)
-
-  ---
-  updated-dependencies:
-  - dependency-name: actions/setup-python
-    dependency-type: direct:production
-    update-type: version-update:semver-minor
-  ...
-
-  Signed-off-by: dependabot[bot] <support@github.com>
-* chore(deps): Bump actions/checkout from 4.2.1 to 4.2.2 ([`984e8ef`](https://github.com/sandialabs/shell-logger/commit/984e8ef5d6a171f7f377c81655294cfcc876a673))
-
-  Bumps [actions/checkout](https://github.com/actions/checkout) from 4.2.1 to 4.2.2.
-  - [Release notes](https://github.com/actions/checkout/releases)
-  - [Changelog](https://github.com/actions/checkout/blob/main/CHANGELOG.md)
-  - [Commits](https://github.com/actions/checkout/compare/eef61447b9ff4aafe5dcd4e0bbf5d482be7e7871...11bd71901bbe5b1630ceea73d27597364c9af683)
-
-  ---
-  updated-dependencies:
-  - dependency-name: actions/checkout
-    dependency-type: direct:production
-    update-type: version-update:semver-patch
-  ...
-
-  Signed-off-by: dependabot[bot] <support@github.com>
-* chore(deps): Bump github/codeql-action from 3.26.13 to 3.27.0 ([`61774cd`](https://github.com/sandialabs/shell-logger/commit/61774cd4d231d1737c857e7e9343ecc16e1c8dcc))
-
-  Bumps [github/codeql-action](https://github.com/github/codeql-action) from 3.26.13 to 3.27.0.
-  - [Release notes](https://github.com/github/codeql-action/releases)
-  - [Changelog](https://github.com/github/codeql-action/blob/main/CHANGELOG.md)
-  - [Commits](https://github.com/github/codeql-action/compare/f779452ac5af1c261dce0346a8f964149f49322b...662472033e021d55d94146f66f6058822b0b39fd)
-
-  ---
-  updated-dependencies:
-  - dependency-name: github/codeql-action
-    dependency-type: direct:production
-    update-type: version-update:semver-minor
-  ...
-
-  Signed-off-by: dependabot[bot] <support@github.com>
-* chore(deps): Bump actions/dependency-review-action from 4.3.4 to 4.3.5 ([`e4e32c9`](https://github.com/sandialabs/shell-logger/commit/e4e32c98154f2e64aad80cb89f11f542aa3f1d4a))
-
-  Bumps [actions/dependency-review-action](https://github.com/actions/dependency-review-action) from 4.3.4 to 4.3.5.
-  - [Release notes](https://github.com/actions/dependency-review-action/releases)
-  - [Commits](https://github.com/actions/dependency-review-action/compare/5a2ce3f5b92ee19cbb1541a4984c76d921601d7c...a6993e2c61fd5dc440b409aa1d6904921c5e1894)
-
-  ---
-  updated-dependencies:
-  - dependency-name: actions/dependency-review-action
-    dependency-type: direct:production
-    update-type: version-update:semver-patch
-  ...
-
-  Signed-off-by: dependabot[bot] <support@github.com>
 * chore(deps): No longer pin Sphinx version ([`ae35ebb`](https://github.com/sandialabs/shell-logger/commit/ae35ebb548308335baa620c01cefe9bb4406bf94))
 
   sphinx-rtd-theme has been updated to work with the latest Sphinx
@@ -455,699 +75,14 @@
   ...
 
   Signed-off-by: dependabot[bot] <support@github.com>
-* chore(deps): Bump python-semantic-release/python-semantic-release ([`728cc83`](https://github.com/sandialabs/shell-logger/commit/728cc83f76404e4d2cc6feef40de9b464567bd55))
-
-  Bumps [python-semantic-release/python-semantic-release](https://github.com/python-semantic-release/python-semantic-release) from 9.11.1 to 9.12.0.
-  - [Release notes](https://github.com/python-semantic-release/python-semantic-release/releases)
-  - [Changelog](https://github.com/python-semantic-release/python-semantic-release/blob/master/CHANGELOG.md)
-  - [Commits](https://github.com/python-semantic-release/python-semantic-release/compare/657118d28ae4a74d8a387bedf5db2bb7bac0cb33...c1bcfdbb994243ac7cf419365d5894d6bfb2950e)
-
-  ---
-  updated-dependencies:
-  - dependency-name: python-semantic-release/python-semantic-release
-    dependency-type: direct:production
-    update-type: version-update:semver-minor
-  ...
-
-  Signed-off-by: dependabot[bot] <support@github.com>
-* chore(deps): Bump taskmedia/action-conventional-commits ([`f35e0ec`](https://github.com/sandialabs/shell-logger/commit/f35e0ec2bdd2a9bb040b8af7f27c466c2ddeca5f))
-
-  Bumps [taskmedia/action-conventional-commits](https://github.com/taskmedia/action-conventional-commits) from 1.1.18 to 1.1.19.
-  - [Release notes](https://github.com/taskmedia/action-conventional-commits/releases)
-  - [Changelog](https://github.com/taskmedia/action-conventional-commits/blob/main/CHANGELOG.md)
-  - [Commits](https://github.com/taskmedia/action-conventional-commits/compare/180c46eb0f4380691dc9845e68b1ef36c05d57d7...cb0de258e7309e163ee353a8c38e24e609608cd6)
-
-  ---
-  updated-dependencies:
-  - dependency-name: taskmedia/action-conventional-commits
-    dependency-type: direct:production
-    update-type: version-update:semver-patch
-  ...
-
-  Signed-off-by: dependabot[bot] <support@github.com>
-* chore(deps): Bump python-semantic-release/python-semantic-release ([`c87cb19`](https://github.com/sandialabs/shell-logger/commit/c87cb19692a05baa96f9f345d414ca6be8b2b4a1))
-
-  Bumps [python-semantic-release/python-semantic-release](https://github.com/python-semantic-release/python-semantic-release) from 9.10.1 to 9.11.1.
-  - [Release notes](https://github.com/python-semantic-release/python-semantic-release/releases)
-  - [Changelog](https://github.com/python-semantic-release/python-semantic-release/blob/master/CHANGELOG.md)
-  - [Commits](https://github.com/python-semantic-release/python-semantic-release/compare/d6ea6b856fc884559d9f66b4d9a7dd643fc82c6a...657118d28ae4a74d8a387bedf5db2bb7bac0cb33)
-
-  ---
-  updated-dependencies:
-  - dependency-name: python-semantic-release/python-semantic-release
-    dependency-type: direct:production
-    update-type: version-update:semver-minor
-  ...
-
-  Signed-off-by: dependabot[bot] <support@github.com>
-* chore(deps): Bump github/codeql-action from 3.26.12 to 3.26.13 ([`f36a8ca`](https://github.com/sandialabs/shell-logger/commit/f36a8ca2ab3d40c091125ba7aeceb11cfef1dcb5))
-
-  Bumps [github/codeql-action](https://github.com/github/codeql-action) from 3.26.12 to 3.26.13.
-  - [Release notes](https://github.com/github/codeql-action/releases)
-  - [Changelog](https://github.com/github/codeql-action/blob/main/CHANGELOG.md)
-  - [Commits](https://github.com/github/codeql-action/compare/c36620d31ac7c881962c3d9dd939c40ec9434f2b...f779452ac5af1c261dce0346a8f964149f49322b)
-
-  ---
-  updated-dependencies:
-  - dependency-name: github/codeql-action
-    dependency-type: direct:production
-    update-type: version-update:semver-patch
-  ...
-
-  Signed-off-by: dependabot[bot] <support@github.com>
-* chore(deps): Bump python-semantic-release/python-semantic-release ([`da42210`](https://github.com/sandialabs/shell-logger/commit/da42210b8c718260ebac5fe737a5923f976b4fb7))
-
-  Bumps [python-semantic-release/python-semantic-release](https://github.com/python-semantic-release/python-semantic-release) from 9.10.0 to 9.10.1.
-  - [Release notes](https://github.com/python-semantic-release/python-semantic-release/releases)
-  - [Changelog](https://github.com/python-semantic-release/python-semantic-release/blob/master/CHANGELOG.md)
-  - [Commits](https://github.com/python-semantic-release/python-semantic-release/compare/18399a7209118c6f0bcc923857ef7052cc5de5e3...d6ea6b856fc884559d9f66b4d9a7dd643fc82c6a)
-
-  ---
-  updated-dependencies:
-  - dependency-name: python-semantic-release/python-semantic-release
-    dependency-type: direct:production
-    update-type: version-update:semver-patch
-  ...
-
-  Signed-off-by: dependabot[bot] <support@github.com>
-* chore(deps): Bump actions/upload-artifact from 4.4.1 to 4.4.3 ([`dd67897`](https://github.com/sandialabs/shell-logger/commit/dd67897cfb18ad4fdc1cf14533eddc75cd8fe972))
-
-  Bumps [actions/upload-artifact](https://github.com/actions/upload-artifact) from 4.4.1 to 4.4.3.
-  - [Release notes](https://github.com/actions/upload-artifact/releases)
-  - [Commits](https://github.com/actions/upload-artifact/compare/604373da6381bf24206979c74d06a550515601b9...b4b15b8c7c6ac21ea08fcf65892d2ee8f75cf882)
-
-  ---
-  updated-dependencies:
-  - dependency-name: actions/upload-artifact
-    dependency-type: direct:production
-    update-type: version-update:semver-patch
-  ...
-
-  Signed-off-by: dependabot[bot] <support@github.com>
-* chore(deps): Bump python-semantic-release/python-semantic-release ([`82d8798`](https://github.com/sandialabs/shell-logger/commit/82d8798fbcd9698b23735652ed421bbcc8b7263c))
-
-  Bumps [python-semantic-release/python-semantic-release](https://github.com/python-semantic-release/python-semantic-release) from 76f1ffae08640b2714f1c333ef38895153e37f34 to 18399a7209118c6f0bcc923857ef7052cc5de5e3.
-  - [Release notes](https://github.com/python-semantic-release/python-semantic-release/releases)
-  - [Changelog](https://github.com/python-semantic-release/python-semantic-release/blob/master/CHANGELOG.md)
-  - [Commits](https://github.com/python-semantic-release/python-semantic-release/compare/76f1ffae08640b2714f1c333ef38895153e37f34...18399a7209118c6f0bcc923857ef7052cc5de5e3)
-
-  ---
-  updated-dependencies:
-  - dependency-name: python-semantic-release/python-semantic-release
-    dependency-type: direct:production
-  ...
-
-  Signed-off-by: dependabot[bot] <support@github.com>
-* chore(deps): Bump actions/checkout from 4.2.0 to 4.2.1 ([`7a03338`](https://github.com/sandialabs/shell-logger/commit/7a033389c01a97e358228fd6bb1642da634eadc4))
-
-  Bumps [actions/checkout](https://github.com/actions/checkout) from 4.2.0 to 4.2.1.
-  - [Release notes](https://github.com/actions/checkout/releases)
-  - [Changelog](https://github.com/actions/checkout/blob/main/CHANGELOG.md)
-  - [Commits](https://github.com/actions/checkout/compare/d632683dd7b4114ad314bca15554477dd762a938...eef61447b9ff4aafe5dcd4e0bbf5d482be7e7871)
-
-  ---
-  updated-dependencies:
-  - dependency-name: actions/checkout
-    dependency-type: direct:production
-    update-type: version-update:semver-patch
-  ...
-
-  Signed-off-by: dependabot[bot] <support@github.com>
-* chore(deps): Bump python-semantic-release/python-semantic-release ([`0483ea7`](https://github.com/sandialabs/shell-logger/commit/0483ea76ff5fc9c14302d4f33f872399afbf2506))
-
-  Bumps [python-semantic-release/python-semantic-release](https://github.com/python-semantic-release/python-semantic-release) from 9.9.0 to 9.10.0.
-  - [Release notes](https://github.com/python-semantic-release/python-semantic-release/releases)
-  - [Changelog](https://github.com/python-semantic-release/python-semantic-release/blob/master/CHANGELOG.md)
-  - [Commits](https://github.com/python-semantic-release/python-semantic-release/compare/fd8c509df1f16daf3f71a9a6fac49247017017b2...76f1ffae08640b2714f1c333ef38895153e37f34)
-
-  ---
-  updated-dependencies:
-  - dependency-name: python-semantic-release/python-semantic-release
-    dependency-type: direct:production
-    update-type: version-update:semver-minor
-  ...
-
-  Signed-off-by: dependabot[bot] <support@github.com>
-* chore(deps): Bump github/codeql-action from 3.26.11 to 3.26.12 ([`837b0c7`](https://github.com/sandialabs/shell-logger/commit/837b0c7938789ea75836035f8a1698d5df3d60c4))
-
-  Bumps [github/codeql-action](https://github.com/github/codeql-action) from 3.26.11 to 3.26.12.
-  - [Release notes](https://github.com/github/codeql-action/releases)
-  - [Changelog](https://github.com/github/codeql-action/blob/main/CHANGELOG.md)
-  - [Commits](https://github.com/github/codeql-action/compare/6db8d6351fd0be61f9ed8ebd12ccd35dcec51fea...c36620d31ac7c881962c3d9dd939c40ec9434f2b)
-
-  ---
-  updated-dependencies:
-  - dependency-name: github/codeql-action
-    dependency-type: direct:production
-    update-type: version-update:semver-patch
-  ...
-
-  Signed-off-by: dependabot[bot] <support@github.com>
-* chore(deps): Bump actions/upload-artifact from 4.4.0 to 4.4.1 ([`0348e5f`](https://github.com/sandialabs/shell-logger/commit/0348e5f65ec4979797afeee95b648b7462ebc945))
-
-  Bumps [actions/upload-artifact](https://github.com/actions/upload-artifact) from 4.4.0 to 4.4.1.
-  - [Release notes](https://github.com/actions/upload-artifact/releases)
-  - [Commits](https://github.com/actions/upload-artifact/compare/50769540e7f4bd5e21e526ee35c689e35e0d6874...604373da6381bf24206979c74d06a550515601b9)
-
-  ---
-  updated-dependencies:
-  - dependency-name: actions/upload-artifact
-    dependency-type: direct:production
-    update-type: version-update:semver-patch
-  ...
-
-  Signed-off-by: dependabot[bot] <support@github.com>
-* chore(deps): Bump pypa/gh-action-pypi-publish from 1.10.2 to 1.10.3 ([`3e49ead`](https://github.com/sandialabs/shell-logger/commit/3e49ead732315800be463bfd37844c4e1e1a4e6d))
-
-  Bumps [pypa/gh-action-pypi-publish](https://github.com/pypa/gh-action-pypi-publish) from 1.10.2 to 1.10.3.
-  - [Release notes](https://github.com/pypa/gh-action-pypi-publish/releases)
-  - [Commits](https://github.com/pypa/gh-action-pypi-publish/compare/897895f1e160c830e369f9779632ebc134688e1b...f7600683efdcb7656dec5b29656edb7bc586e597)
-
-  ---
-  updated-dependencies:
-  - dependency-name: pypa/gh-action-pypi-publish
-    dependency-type: direct:production
-    update-type: version-update:semver-patch
-  ...
-
-  Signed-off-by: dependabot[bot] <support@github.com>
-* chore(deps): Bump github/codeql-action from 3.26.10 to 3.26.11 ([`2b93730`](https://github.com/sandialabs/shell-logger/commit/2b937309c687cd1e02fe0ccd53b4720b81d49507))
-
-  Bumps [github/codeql-action](https://github.com/github/codeql-action) from 3.26.10 to 3.26.11.
-  - [Release notes](https://github.com/github/codeql-action/releases)
-  - [Changelog](https://github.com/github/codeql-action/blob/main/CHANGELOG.md)
-  - [Commits](https://github.com/github/codeql-action/compare/e2b3eafc8d227b0241d48be5f425d47c2d750a13...6db8d6351fd0be61f9ed8ebd12ccd35dcec51fea)
-
-  ---
-  updated-dependencies:
-  - dependency-name: github/codeql-action
-    dependency-type: direct:production
-    update-type: version-update:semver-patch
-  ...
-
-  Signed-off-by: dependabot[bot] <support@github.com>
-* chore(deps): Bump codecov/codecov-action from 4.5.0 to 4.6.0 ([`6cfeac6`](https://github.com/sandialabs/shell-logger/commit/6cfeac693b7754486d6be2bd4e5c49a13b18612b))
-
-  Bumps [codecov/codecov-action](https://github.com/codecov/codecov-action) from 4.5.0 to 4.6.0.
-  - [Release notes](https://github.com/codecov/codecov-action/releases)
-  - [Changelog](https://github.com/codecov/codecov-action/blob/main/CHANGELOG.md)
-  - [Commits](https://github.com/codecov/codecov-action/compare/e28ff129e5465c2c0dcc6f003fc735cb6ae0c673...b9fd7d16f6d7d1b5d2bec1a2887e65ceed900238)
-
-  ---
-  updated-dependencies:
-  - dependency-name: codecov/codecov-action
-    dependency-type: direct:production
-    update-type: version-update:semver-minor
-  ...
-
-  Signed-off-by: dependabot[bot] <support@github.com>
-* chore(deps): Bump python-semantic-release/python-semantic-release ([`e6a7f09`](https://github.com/sandialabs/shell-logger/commit/e6a7f094242862c677965d0f32818f05aede5b35))
-
-  Bumps [python-semantic-release/python-semantic-release](https://github.com/python-semantic-release/python-semantic-release) from 9.8.9 to 9.9.0.
-  - [Release notes](https://github.com/python-semantic-release/python-semantic-release/releases)
-  - [Changelog](https://github.com/python-semantic-release/python-semantic-release/blob/master/CHANGELOG.md)
-  - [Commits](https://github.com/python-semantic-release/python-semantic-release/compare/cbe8eaaa7a06ef218fce69bd1bc01dd16483dc6d...fd8c509df1f16daf3f71a9a6fac49247017017b2)
-
-  ---
-  updated-dependencies:
-  - dependency-name: python-semantic-release/python-semantic-release
-    dependency-type: direct:production
-    update-type: version-update:semver-minor
-  ...
-
-  Signed-off-by: dependabot[bot] <support@github.com>
-* chore(deps): Bump github/codeql-action from 3.26.9 to 3.26.10 ([`816510b`](https://github.com/sandialabs/shell-logger/commit/816510b031730c48e9c8833c148c6da2012c5310))
-
-  Bumps [github/codeql-action](https://github.com/github/codeql-action) from 3.26.9 to 3.26.10.
-  - [Release notes](https://github.com/github/codeql-action/releases)
-  - [Changelog](https://github.com/github/codeql-action/blob/main/CHANGELOG.md)
-  - [Commits](https://github.com/github/codeql-action/compare/461ef6c76dfe95d5c364de2f431ddbd31a417628...e2b3eafc8d227b0241d48be5f425d47c2d750a13)
-
-  ---
-  updated-dependencies:
-  - dependency-name: github/codeql-action
-    dependency-type: direct:production
-    update-type: version-update:semver-patch
-  ...
-
-  Signed-off-by: dependabot[bot] <support@github.com>
-* chore(deps): Bump python-semantic-release/upload-to-gh-release ([`40c37bf`](https://github.com/sandialabs/shell-logger/commit/40c37bfa29784c059dbe0208e5e3da20bd88361c))
-
-  Bumps [python-semantic-release/upload-to-gh-release](https://github.com/python-semantic-release/upload-to-gh-release) from 9.8.8 to 9.8.9.
-  - [Release notes](https://github.com/python-semantic-release/upload-to-gh-release/releases)
-  - [Changelog](https://github.com/python-semantic-release/upload-to-gh-release/blob/main/releaserc.toml)
-  - [Commits](https://github.com/python-semantic-release/upload-to-gh-release/compare/fa2bbbf8e61069551abd513fdc5627e14c8637c7...0a92b5d7ebfc15a84f9801ebd1bf706343d43711)
-
-  ---
-  updated-dependencies:
-  - dependency-name: python-semantic-release/upload-to-gh-release
-    dependency-type: direct:production
-    update-type: version-update:semver-patch
-  ...
-
-  Signed-off-by: dependabot[bot] <support@github.com>
-* chore(deps): Bump python-semantic-release/python-semantic-release ([`f9f91b8`](https://github.com/sandialabs/shell-logger/commit/f9f91b801db9685275123e61f22d997e79a886b0))
-
-  Bumps [python-semantic-release/python-semantic-release](https://github.com/python-semantic-release/python-semantic-release) from 9.8.8 to 9.8.9.
-  - [Release notes](https://github.com/python-semantic-release/python-semantic-release/releases)
-  - [Changelog](https://github.com/python-semantic-release/python-semantic-release/blob/master/CHANGELOG.md)
-  - [Commits](https://github.com/python-semantic-release/python-semantic-release/compare/fe6b271e942115b528c85e42bc19611b01dcea59...cbe8eaaa7a06ef218fce69bd1bc01dd16483dc6d)
-
-  ---
-  updated-dependencies:
-  - dependency-name: python-semantic-release/python-semantic-release
-    dependency-type: direct:production
-    update-type: version-update:semver-patch
-  ...
-
-  Signed-off-by: dependabot[bot] <support@github.com>
-* chore(deps): Bump actions/checkout from 4.1.7 to 4.2.0 ([`25af15c`](https://github.com/sandialabs/shell-logger/commit/25af15c9bcd92fa1546dab1cc81368c2cf0539b2))
-
-  Bumps [actions/checkout](https://github.com/actions/checkout) from 4.1.7 to 4.2.0.
-  - [Release notes](https://github.com/actions/checkout/releases)
-  - [Changelog](https://github.com/actions/checkout/blob/main/CHANGELOG.md)
-  - [Commits](https://github.com/actions/checkout/compare/692973e3d937129bcbf40652eb9f2f61becf3332...d632683dd7b4114ad314bca15554477dd762a938)
-
-  ---
-  updated-dependencies:
-  - dependency-name: actions/checkout
-    dependency-type: direct:production
-    update-type: version-update:semver-minor
-  ...
-
-  Signed-off-by: dependabot[bot] <support@github.com>
-* chore(deps): Bump github/codeql-action from 3.26.8 to 3.26.9 ([`27f7b89`](https://github.com/sandialabs/shell-logger/commit/27f7b89393f6527df922051eb9d8e0fa69aa3dda))
-
-  Bumps [github/codeql-action](https://github.com/github/codeql-action) from 3.26.8 to 3.26.9.
-  - [Release notes](https://github.com/github/codeql-action/releases)
-  - [Changelog](https://github.com/github/codeql-action/blob/main/CHANGELOG.md)
-  - [Commits](https://github.com/github/codeql-action/compare/294a9d92911152fe08befb9ec03e240add280cb3...461ef6c76dfe95d5c364de2f431ddbd31a417628)
-
-  ---
-  updated-dependencies:
-  - dependency-name: github/codeql-action
-    dependency-type: direct:production
-    update-type: version-update:semver-patch
-  ...
-
-  Signed-off-by: dependabot[bot] <support@github.com>
-* chore(deps): Bump pypa/gh-action-pypi-publish from 1.10.1 to 1.10.2 ([`0d3f3e1`](https://github.com/sandialabs/shell-logger/commit/0d3f3e1a7515b6a0fd34e12510e358ef01cbf4a5))
-
-  Bumps [pypa/gh-action-pypi-publish](https://github.com/pypa/gh-action-pypi-publish) from 1.10.1 to 1.10.2.
-  - [Release notes](https://github.com/pypa/gh-action-pypi-publish/releases)
-  - [Commits](https://github.com/pypa/gh-action-pypi-publish/compare/0ab0b79471669eb3a4d647e625009c62f9f3b241...897895f1e160c830e369f9779632ebc134688e1b)
-
-  ---
-  updated-dependencies:
-  - dependency-name: pypa/gh-action-pypi-publish
-    dependency-type: direct:production
-    update-type: version-update:semver-patch
-  ...
-
-  Signed-off-by: dependabot[bot] <support@github.com>
-* chore(deps): Bump github/codeql-action from 3.26.7 to 3.26.8 ([`7d4a0db`](https://github.com/sandialabs/shell-logger/commit/7d4a0db692d2ba7c6f72c33a0039bd8643091524))
-
-  Bumps [github/codeql-action](https://github.com/github/codeql-action) from 3.26.7 to 3.26.8.
-  - [Release notes](https://github.com/github/codeql-action/releases)
-  - [Changelog](https://github.com/github/codeql-action/blob/main/CHANGELOG.md)
-  - [Commits](https://github.com/github/codeql-action/compare/8214744c546c1e5c8f03dde8fab3a7353211988d...294a9d92911152fe08befb9ec03e240add280cb3)
-
-  ---
-  updated-dependencies:
-  - dependency-name: github/codeql-action
-    dependency-type: direct:production
-    update-type: version-update:semver-patch
-  ...
-
-  Signed-off-by: dependabot[bot] <support@github.com>
-* chore(deps): Bump taskmedia/action-conventional-commits ([`a37b56f`](https://github.com/sandialabs/shell-logger/commit/a37b56f2a8bb85ea79023c24de9acef2bebc1629))
-
-  Bumps [taskmedia/action-conventional-commits](https://github.com/taskmedia/action-conventional-commits) from 1.1.17 to 1.1.18.
-  - [Release notes](https://github.com/taskmedia/action-conventional-commits/releases)
-  - [Changelog](https://github.com/taskmedia/action-conventional-commits/blob/main/CHANGELOG.md)
-  - [Commits](https://github.com/taskmedia/action-conventional-commits/compare/866c0e6dba6aaaef9ad0939a40620b27888906c2...180c46eb0f4380691dc9845e68b1ef36c05d57d7)
-
-  ---
-  updated-dependencies:
-  - dependency-name: taskmedia/action-conventional-commits
-    dependency-type: direct:production
-    update-type: version-update:semver-patch
-  ...
-
-  Signed-off-by: dependabot[bot] <support@github.com>
-* chore(deps): Bump github/codeql-action from 3.26.6 to 3.26.7 ([`b50887c`](https://github.com/sandialabs/shell-logger/commit/b50887c8fb7f065b3fe29a5a389ca67dd92ba963))
-
-  Bumps [github/codeql-action](https://github.com/github/codeql-action) from 3.26.6 to 3.26.7.
-  - [Release notes](https://github.com/github/codeql-action/releases)
-  - [Changelog](https://github.com/github/codeql-action/blob/main/CHANGELOG.md)
-  - [Commits](https://github.com/github/codeql-action/compare/4dd16135b69a43b6c8efb853346f8437d92d3c93...8214744c546c1e5c8f03dde8fab3a7353211988d)
-
-  ---
-  updated-dependencies:
-  - dependency-name: github/codeql-action
-    dependency-type: direct:production
-    update-type: version-update:semver-patch
-  ...
-
-  Signed-off-by: dependabot[bot] <support@github.com>
-* chore(deps): Bump step-security/harden-runner from 2.9.1 to 2.10.1 ([`9dfbb3e`](https://github.com/sandialabs/shell-logger/commit/9dfbb3eb411bb0415e3ccb5488e4f3d33e543e18))
-
-  Bumps [step-security/harden-runner](https://github.com/step-security/harden-runner) from 2.9.1 to 2.10.1.
-  - [Release notes](https://github.com/step-security/harden-runner/releases)
-  - [Commits](https://github.com/step-security/harden-runner/compare/5c7944e73c4c2a096b17a9cb74d65b6c2bbafbde...91182cccc01eb5e619899d80e4e971d6181294a7)
-
-  ---
-  updated-dependencies:
-  - dependency-name: step-security/harden-runner
-    dependency-type: direct:production
-    update-type: version-update:semver-minor
-  ...
-
-  Signed-off-by: dependabot[bot] <support@github.com>
-* chore(deps): Bump python-semantic-release/upload-to-gh-release ([`5596bf6`](https://github.com/sandialabs/shell-logger/commit/5596bf68bf5cf0ee872f05d1e5fd7e94c3916eee))
-
-  Bumps [python-semantic-release/upload-to-gh-release](https://github.com/python-semantic-release/upload-to-gh-release) from 9.8.7 to 9.8.8.
-  - [Release notes](https://github.com/python-semantic-release/upload-to-gh-release/releases)
-  - [Changelog](https://github.com/python-semantic-release/upload-to-gh-release/blob/main/releaserc.toml)
-  - [Commits](https://github.com/python-semantic-release/upload-to-gh-release/compare/17c75b706f81263690a0a0dc88d83415f783fc04...fa2bbbf8e61069551abd513fdc5627e14c8637c7)
-
-  ---
-  updated-dependencies:
-  - dependency-name: python-semantic-release/upload-to-gh-release
-    dependency-type: direct:production
-    update-type: version-update:semver-patch
-  ...
-
-  Signed-off-by: dependabot[bot] <support@github.com>
-* chore(deps): Bump pypa/gh-action-pypi-publish from 1.10.0 to 1.10.1 ([`783816f`](https://github.com/sandialabs/shell-logger/commit/783816f3cb9aed63fec1bb6d516d3f08181db6ed))
-
-  Bumps [pypa/gh-action-pypi-publish](https://github.com/pypa/gh-action-pypi-publish) from 1.10.0 to 1.10.1.
-  - [Release notes](https://github.com/pypa/gh-action-pypi-publish/releases)
-  - [Commits](https://github.com/pypa/gh-action-pypi-publish/compare/8a08d616893759ef8e1aa1f2785787c0b97e20d6...0ab0b79471669eb3a4d647e625009c62f9f3b241)
-
-  ---
-  updated-dependencies:
-  - dependency-name: pypa/gh-action-pypi-publish
-    dependency-type: direct:production
-    update-type: version-update:semver-patch
-  ...
-
-  Signed-off-by: dependabot[bot] <support@github.com>
-* chore(deps): Bump python-semantic-release/python-semantic-release ([`a802071`](https://github.com/sandialabs/shell-logger/commit/a8020718f7c2cb2cb95111fa2f653d4107a00d11))
-
-  Bumps [python-semantic-release/python-semantic-release](https://github.com/python-semantic-release/python-semantic-release) from 9.8.7 to 9.8.8.
-  - [Release notes](https://github.com/python-semantic-release/python-semantic-release/releases)
-  - [Changelog](https://github.com/python-semantic-release/python-semantic-release/blob/master/CHANGELOG.md)
-  - [Commits](https://github.com/python-semantic-release/python-semantic-release/compare/708671d0eb33bcbea78c5a3d81ae04c60deeddf3...fe6b271e942115b528c85e42bc19611b01dcea59)
-
-  ---
-  updated-dependencies:
-  - dependency-name: python-semantic-release/python-semantic-release
-    dependency-type: direct:production
-    update-type: version-update:semver-patch
-  ...
-
-  Signed-off-by: dependabot[bot] <support@github.com>
-* chore(deps): Bump pypa/gh-action-pypi-publish from 1.9.0 to 1.10.0 ([`3442cb8`](https://github.com/sandialabs/shell-logger/commit/3442cb8b9e0196a30fbf9198a78e5afd02317c43))
-
-  Bumps [pypa/gh-action-pypi-publish](https://github.com/pypa/gh-action-pypi-publish) from 1.9.0 to 1.10.0.
-  - [Release notes](https://github.com/pypa/gh-action-pypi-publish/releases)
-  - [Commits](https://github.com/pypa/gh-action-pypi-publish/compare/ec4db0b4ddc65acdf4bff5fa45ac92d78b56bdf0...8a08d616893759ef8e1aa1f2785787c0b97e20d6)
-
-  ---
-  updated-dependencies:
-  - dependency-name: pypa/gh-action-pypi-publish
-    dependency-type: direct:production
-    update-type: version-update:semver-minor
-  ...
-
-  Signed-off-by: dependabot[bot] <support@github.com>
-* chore(deps): Bump github/codeql-action from 3.26.5 to 3.26.6 ([`dacb477`](https://github.com/sandialabs/shell-logger/commit/dacb47758dfa3ac47efa74b9523c51fc4e8598ef))
-
-  Bumps [github/codeql-action](https://github.com/github/codeql-action) from 3.26.5 to 3.26.6.
-  - [Release notes](https://github.com/github/codeql-action/releases)
-  - [Changelog](https://github.com/github/codeql-action/blob/main/CHANGELOG.md)
-  - [Commits](https://github.com/github/codeql-action/compare/2c779ab0d087cd7fe7b826087247c2c81f27bfa6...4dd16135b69a43b6c8efb853346f8437d92d3c93)
-
-  ---
-  updated-dependencies:
-  - dependency-name: github/codeql-action
-    dependency-type: direct:production
-    update-type: version-update:semver-patch
-  ...
-
-  Signed-off-by: dependabot[bot] <support@github.com>
-* chore(deps): Bump actions/setup-python from 5.1.1 to 5.2.0 ([`6b09aa9`](https://github.com/sandialabs/shell-logger/commit/6b09aa988015973e9164094da1ceaa2c74a102c1))
-
-  Bumps [actions/setup-python](https://github.com/actions/setup-python) from 5.1.1 to 5.2.0.
-  - [Release notes](https://github.com/actions/setup-python/releases)
-  - [Commits](https://github.com/actions/setup-python/compare/39cd14951b08e74b54015e9e001cdefcf80e669f...f677139bbe7f9c59b41e40162b753c062f5d49a3)
-
-  ---
-  updated-dependencies:
-  - dependency-name: actions/setup-python
-    dependency-type: direct:production
-    update-type: version-update:semver-minor
-  ...
-
-  Signed-off-by: dependabot[bot] <support@github.com>
-* chore(deps): Bump actions/upload-artifact from 4.3.6 to 4.4.0 ([`cff3033`](https://github.com/sandialabs/shell-logger/commit/cff3033fde9b84aa8798b00da87d4c6316379b6b))
-
-  Bumps [actions/upload-artifact](https://github.com/actions/upload-artifact) from 4.3.6 to 4.4.0.
-  - [Release notes](https://github.com/actions/upload-artifact/releases)
-  - [Commits](https://github.com/actions/upload-artifact/compare/834a144ee995460fba8ed112a2fc961b36a5ec5a...50769540e7f4bd5e21e526ee35c689e35e0d6874)
-
-  ---
-  updated-dependencies:
-  - dependency-name: actions/upload-artifact
-    dependency-type: direct:production
-    update-type: version-update:semver-minor
-  ...
-
-  Signed-off-by: dependabot[bot] <support@github.com>
-* chore(deps): Bump github/codeql-action from 3.25.11 to 3.26.5 ([`2608f84`](https://github.com/sandialabs/shell-logger/commit/2608f8457fb3f95fc164049044472b7e0410cf15))
-
-  Bumps [github/codeql-action](https://github.com/github/codeql-action) from 3.25.11 to 3.26.5.
-  - [Release notes](https://github.com/github/codeql-action/releases)
-  - [Changelog](https://github.com/github/codeql-action/blob/main/CHANGELOG.md)
-  - [Commits](https://github.com/github/codeql-action/compare/v3.25.11...2c779ab0d087cd7fe7b826087247c2c81f27bfa6)
-
-  ---
-  updated-dependencies:
-  - dependency-name: github/codeql-action
-    dependency-type: direct:production
-    update-type: version-update:semver-minor
-  ...
-
-  Signed-off-by: dependabot[bot] <support@github.com>
-* chore(deps): Bump python-semantic-release/upload-to-gh-release ([`c4c25a2`](https://github.com/sandialabs/shell-logger/commit/c4c25a23e4bf31ca83f03957a4f8858ffd947647))
-
-  Bumps [python-semantic-release/upload-to-gh-release](https://github.com/python-semantic-release/upload-to-gh-release) from 9.8.6 to 9.8.7.
-  - [Release notes](https://github.com/python-semantic-release/upload-to-gh-release/releases)
-  - [Changelog](https://github.com/python-semantic-release/upload-to-gh-release/blob/main/releaserc.toml)
-  - [Commits](https://github.com/python-semantic-release/upload-to-gh-release/compare/0dcddac3ba7b691d7a3fd4586b640d7b214a0016...17c75b706f81263690a0a0dc88d83415f783fc04)
-
-  ---
-  updated-dependencies:
-  - dependency-name: python-semantic-release/upload-to-gh-release
-    dependency-type: direct:production
-    update-type: version-update:semver-patch
-  ...
-
-  Signed-off-by: dependabot[bot] <support@github.com>
-* chore(deps): Bump python-semantic-release/python-semantic-release ([`1e220c2`](https://github.com/sandialabs/shell-logger/commit/1e220c25a25302e1e9da98497393ba7018d0fa6c))
-
-  Bumps [python-semantic-release/python-semantic-release](https://github.com/python-semantic-release/python-semantic-release) from 9.8.6 to 9.8.7.
-  - [Release notes](https://github.com/python-semantic-release/python-semantic-release/releases)
-  - [Changelog](https://github.com/python-semantic-release/python-semantic-release/blob/master/CHANGELOG.md)
-  - [Commits](https://github.com/python-semantic-release/python-semantic-release/compare/dec06aa649fddae6610bc64878868498bfcbad7b...708671d0eb33bcbea78c5a3d81ae04c60deeddf3)
-
-  ---
-  updated-dependencies:
-  - dependency-name: python-semantic-release/python-semantic-release
-    dependency-type: direct:production
-    update-type: version-update:semver-patch
-  ...
-
-  Signed-off-by: dependabot[bot] <support@github.com>
 * chore: Don't have ruff fix PRs ([`16f4eed`](https://github.com/sandialabs/shell-logger/commit/16f4eed297afd49ff1dc4c4a3ed4c5d3c345866a))
 
   Require a maintainer to make the changes so they're more aware of them.
-* chore(deps): Bump step-security/harden-runner from 2.9.0 to 2.9.1 ([`6bfe509`](https://github.com/sandialabs/shell-logger/commit/6bfe509d392bf0fb84e234aa4e65cd80196bee81))
-
-  Bumps [step-security/harden-runner](https://github.com/step-security/harden-runner) from 2.9.0 to 2.9.1.
-  - [Release notes](https://github.com/step-security/harden-runner/releases)
-  - [Commits](https://github.com/step-security/harden-runner/compare/0d381219ddf674d61a7572ddd19d7941e271515c...5c7944e73c4c2a096b17a9cb74d65b6c2bbafbde)
-
-  ---
-  updated-dependencies:
-  - dependency-name: step-security/harden-runner
-    dependency-type: direct:production
-    update-type: version-update:semver-patch
-  ...
-
-  Signed-off-by: dependabot[bot] <support@github.com>
-* chore(deps): Bump ossf/scorecard-action from 2.3.3 to 2.4.0 ([`17e20b8`](https://github.com/sandialabs/shell-logger/commit/17e20b83500647890929ec2b49a1d75dabaa2994))
-
-  Bumps [ossf/scorecard-action](https://github.com/ossf/scorecard-action) from 2.3.3 to 2.4.0.
-  - [Release notes](https://github.com/ossf/scorecard-action/releases)
-  - [Changelog](https://github.com/ossf/scorecard-action/blob/main/RELEASE.md)
-  - [Commits](https://github.com/ossf/scorecard-action/compare/v2.3.3...v2.4.0)
-
-  ---
-  updated-dependencies:
-  - dependency-name: ossf/scorecard-action
-    dependency-type: direct:production
-    update-type: version-update:semver-minor
-  ...
-
-  Signed-off-by: dependabot[bot] <support@github.com>
-* chore(deps): Bump python-semantic-release/upload-to-gh-release ([`ce3eef8`](https://github.com/sandialabs/shell-logger/commit/ce3eef8aa9e2131697a9db4bcd8ff688184b90be))
-
-  Bumps [python-semantic-release/upload-to-gh-release](https://github.com/python-semantic-release/upload-to-gh-release) from 9.8.5 to 9.8.6.
-  - [Release notes](https://github.com/python-semantic-release/upload-to-gh-release/releases)
-  - [Changelog](https://github.com/python-semantic-release/upload-to-gh-release/blob/main/releaserc.toml)
-  - [Commits](https://github.com/python-semantic-release/upload-to-gh-release/compare/fe6cc89b43d8cbf0f9ce3285df3f77ff69c9b5d4...0dcddac3ba7b691d7a3fd4586b640d7b214a0016)
-
-  ---
-  updated-dependencies:
-  - dependency-name: python-semantic-release/upload-to-gh-release
-    dependency-type: direct:production
-    update-type: version-update:semver-patch
-  ...
-
-  Signed-off-by: dependabot[bot] <support@github.com>
-* chore(deps): Bump python-semantic-release/python-semantic-release ([`566e375`](https://github.com/sandialabs/shell-logger/commit/566e375e42ffc8bcdd9c11af4b684266e933b09d))
-
-  Bumps [python-semantic-release/python-semantic-release](https://github.com/python-semantic-release/python-semantic-release) from 9.8.5 to 9.8.6.
-  - [Release notes](https://github.com/python-semantic-release/python-semantic-release/releases)
-  - [Changelog](https://github.com/python-semantic-release/python-semantic-release/blob/master/CHANGELOG.md)
-  - [Commits](https://github.com/python-semantic-release/python-semantic-release/compare/3ba53469e72452e7597dd5c61851e6fbf294420b...dec06aa649fddae6610bc64878868498bfcbad7b)
-
-  ---
-  updated-dependencies:
-  - dependency-name: python-semantic-release/python-semantic-release
-    dependency-type: direct:production
-    update-type: version-update:semver-patch
-  ...
-
-  Signed-off-by: dependabot[bot] <support@github.com>
-* chore(deps): Bump step-security/harden-runner from 2.8.1 to 2.9.0 ([`351e873`](https://github.com/sandialabs/shell-logger/commit/351e873f113711601d5ac5f8972baf4da4ab6f60))
-
-  Bumps [step-security/harden-runner](https://github.com/step-security/harden-runner) from 2.8.1 to 2.9.0.
-  - [Release notes](https://github.com/step-security/harden-runner/releases)
-  - [Commits](https://github.com/step-security/harden-runner/compare/17d0e2bd7d51742c71671bd19fa12bdc9d40a3d6...0d381219ddf674d61a7572ddd19d7941e271515c)
-
-  ---
-  updated-dependencies:
-  - dependency-name: step-security/harden-runner
-    dependency-type: direct:production
-    update-type: version-update:semver-minor
-  ...
-
-  Signed-off-by: dependabot[bot] <support@github.com>
-* chore(deps): Bump actions/dependency-review-action from 4.3.3 to 4.3.4 ([`5a3336b`](https://github.com/sandialabs/shell-logger/commit/5a3336bcbe4b9068d7361077803c47d7a44cb67d))
-
-  Bumps [actions/dependency-review-action](https://github.com/actions/dependency-review-action) from 4.3.3 to 4.3.4.
-  - [Release notes](https://github.com/actions/dependency-review-action/releases)
-  - [Commits](https://github.com/actions/dependency-review-action/compare/72eb03d02c7872a771aacd928f3123ac62ad6d3a...5a2ce3f5b92ee19cbb1541a4984c76d921601d7c)
-
-  ---
-  updated-dependencies:
-  - dependency-name: actions/dependency-review-action
-    dependency-type: direct:production
-    update-type: version-update:semver-patch
-  ...
-
-  Signed-off-by: dependabot[bot] <support@github.com>
 
 ### Continuous integration
-* ci: pre-commit auto-update ([`c8863a3`](https://github.com/sandialabs/shell-logger/commit/c8863a3cf0aad3cc15b2a06442d17e25bf02a605))
-
-  updates:
-  - [github.com/astral-sh/ruff-pre-commit: v0.7.4 → v0.8.0](https://github.com/astral-sh/ruff-pre-commit/compare/v0.7.4...v0.8.0)
-* ci: pre-commit auto-update ([`77fbccd`](https://github.com/sandialabs/shell-logger/commit/77fbccde93a2804e8e2d54b6ce5f4a8c26e66e9b))
-
-  updates:
-  - [github.com/astral-sh/ruff-pre-commit: v0.7.3 → v0.7.4](https://github.com/astral-sh/ruff-pre-commit/compare/v0.7.3...v0.7.4)
-* ci: pre-commit auto-update ([`e6e36d0`](https://github.com/sandialabs/shell-logger/commit/e6e36d0cd00d0a3c4d159833d9112febebe72a82))
-
-  updates:
-  - [github.com/astral-sh/ruff-pre-commit: v0.7.2 → v0.7.3](https://github.com/astral-sh/ruff-pre-commit/compare/v0.7.2...v0.7.3)
-* ci: pre-commit auto-update ([`3623fed`](https://github.com/sandialabs/shell-logger/commit/3623fed4e9ede4bd0ef97661f395ce431c881d59))
-
-  updates:
-  - [github.com/astral-sh/ruff-pre-commit: v0.7.1 → v0.7.2](https://github.com/astral-sh/ruff-pre-commit/compare/v0.7.1...v0.7.2)
-* ci: pre-commit auto-update ([`51a3c01`](https://github.com/sandialabs/shell-logger/commit/51a3c01c2053cf85db9eaf03d03aeb75521d2f9c))
-
-  updates:
-  - [github.com/astral-sh/ruff-pre-commit: v0.7.0 → v0.7.1](https://github.com/astral-sh/ruff-pre-commit/compare/v0.7.0...v0.7.1)
-  - [github.com/gitleaks/gitleaks: v8.21.1 → v8.21.2](https://github.com/gitleaks/gitleaks/compare/v8.21.1...v8.21.2)
-* ci: pre-commit auto-update ([`b5baf41`](https://github.com/sandialabs/shell-logger/commit/b5baf41a57a55573e5a0a6e66db41110912ae46c))
-
-  updates:
-  - [github.com/astral-sh/ruff-pre-commit: v0.6.9 → v0.7.0](https://github.com/astral-sh/ruff-pre-commit/compare/v0.6.9...v0.7.0)
-  - [github.com/gitleaks/gitleaks: v8.20.1 → v8.21.1](https://github.com/gitleaks/gitleaks/compare/v8.20.1...v8.21.1)
-* ci: pre-commit auto-update ([`5d8a3c1`](https://github.com/sandialabs/shell-logger/commit/5d8a3c18c564290916340d6fe92463b4780b1e6f))
-
-  updates:
-  - [github.com/astral-sh/ruff-pre-commit: v0.6.8 → v0.6.9](https://github.com/astral-sh/ruff-pre-commit/compare/v0.6.8...v0.6.9)
-  - [github.com/gitleaks/gitleaks: v8.19.3 → v8.20.1](https://github.com/gitleaks/gitleaks/compare/v8.19.3...v8.20.1)
-  - [github.com/pre-commit/pre-commit-hooks: v4.6.0 → v5.0.0](https://github.com/pre-commit/pre-commit-hooks/compare/v4.6.0...v5.0.0)
-* ci: pre-commit auto-update ([`bb68aa2`](https://github.com/sandialabs/shell-logger/commit/bb68aa212dbd19b4401a8e42770d9b9a09241143))
-
-  updates:
-  - [github.com/astral-sh/ruff-pre-commit: v0.6.7 → v0.6.8](https://github.com/astral-sh/ruff-pre-commit/compare/v0.6.7...v0.6.8)
-  - [github.com/gitleaks/gitleaks: v8.19.2 → v8.19.3](https://github.com/gitleaks/gitleaks/compare/v8.19.2...v8.19.3)
-* ci: pre-commit auto-update ([`c3797f1`](https://github.com/sandialabs/shell-logger/commit/c3797f116e465338fc6226b31aa3619d87ccebe3))
-
-  updates:
-  - [github.com/astral-sh/ruff-pre-commit: v0.6.5 → v0.6.7](https://github.com/astral-sh/ruff-pre-commit/compare/v0.6.5...v0.6.7)
-* ci: pre-commit auto-update ([`28b8cc6`](https://github.com/sandialabs/shell-logger/commit/28b8cc641bc48da66658ac269dc045f457a14e48))
-
-  updates:
-  - [github.com/astral-sh/ruff-pre-commit: v0.6.4 → v0.6.5](https://github.com/astral-sh/ruff-pre-commit/compare/v0.6.4...v0.6.5)
-  - [github.com/gitleaks/gitleaks: v8.18.4 → v8.19.2](https://github.com/gitleaks/gitleaks/compare/v8.18.4...v8.19.2)
-* ci: pre-commit auto-update ([`026db7b`](https://github.com/sandialabs/shell-logger/commit/026db7bc3b7694001eda7544fb2a82c381d4bc26))
-
-  updates:
-  - [github.com/astral-sh/ruff-pre-commit: v0.6.3 → v0.6.4](https://github.com/astral-sh/ruff-pre-commit/compare/v0.6.3...v0.6.4)
-* ci: pre-commit auto-update ([`36a89c4`](https://github.com/sandialabs/shell-logger/commit/36a89c46e59d2635def2d4c3ab41cf7b9a5fbad7))
-
-  updates:
-  - [github.com/astral-sh/ruff-pre-commit: v0.6.2 → v0.6.3](https://github.com/astral-sh/ruff-pre-commit/compare/v0.6.2...v0.6.3)
-  - [github.com/PyCQA/doc8: v1.1.1 → v1.1.2](https://github.com/PyCQA/doc8/compare/v1.1.1...v1.1.2)
 * ci: Harden GitHub Actions ([`156b2bb`](https://github.com/sandialabs/shell-logger/commit/156b2bb09e34a6f71cc30d29b63316806c0c2000))
 
   Signed-off-by: StepSecurity Bot <bot@stepsecurity.io>
-* ci: pre-commit auto-update ([`73fdd82`](https://github.com/sandialabs/shell-logger/commit/73fdd82e57fc961e342c7ec24587a284f5e3a96a))
-
-  updates:
-  - [github.com/astral-sh/ruff-pre-commit: v0.6.1 → v0.6.2](https://github.com/astral-sh/ruff-pre-commit/compare/v0.6.1...v0.6.2)
-* ci: pre-commit auto-update ([`7bddfe2`](https://github.com/sandialabs/shell-logger/commit/7bddfe2225044e7ab3bd82dcc0ba484528c0cb7f))
-
-  updates:
-  - [github.com/astral-sh/ruff-pre-commit: v0.5.7 → v0.6.1](https://github.com/astral-sh/ruff-pre-commit/compare/v0.5.7...v0.6.1)
-* ci: pre-commit auto-update ([`cbfb3da`](https://github.com/sandialabs/shell-logger/commit/cbfb3da06b0e73b8157252b9fbd3d36eeb9803b3))
-
-  updates:
-  - [github.com/astral-sh/ruff-pre-commit: v0.5.6 → v0.5.7](https://github.com/astral-sh/ruff-pre-commit/compare/v0.5.6...v0.5.7)
-* ci: pre-commit auto-update ([`4082e78`](https://github.com/sandialabs/shell-logger/commit/4082e7853ede37d5c83753a908512eb6ccae0a6c))
-
-  updates:
-  - [github.com/astral-sh/ruff-pre-commit: v0.5.5 → v0.5.6](https://github.com/astral-sh/ruff-pre-commit/compare/v0.5.5...v0.5.6)
-* ci: pre-commit auto-update ([`5a04ae8`](https://github.com/sandialabs/shell-logger/commit/5a04ae893a99a8fb3e3c7e755c879fb66d87759a))
-
-  updates:
-  - [github.com/astral-sh/ruff-pre-commit: v0.5.4 → v0.5.5](https://github.com/astral-sh/ruff-pre-commit/compare/v0.5.4...v0.5.5)
-* ci: pre-commit auto-update ([`4541eb5`](https://github.com/sandialabs/shell-logger/commit/4541eb5bc1bdbb580b9a4364b91500c1df299d91))
-
-  updates:
-  - [github.com/astral-sh/ruff-pre-commit: v0.5.2 → v0.5.4](https://github.com/astral-sh/ruff-pre-commit/compare/v0.5.2...v0.5.4)
-* ci: pre-commit auto-update ([`12e575a`](https://github.com/sandialabs/shell-logger/commit/12e575a7324cc8ccccde43a20b9fd6582c6bd191))
-
-  updates:
-  - [github.com/astral-sh/ruff-pre-commit: v0.5.1 → v0.5.2](https://github.com/astral-sh/ruff-pre-commit/compare/v0.5.1...v0.5.2)
 
 ### Documentation
 * docs: Update type hint to match the docs/code ([`ee8fdcc`](https://github.com/sandialabs/shell-logger/commit/ee8fdcce4d36087b640f8303d5f303b62979cbf2))
@@ -1160,7 +95,7 @@
   I'm pinning sphinx below 8.0 to get things back up and running.
 
 ### Refactoring
-* refactor:  Use exception instead of return value ([`f9ec075`](https://github.com/sandialabs/shell-logger/commit/f9ec075094fef5032987571d16a68c11917e3672))
+* refactor: Use exception instead of return value ([`f9ec075`](https://github.com/sandialabs/shell-logger/commit/f9ec075094fef5032987571d16a68c11917e3672))
 
   Sourcery suggested using an exception for this unreachable scenario.
 
@@ -1197,67 +132,6 @@
 
 ## v1.0.1 (2024-07-10)
 
-### Chores
-* chore(deps): Bump actions/upload-artifact from 3 to 4 ([`844a3b2`](https://github.com/sandialabs/shell-logger/commit/844a3b23ef537977494a4f2b3e91f56f96933fbc))
-
-  Bumps [actions/upload-artifact](https://github.com/actions/upload-artifact) from 3 to 4.
-  - [Release notes](https://github.com/actions/upload-artifact/releases)
-  - [Commits](https://github.com/actions/upload-artifact/compare/v3...v4)
-
-  ---
-  updated-dependencies:
-  - dependency-name: actions/upload-artifact
-    dependency-type: direct:production
-    update-type: version-update:semver-major
-  ...
-
-  Signed-off-by: dependabot[bot] <support@github.com>
-* chore(deps): Bump codecov/codecov-action from 3 to 4 ([`5dfec95`](https://github.com/sandialabs/shell-logger/commit/5dfec95a1fbb4c5593de796e15117a8f59274212))
-
-  Bumps [codecov/codecov-action](https://github.com/codecov/codecov-action) from 3 to 4.
-  - [Release notes](https://github.com/codecov/codecov-action/releases)
-  - [Changelog](https://github.com/codecov/codecov-action/blob/main/CHANGELOG.md)
-  - [Commits](https://github.com/codecov/codecov-action/compare/v3...v4)
-
-  ---
-  updated-dependencies:
-  - dependency-name: codecov/codecov-action
-    dependency-type: direct:production
-    update-type: version-update:semver-major
-  ...
-
-  Signed-off-by: dependabot[bot] <support@github.com>
-* chore(deps): Bump ossf/scorecard-action from 2.3.1 to 2.3.3 ([`58cce00`](https://github.com/sandialabs/shell-logger/commit/58cce009cade554589bd5084f2aaaf23e423b32a))
-
-  Bumps [ossf/scorecard-action](https://github.com/ossf/scorecard-action) from 2.3.1 to 2.3.3.
-  - [Release notes](https://github.com/ossf/scorecard-action/releases)
-  - [Changelog](https://github.com/ossf/scorecard-action/blob/main/RELEASE.md)
-  - [Commits](https://github.com/ossf/scorecard-action/compare/v2.3.1...v2.3.3)
-
-  ---
-  updated-dependencies:
-  - dependency-name: ossf/scorecard-action
-    dependency-type: direct:production
-    update-type: version-update:semver-patch
-  ...
-
-  Signed-off-by: dependabot[bot] <support@github.com>
-* chore(deps): Bump taskmedia/action-conventional-commits ([`80ea6bf`](https://github.com/sandialabs/shell-logger/commit/80ea6bf46d8830069055f13ffebee16ea000509a))
-
-  Bumps [taskmedia/action-conventional-commits](https://github.com/taskmedia/action-conventional-commits) from 1.1.14 to 1.1.17.
-  - [Release notes](https://github.com/taskmedia/action-conventional-commits/releases)
-  - [Changelog](https://github.com/taskmedia/action-conventional-commits/blob/main/CHANGELOG.md)
-  - [Commits](https://github.com/taskmedia/action-conventional-commits/compare/v1.1.14...v1.1.17)
-
-  ---
-  updated-dependencies:
-  - dependency-name: taskmedia/action-conventional-commits
-    dependency-type: direct:production
-    update-type: version-update:semver-patch
-  ...
-
-  Signed-off-by: dependabot[bot] <support@github.com>
-
 ### Continuous integration
 * ci: Change documentation coverage file name ([`8f62d45`](https://github.com/sandialabs/shell-logger/commit/8f62d4551aef3d2eb079a52e7861df9ed5d81bd1))
 
@@ -1267,7 +141,7 @@
   When trying to upload the initial release to PyPI, the upload failed
   with the following error:
 
-  ERROR    HTTPError: 400 Bad Request from https://upload.pypi.org/legacy/
+  ERROR HTTPError: 400 Bad Request from https://upload.pypi.org/legacy/
            The name 'shell-logger' is too similar to an existing project.
            See https://pypi.org/help/#project-name for more information.
 
@@ -1295,7 +169,7 @@
 
   In order to enable a faster development workflow, remove the commitizen
   pre-commit hook to allow commits messages that don't adhere to the
-  Conventional Commits specification.  Commit messages are still checked
+  Conventional Commits specification. Commit messages are still checked
   in the Continuous Integration workflow, though, so a branch will need to
   be clean before merging.
 * chore: Disable pyupgrade ([`13a27b2`](https://github.com/sandialabs/shell-logger/commit/13a27b2833069143263cb75f803c3fee4ee56a0d))
@@ -1314,7 +188,7 @@
 * chore: Ignore magic number warnings in HTML utils ([`728874b`](https://github.com/sandialabs/shell-logger/commit/728874b47269a980f47e53cc1c609829dd8a7460))
 
   The HTML utilities module has a bunch of magic numbers in it for
-  converting between SGR codes and HTML.  Replacing the magic numbers with
+  converting between SGR codes and HTML. Replacing the magic numbers with
   corresponding constants will be a significant refactoring, so for now,
   just ignore these warnings in this one file.
 * chore: Disable certain Pylint findings ([`dd52a94`](https://github.com/sandialabs/shell-logger/commit/dd52a94280dc53b712cce04da3ac0a6509e2f3a6))
@@ -1336,7 +210,7 @@
 * chore: Disable `datetime` checks ([`cef4d26`](https://github.com/sandialabs/shell-logger/commit/cef4d2696f72f4d84f5419d36215757707acc66c))
 
   I'll need to come back at some point and make all the `datetime` objects
-  timezone-aware.  Ruff produces the following findings:
+  timezone-aware. Ruff produces the following findings:
 
   * DTZ005 `datetime.datetime.now()` called without a `tz` argument
   * DTZ006 `datetime.datetime.fromtimestamp()` called without a `tz`
@@ -1403,77 +277,13 @@
   The libenchant library needs to be installed and configured on a Mac,
   and I don't want to mess with that at the moment.
 * ci: Test Python 3.12 as well ([`93a9b85`](https://github.com/sandialabs/shell-logger/commit/93a9b85c8c8e8953442a51e0fd8f45b3ac3132ca))
-* ci: pre-commit auto-update ([`e8707c7`](https://github.com/sandialabs/shell-logger/commit/e8707c790827fb30576a31a84120ce1ef4d654b0))
-
-  updates:
-  - [github.com/astral-sh/ruff-pre-commit: v0.5.0 → v0.5.1](https://github.com/astral-sh/ruff-pre-commit/compare/v0.5.0...v0.5.1)
-* ci: pre-commit auto-update ([`64b89d6`](https://github.com/sandialabs/shell-logger/commit/64b89d69a3273727eb6db04e6cea62cafb312f35))
-
-  updates:
-  - [github.com/astral-sh/ruff-pre-commit: v0.4.10 → v0.5.0](https://github.com/astral-sh/ruff-pre-commit/compare/v0.4.10...v0.5.0)
-* ci: pre-commit auto-update ([`6645238`](https://github.com/sandialabs/shell-logger/commit/66452385313b5fb678a296af57286d0eb0d67a11))
-
-  updates:
-  - [github.com/astral-sh/ruff-pre-commit: v0.4.9 → v0.4.10](https://github.com/astral-sh/ruff-pre-commit/compare/v0.4.9...v0.4.10)
-* ci: pre-commit auto-update ([`37f8452`](https://github.com/sandialabs/shell-logger/commit/37f84529a320ce4b037c0bc328aab4c73287bbb1))
-
-  updates:
-  - [github.com/astral-sh/ruff-pre-commit: v0.4.8 → v0.4.9](https://github.com/astral-sh/ruff-pre-commit/compare/v0.4.8...v0.4.9)
-* ci: pre-commit auto-update ([`a6c8b62`](https://github.com/sandialabs/shell-logger/commit/a6c8b62aaafab714a5cc4992a45ed1b03d120bcd))
-
-  updates:
-  - [github.com/astral-sh/ruff-pre-commit: v0.4.7 → v0.4.8](https://github.com/astral-sh/ruff-pre-commit/compare/v0.4.7...v0.4.8)
-* ci: pre-commit auto-update ([`f320a1a`](https://github.com/sandialabs/shell-logger/commit/f320a1a8787e75ac5ad456c3fb8198ddec3e852c))
-
-  updates:
-  - [github.com/astral-sh/ruff-pre-commit: v0.4.5 → v0.4.7](https://github.com/astral-sh/ruff-pre-commit/compare/v0.4.5...v0.4.7)
-* ci: pre-commit auto-update ([`baf3bc9`](https://github.com/sandialabs/shell-logger/commit/baf3bc9df53d12205a746031bcfcb6ce1ce7a9db))
-
-  updates:
-  - [github.com/astral-sh/ruff-pre-commit: v0.4.4 → v0.4.5](https://github.com/astral-sh/ruff-pre-commit/compare/v0.4.4...v0.4.5)
-* ci: pre-commit auto-update ([`3b298db`](https://github.com/sandialabs/shell-logger/commit/3b298db72a036b70665a7ee0179522f6772762be))
-
-  updates:
-  - [github.com/astral-sh/ruff-pre-commit: v0.4.3 → v0.4.4](https://github.com/astral-sh/ruff-pre-commit/compare/v0.4.3...v0.4.4)
-* ci: pre-commit auto-update ([`0b9dc76`](https://github.com/sandialabs/shell-logger/commit/0b9dc76c3b836f8965b65f798091dc556faba160))
-
-  updates:
-  - [github.com/astral-sh/ruff-pre-commit: v0.4.2 → v0.4.3](https://github.com/astral-sh/ruff-pre-commit/compare/v0.4.2...v0.4.3)
-* ci: pre-commit auto-update ([`f50d625`](https://github.com/sandialabs/shell-logger/commit/f50d625c6e0fcbf909117ebcba62bf8e6c57871f))
-
-  updates:
-  - [github.com/astral-sh/ruff-pre-commit: v0.4.1 → v0.4.2](https://github.com/astral-sh/ruff-pre-commit/compare/v0.4.1...v0.4.2)
 * ci: Add OpenSSF Scorecard workflow ([`68d3dfe`](https://github.com/sandialabs/shell-logger/commit/68d3dfefe8dbfdfdcdd8993c61fdf9f670d1096b))
-* ci: pre-commit auto-update ([`ccc68d0`](https://github.com/sandialabs/shell-logger/commit/ccc68d0383a4306ae625ac24e1e039e0f99c59a4))
-
-  updates:
-  - [github.com/psf/black: 24.3.0 → 24.4.0](https://github.com/psf/black/compare/24.3.0...24.4.0)
-* ci: pre-commit auto-update ([`fe66ad1`](https://github.com/sandialabs/shell-logger/commit/fe66ad1d30edfa4dffc1598633f75f8ff36bfed7))
-
-  updates:
-  - [github.com/pre-commit/pre-commit-hooks: v4.5.0 → v4.6.0](https://github.com/pre-commit/pre-commit-hooks/compare/v4.5.0...v4.6.0)
-* ci: pre-commit auto-update ([`51730e1`](https://github.com/sandialabs/shell-logger/commit/51730e1b0156d6eb6a1ad1d87a928c58e0c41a6e))
-
-  updates:
-  - [github.com/psf/black: 24.2.0 → 24.3.0](https://github.com/psf/black/compare/24.2.0...24.3.0)
 * ci: Add continuous integration workflow ([`7c22cc7`](https://github.com/sandialabs/shell-logger/commit/7c22cc76c721afcaddb0cf3c0b4ceb91dea1e79b))
 
   Create two jobs:
 
-  * commits:  Ensure we're adhering to the Conventional Commits
+  * commits: Ensure we're adhering to the Conventional Commits
     specification.
-
-  * test:  Currently this job
-
-    * Checks out the commit
-    * Sets up a Python environment
-    * Installs the requirements
-    * Installs the package
-    * Checks documentation spelling and coverage
-    * Uninstalls the package
-
-    Note that the unit test suite is not running yet, because it's not
-    completely passing.  That will be handled soon.
 
 ### Documentation
 * docs: Update contributing guidelines ([`2598c88`](https://github.com/sandialabs/shell-logger/commit/2598c88480ee6072c3fc8e0156da55ef4f3f13d5))
@@ -1493,7 +303,7 @@
   https://docs.astral.sh/ruff/rules/builtin-variable-shadowing/
 * docs: Update examples on main page ([`a09918f`](https://github.com/sandialabs/shell-logger/commit/a09918fb5817dee56ae6334362435090ee2bf001))
 
-  Just change which lines are included.  The lines at the top of the
+  Just change which lines are included. The lines at the top of the
   example files were changed at some point, but the include directives
   weren't updated to match.
 * docs: Adopt Conventional Comments ([`6fa7aa7`](https://github.com/sandialabs/shell-logger/commit/6fa7aa7bbf35e5fab58aba7eb3dbf1ea0a79f719))
@@ -1517,7 +327,7 @@
 * docs: Move copyright/license text to comments ([`33ff463`](https://github.com/sandialabs/shell-logger/commit/33ff4639c4daf75e858e4058e8b4e25f65219cd5))
 
   In all the source files, move the copyright and license text from the
-  module docstring to comments immediately below it.  This is to remove
+  module docstring to comments immediately below it. This is to remove
   this text from automatic processing of docstrings when building the
   documentation.
 * docs: Update links ([`89d88fa`](https://github.com/sandialabs/shell-logger/commit/89d88fa5f3eca4c162bc9bf5aad920899b976099))
@@ -1572,10 +382,10 @@
 
   The intent all along was that these (along with any others that had
   default values associated) be keyword-only arguments, but they were not
-  denoted as such.  This commit remedies that oversight.
+  denoted as such. This commit remedies that oversight.
 
   Note that this is a breaking change because it changes the call
-  signatures of the `Shell` and `ShellLogger` public classes.  To update
+  signatures of the `Shell` and `ShellLogger` public classes. To update
   your usage, simply switch from positional to keyword arguments for any
   arguments affected.
 * refactor: Save exception messages as variables ([`cb3c78e`](https://github.com/sandialabs/shell-logger/commit/cb3c78e82c9a28b78ce28ef72ad4e8767fca4198))
@@ -1593,7 +403,7 @@
 * test: Don't check disk statistics on RHEL ([`a3ff573`](https://github.com/sandialabs/shell-logger/commit/a3ff5734386c15379663b276f94a8dec8dc37005))
 
   For some reason, the `DiskStatsCollector` appears to not be collecting
-  disk statistics at the specified interval on RHEL.  Disable these checks
+  disk statistics at the specified interval on RHEL. Disable these checks
   until there's time to debug the issue.
 * test: Use keyword argument in constructor ([`f9bf643`](https://github.com/sandialabs/shell-logger/commit/f9bf64347222c4e4e250302d5f09ef5ad2963e5f))
 
@@ -1604,6 +414,17 @@
   that it doesn't return anything.
 
   https://docs.astral.sh/ruff/rules/pytest-missing-fixture-name-underscore/
+* test: Currently this job ([`7c22cc7`](https://github.com/sandialabs/shell-logger/commit/7c22cc76c721afcaddb0cf3c0b4ceb91dea1e79b))
+
+  * Checks out the commit
+  * Sets up a Python environment
+  * Installs the requirements
+  * Installs the package
+  * Checks documentation spelling and coverage
+  * Uninstalls the package
+
+  Note that the unit test suite is not running yet, because it's not
+  completely passing. That will be handled soon.
 
 ### Unknown
 * Add copyright/license info to all source files ([`76a00b5`](https://github.com/sandialabs/shell-logger/commit/76a00b5e09254e15440aeeb57acf87cd1e8a6c4f))
@@ -1618,21 +439,7 @@
 
   Adjust coverage report syntax for upgrade to GitLab 15.
 * Update CONTRIBUTING.md ([`eccab54`](https://github.com/sandialabs/shell-logger/commit/eccab54050a90b93b64d5e75eb6fe0c2815a555a))
-* Merge branch 'Issue#42' into 'master' ([`b09364d`](https://github.com/sandialabs/shell-logger/commit/b09364debd400a649c4be6d9541fc71ddde64097))
-
-  Correct typo in CONTRIBUTING.md
-
-  Closes #42
-
-  See merge request ShellLogger/ShellLogger!27
 * Correct typo in CONTRIBUTING.md ([`33ae7da`](https://github.com/sandialabs/shell-logger/commit/33ae7da45fe70220bd7d3f421f7d839f04508118))
-* Merge branch '33-add-yapf-configuration' into 'master' ([`641cfe7`](https://github.com/sandialabs/shell-logger/commit/641cfe781f66d4e46560c40baeffb8be4232a0d0))
-
-  Resolve "Add YAPF configuration"
-
-  Closes #33
-
-  See merge request ShellLogger/ShellLogger!26
 * Fix broken tests ([`31e16b3`](https://github.com/sandialabs/shell-logger/commit/31e16b36ddf1471980d1d924a38fbb870436eafa))
 * Fix broken test ([`4f160ac`](https://github.com/sandialabs/shell-logger/commit/4f160ac4b1fba72e813dc881f75dad89357c5e9c))
 * Fix style issues ([`11f1dc3`](https://github.com/sandialabs/shell-logger/commit/11f1dc3586182aa426f0007d9836e118ee1bfc34))
@@ -1644,49 +451,16 @@
 * Tweak ([`156a3e3`](https://github.com/sandialabs/shell-logger/commit/156a3e39c7fde670b51c4249ad1f3caeebbe6528))
 * Debugging ([`63a89f6`](https://github.com/sandialabs/shell-logger/commit/63a89f6dbf16d58c9e3094fda2da177e154885a8))
 * Add YAPF job ([`c9523d9`](https://github.com/sandialabs/shell-logger/commit/c9523d93422ae1dd8dfa9889d7e4b83538c2fc8e))
-* Merge branch 'remove-windows-support-take-2' into 'master' ([`5e35357`](https://github.com/sandialabs/shell-logger/commit/5e35357ced65d6f15be7ef9ef6a172d1c64b401d))
-
-  Remove Windows support (take 2)
-
-  See merge request ShellLogger/ShellLogger!25
 * Remove Windows support ([`8a5e08f`](https://github.com/sandialabs/shell-logger/commit/8a5e08f1932e547c86a25e11c6237c78092caef8))
 
-  Follow-on to #12.  These changes should have been included
+  Follow-on to #12. These changes should have been included
   in e034d0b6c8c1a10616d8d07ea5cae687fc70d263, but were
   accidentally omitted.
-* Merge branch '31-change-file-naming-scheme' into 'master' ([`aa564f2`](https://github.com/sandialabs/shell-logger/commit/aa564f255b617fcbd7fc654e608583bed1722954))
-
-  Change file naming scheme (#31)
-
-  Closes #31
-
-  See merge request ShellLogger/ShellLogger!24
 * Change file naming scheme (#31) ([`e6ecedd`](https://github.com/sandialabs/shell-logger/commit/e6ecedd47bfad0e9c1ef78001c487e4374b662df))
-* Merge branch '12-remove-windows-support' into 'master' ([`79e5adc`](https://github.com/sandialabs/shell-logger/commit/79e5adc9ca59240ec8ed3f536e21dae237a6b3e7))
-
-  Remove Windows support (#12)
-
-  Closes #12
-
-  See merge request ShellLogger/ShellLogger!23
 * Remove Windows support (#12) ([`e034d0b`](https://github.com/sandialabs/shell-logger/commit/e034d0b6c8c1a10616d8d07ea5cae687fc70d263))
-* Merge branch '30-create-snapshot-script' into 'master' ([`9a58ad0`](https://github.com/sandialabs/shell-logger/commit/9a58ad00aa27522a12508c5c751054c92f2d3317))
-
-  Resolve "Create snapshot script"
-
-  Closes #30
-
-  See merge request ShellLogger/ShellLogger!21
 * Remove snapshot script ([`ff92fbd`](https://github.com/sandialabs/shell-logger/commit/ff92fbdbe330e0aec83dd761aba6288cb005e448))
 * Add notes to script ([`5898817`](https://github.com/sandialabs/shell-logger/commit/5898817bf6463a156684f988f5579da0f87553b3))
 * Add instructions to README ([`ee7d56d`](https://github.com/sandialabs/shell-logger/commit/ee7d56de917724a29152df1ba1f4eac47948af59))
-* Merge branch '11-reorganize-classes-in-files' into 'master' ([`fe509ed`](https://github.com/sandialabs/shell-logger/commit/fe509ed4ea8cc4ccd96231d934ecf1b5d9fffdac))
-
-  Resolve "Reorganize classes in files"
-
-  Closes #11
-
-  See merge request ShellLogger/ShellLogger!22
 * Tweaks to docs ([`7f44ff0`](https://github.com/sandialabs/shell-logger/commit/7f44ff06a1f123aad26c1cedb83cc9618b57ebd5))
 * Fix typo in last commit ([`4c343ba`](https://github.com/sandialabs/shell-logger/commit/4c343bafbd48c523d49da66c3099b1847fc4ed83))
 * Fix typo in last commit ([`ea707e9`](https://github.com/sandialabs/shell-logger/commit/ea707e90dc1320037f34e42056af5704992453bb))
@@ -1699,86 +473,27 @@
 * Adjust docs for `Shell` movement ([`94da4b1`](https://github.com/sandialabs/shell-logger/commit/94da4b1fba28619961bfe3ef4efc3d94e4b94689))
 * Move `Shell` to its own file ([`e84ceca`](https://github.com/sandialabs/shell-logger/commit/e84ceca26e0b0e0b6307da8368666bb96c942986))
 * Update README.md ([`6169426`](https://github.com/sandialabs/shell-logger/commit/6169426b8ca148238d985fe0471ea91a6af9e832))
-* Merge branch '27-preserve-newlines-and-spacing' into 'master' ([`759ce10`](https://github.com/sandialabs/shell-logger/commit/759ce108682b33946bee4694f275e8892c610204))
-
-  Preserve newlines and spacing (#27)
-
-  Closes #27
-
-  See merge request ShellLogger/ShellLogger!20
 * Preserve newlines and spacing (#27) ([`cee1d80`](https://github.com/sandialabs/shell-logger/commit/cee1d80d3fa62fa6b187aaf503ce0350db3d077d))
-* Merge branch '26-remove-no-break-character' into 'master' ([`ae07f99`](https://github.com/sandialabs/shell-logger/commit/ae07f9952c9c6c09ff8b81af54cad61349d0f141))
-
-  Remove no-break character (#26)
-
-  Closes #26
-
-  See merge request ShellLogger/ShellLogger!19
 * Update javascript after removal of no-break ([`4a4f298`](https://github.com/sandialabs/shell-logger/commit/4a4f2985cea3e9cf2a4aa731607cc6dfc542628f))
 
   We no longer need to have the javascript search function take out the
   no-break characters since we no longer use them in the first place.
 * Remove no-break character (#26) ([`0484662`](https://github.com/sandialabs/shell-logger/commit/0484662dfbf2438e4cfedfacf060ce14ba4ca302))
-* Merge branch '10-add-issue-templates' into 'master' ([`204fc52`](https://github.com/sandialabs/shell-logger/commit/204fc529e03e94ff2fe6b9a24235040372c1f458))
-
-  Add issue templates (#10)
-
-  Closes #10
-
-  See merge request ShellLogger/ShellLogger!18
 * Add issue templates (#10) ([`02e69a7`](https://github.com/sandialabs/shell-logger/commit/02e69a76863f6f8af1dead50d17af02a285ae589))
-* Merge branch 'switch-to-login-shell' into 'master' ([`756705f`](https://github.com/sandialabs/shell-logger/commit/756705fc04cd3fb079a1acd58ff898d823b48a4d))
-
-  Switch to login shell
-
-  See merge request ShellLogger/ShellLogger!17
 * Add `login_shell` toggle ([`a2d10c9`](https://github.com/sandialabs/shell-logger/commit/a2d10c907673b4b217449a33672965401894ca09))
 
   Add the ability to optionally spawn a login `Shell` when
-  creating a `ShellLogger`.  Defaults to `False` to preserve
+  creating a `ShellLogger`. Defaults to `False` to preserve
   existing functionality.
-* Merge branch 'downgrade-to-python-3.7' into 'master' ([`1a1c5da`](https://github.com/sandialabs/shell-logger/commit/1a1c5da4d10f90d8d69499e6fc1a3c1865e82a97))
-
-  Downgrade to Python 3.7
-
-  See merge request ShellLogger/ShellLogger!16
 * Downgrade to Python 3.7 ([`040f505`](https://github.com/sandialabs/shell-logger/commit/040f505368ae279199fe3f9f8d117414dd160225))
-* Merge branch '9-add-contributing-guidelines' into 'master' ([`74356f5`](https://github.com/sandialabs/shell-logger/commit/74356f5afc17fad81ef830632127ebdb1b0999f2))
-
-  Resolve "Create contributing guidelines"
-
-  Closes #9
-
-  See merge request ShellLogger/ShellLogger!15
 * Add contributing guidelines (#9) ([`bfd73b2`](https://github.com/sandialabs/shell-logger/commit/bfd73b2fac7214c0ca3dc013adba9f1d9174095f))
-* Merge branch '7-fill-out-readme' into 'master' ([`83303ce`](https://github.com/sandialabs/shell-logger/commit/83303ce8c5b8df91784a6ef00279c2faba7edd51))
-
-  Resolve "Fill out README.md"
-
-  Closes #7
-
-  See merge request ShellLogger/ShellLogger!14
 * Fill out README.md (#7) ([`ea21b89`](https://github.com/sandialabs/shell-logger/commit/ea21b8965f80521aa8ec99fc620a05608a4995b2))
-* Merge branch '17-publish-example-log-files-vi-pages' into 'master' ([`0917561`](https://github.com/sandialabs/shell-logger/commit/091756154d6780f012d7d736e854204584006157))
-
-  Resolve "Publish example log files via Pages"
-
-  Closes #17
-
-  See merge request ShellLogger/ShellLogger!13
 * Publish example log files via Pages (#17) ([`0206797`](https://github.com/sandialabs/shell-logger/commit/0206797be203f3fcd53036a93f7393f75376209f))
 
   * Switch from global cache to artifacts for the extras
     getting published via pages
   * Copy example log files to appropriate directory
   * Link to example log files from docs index
-* Merge branch '18-troubleshoot-virtual-environment-in-ci' into 'master' ([`fb0a941`](https://github.com/sandialabs/shell-logger/commit/fb0a941542cb028962161b7c24df33499293f559))
-
-  Resolve "Troubleshoot virtual environment in CI"
-
-  Closes #18
-
-  See merge request ShellLogger/ShellLogger!12
 * Remove `needs` ([`297d0dc`](https://github.com/sandialabs/shell-logger/commit/297d0dc887acf94d0b611dba196b8bbc8544a836))
 
   Allow jobs to run serially stage by stage instead.
@@ -1793,13 +508,6 @@
 * Revert "Replace cache with artifacts" ([`28c747c`](https://github.com/sandialabs/shell-logger/commit/28c747cb06f4fcc764217317cb48ff81b93ee72e))
 
   This reverts commit ca232364599c56c766967f4cad3532d5208248d0.
-* Merge branch '19-add-bash-versions-of-the-examples' into 'master' ([`b2ab949`](https://github.com/sandialabs/shell-logger/commit/b2ab949bd6f1a0cedc5024b18fbface898877685))
-
-  Add bash versions of the examples (#19)
-
-  Closes #19
-
-  See merge request ShellLogger/ShellLogger!11
 * Add bash versions of the examples (#19) ([`f666c44`](https://github.com/sandialabs/shell-logger/commit/f666c44c0d8fd6685c7999e14c44e70152efb543))
 
   * Add bash scripts equivalent to `hello_world_html.py` and
@@ -1807,24 +515,12 @@
   * Include them in the documentation home page for comparison
     purposes.
   * Rework example write-up into bulleted list.
-* Merge branch 'replace-cache-with-artifacts' into 'master' ([`084f474`](https://github.com/sandialabs/shell-logger/commit/084f474baeae0229978f47dcd638c911fe32c58d))
-
-  Replace cache with artifacts
-
-  See merge request ShellLogger/ShellLogger!10
 * Replace cache with artifacts ([`ca23236`](https://github.com/sandialabs/shell-logger/commit/ca232364599c56c766967f4cad3532d5208248d0))
 
   It seems storing the virtual environment in the cache was causing
   non-deterministic problems with `shelllogger` sometimes not existing
-  in the environment after it was installed.  Hopefully using
+  in the environment after it was installed. Hopefully using
   artifacts instead of the cache will solve the problem.
-* Merge branch '15-create-examples' into 'master' ([`3a5a282`](https://github.com/sandialabs/shell-logger/commit/3a5a282c9d2712efeabd4d58ebac58ed149e0338))
-
-  Resolve "Create examples"
-
-  Closes #15
-
-  See merge request ShellLogger/ShellLogger!7
 * Create examples (#15) ([`c478b3c`](https://github.com/sandialabs/shell-logger/commit/c478b3c8e24800d7ab5e78dd64e39848b6417d3f))
 
   * Add example scripts demonstrating the usage of
@@ -1833,32 +529,15 @@
     screenshots of the generated log file.
   * Run the examples in the pipeline to ensure they always
     work.
-* Merge branch 'fix-ci-stages' into 'master' ([`8f4c88a`](https://github.com/sandialabs/shell-logger/commit/8f4c88a32eb07c80185f469bfb4ab7cc081134e6))
-
-  Fix CI Stages
-
-  See merge request ShellLogger/ShellLogger!9
 * Fix CI Stages ([`d36ee93`](https://github.com/sandialabs/shell-logger/commit/d36ee938731843198d321ad9113cdf98f2f08774))
 
   Make the `pages` job happen in the `deploy` stage (just the way
   GitLab expects it to be), and rename the `deploy` stage `install`.
-* Merge branch 'fix-pages-deployment' into 'master' ([`dca0795`](https://github.com/sandialabs/shell-logger/commit/dca0795eb08eba5337345f868020058a8c64e38c))
-
-  Fix Pages Deployment
-
-  See merge request ShellLogger/ShellLogger!8
 * Fix Pages Deployment ([`cca72b7`](https://github.com/sandialabs/shell-logger/commit/cca72b78711af2b5d31b4653c6f066b431835d45))
 
-  Lowercase all CI job names.  It sounds like the CI job name needs
+  Lowercase all CI job names. It sounds like the CI job name needs
   to be `pages` (case-sensitive) to tell the GitLab Runner to deploy
   the `public` directory via GitLab Pages.
-* Merge branch '6-add-sphinx-documentation' into 'master' ([`a642d81`](https://github.com/sandialabs/shell-logger/commit/a642d815cda8b31698317f7bd624144e6c274521))
-
-  Resolve "Add Sphinx documentation"
-
-  Closes #6
-
-  See merge request ShellLogger/ShellLogger!6
 * Add Sphinx Documentation (#6) ([`1e41edc`](https://github.com/sandialabs/shell-logger/commit/1e41edca6455ca8c12b8b5f6c545ce24ee9e7bd7))
 
   * Create the infrastructure for generating the Sphinx
@@ -1866,24 +545,10 @@
   * Add a job to the CI pipeline to build the documentation.
   * Add a documentation badge to the README.md.
   * Fix Sphinx warnings/errors.
-* Merge branch '5-add-flake8' into 'master' ([`5e862f7`](https://github.com/sandialabs/shell-logger/commit/5e862f7044d9ac1b6992dd822065b7b12cb21d8e))
-
-  Resolve "Add flake8"
-
-  Closes #5
-
-  See merge request ShellLogger/ShellLogger!4
 * Exclude virtual environment from flake8 ([`dbd41eb`](https://github.com/sandialabs/shell-logger/commit/dbd41eb6864854e74721deefd252292a5fec6da1))
 * Add flake8 to testing requirements ([`aded66c`](https://github.com/sandialabs/shell-logger/commit/aded66c5bee9816af3952255f43dcc1d757d80ba))
 * Add flake8 CI job ([`b4e97d5`](https://github.com/sandialabs/shell-logger/commit/b4e97d565d3770a0a044c6c93b49a220a29725ea))
 * Get flake8 passing ([`a3fd6ba`](https://github.com/sandialabs/shell-logger/commit/a3fd6baef676e7f26a61f88618802d64cfcf3c77))
-* Merge branch '4-add-pytest' into 'master' ([`8b0a4af`](https://github.com/sandialabs/shell-logger/commit/8b0a4af66db0660cf074f934f12d62937109c110))
-
-  Resolve "Add pytest"
-
-  Closes #4
-
-  See merge request ShellLogger/ShellLogger!5
 * Add pytest (#4) ([`6a80d00`](https://github.com/sandialabs/shell-logger/commit/6a80d00cb140ab549e588aae363a732bf945f8ac))
 
   * Create a GitLab CI pipeline to run pytest
@@ -1892,13 +557,6 @@
   * Include coverage testing, distribution creation,
     and un/installation
 * Fix CaptureFixture type hinting ([`06c7381`](https://github.com/sandialabs/shell-logger/commit/06c7381648ba82e287ed711c0f2bca3fa76b5460))
-* Merge branch '8-refactor-for-python-3.8' into 'master' ([`8e65770`](https://github.com/sandialabs/shell-logger/commit/8e6577039bdc6895ceb26ad799cec7cc0d1b7a21))
-
-  Resolve "Refactor for Python 3.8"
-
-  Closes #8
-
-  See merge request ShellLogger/ShellLogger!2
 * Update the test suite; finish work on branch ([`daa36bc`](https://github.com/sandialabs/shell-logger/commit/daa36bc55d907c9dfbc7885bcdf592cccbf7652a))
 * Finish updating everything but the test suite ([`2eb3f79`](https://github.com/sandialabs/shell-logger/commit/2eb3f795efec8f1cd3d479ca0bc0da4905ba52e7))
 * Finish util.py ([`385860e`](https://github.com/sandialabs/shell-logger/commit/385860e5716c92fc8339046d3b101d7eb3bc88a4))
@@ -1918,29 +576,22 @@
 
   * Mostly type hinting and docstrings.
   * The occasional reorganization of a function.
-* Merge branch '14-get-the-pytest-suite-passing' into 'master' ([`a67fa22`](https://github.com/sandialabs/shell-logger/commit/a67fa22d74da84972e900b05415171786c61fe74))
-
-  Resolve "Get the pytest suite passing"
-
-  Closes #14
-
-  See merge request ShellLogger/ShellLogger!3
 * Add installation files ([`0ec0ce4`](https://github.com/sandialabs/shell-logger/commit/0ec0ce48ce83d5bb27a9501955a5ac8b9f02d0e6))
 * Remove unused imports ([`04d5b91`](https://github.com/sandialabs/shell-logger/commit/04d5b91ca3afe6d10ff6fb131afa798ee439f8b0))
 * Skip trace test for Darwin ([`4204630`](https://github.com/sandialabs/shell-logger/commit/420463028400ab5705c18570ab41c3164a8df27a))
 * Switch from Process().start() and .join() to simple logger.log()s ([`9b641d1`](https://github.com/sandialabs/shell-logger/commit/9b641d1ae42991496bfe4e6637e4a57fa068e575))
 
-  I'm not sure of the motivation for the former method.  It was
+  I'm not sure of the motivation for the former method. It was
   causing `TypeError: cannot pickle '_thread.lock' object` errors on
   the `start()`s, but I couldn't figure out why or how to fix it.
 * Add `sleep`s to allow time to collect memory/CPU stats ([`b8012ff`](https://github.com/sandialabs/shell-logger/commit/b8012ff038c935e8d08510236e0202bf5feda9ea))
 * Use tmpdir for all tests ([`ae1c49e`](https://github.com/sandialabs/shell-logger/commit/ae1c49e867b1676302b0b1528fdebdf36f43e881))
 * Adjust `test_stats` ([`8166bdf`](https://github.com/sandialabs/shell-logger/commit/8166bdfba63f6509c1e6943a17522dcc55f0cd8e))
 * Skip `ltrace` test on Darwin ([`a2a06ad`](https://github.com/sandialabs/shell-logger/commit/a2a06ad2e36f286d2483163410826876ac0f3331))
-* Revert "WIP:  Trying to get next test working" ([`760d754`](https://github.com/sandialabs/shell-logger/commit/760d7549bae313da32022c19888c585455826371))
+* Revert "WIP: Trying to get next test working" ([`760d754`](https://github.com/sandialabs/shell-logger/commit/760d7549bae313da32022c19888c585455826371))
 
   This reverts commit 89bade69948d10c442328a80ef961b648316fb0a.
-* WIP:  Trying to get next test working ([`89bade6`](https://github.com/sandialabs/shell-logger/commit/89bade69948d10c442328a80ef961b648316fb0a))
+* WIP: Trying to get next test working ([`89bade6`](https://github.com/sandialabs/shell-logger/commit/89bade69948d10c442328a80ef961b648316fb0a))
 
   `test_finalize_creates_html_with_correct_information` is
   failing because the memory and CPU usage aren't getting
@@ -1959,24 +610,12 @@
 * Lowercase variable names ([`16c81c8`](https://github.com/sandialabs/shell-logger/commit/16c81c822704ae92186f006b7e0c906b37e365ee))
 * PEP8 pass ([`3402ed0`](https://github.com/sandialabs/shell-logger/commit/3402ed020ca5752e68ee43482fc2f2f4b61ea0ec))
 * Lowercase function names ([`d1a2b87`](https://github.com/sandialabs/shell-logger/commit/d1a2b87beebb32be45709156ca6e11b8ab80ebed))
-* Merge branch '1-reorganize-directory-structure' into 'master' ([`9492ac5`](https://github.com/sandialabs/shell-logger/commit/9492ac59ce57b7eb7929520641c26be482643806))
-
-  Resolve "Reorganize directory structure"
-
-  Closes #1
-
-  See merge request ShellLogger/ShellLogger!1
-* Rename class:  Logger -> ShellLogger ([`3faf70f`](https://github.com/sandialabs/shell-logger/commit/3faf70f18892a6df5894b49d3dafe39f8234a823))
-* Rename directory:  logger -> shelllogger ([`be2a76b`](https://github.com/sandialabs/shell-logger/commit/be2a76b7a06fd63b75ebeeead7ee5ac713d039da))
+* Rename class: Logger -> ShellLogger ([`3faf70f`](https://github.com/sandialabs/shell-logger/commit/3faf70f18892a6df5894b49d3dafe39f8234a823))
+* Rename directory: logger -> shelllogger ([`be2a76b`](https://github.com/sandialabs/shell-logger/commit/be2a76b7a06fd63b75ebeeead7ee5ac713d039da))
 * Add Pycharm configuration ([`196cd41`](https://github.com/sandialabs/shell-logger/commit/196cd41a91298788f487af27830928907ccda4f4))
 * Restructure Logger files for conversion to ShellLogger repo ([`60f9c00`](https://github.com/sandialabs/shell-logger/commit/60f9c00354aba86bb276ac6455407cb65450d32c))
 * Use fonts in logger whose word joiner is zero width ([`0d71dc8`](https://github.com/sandialabs/shell-logger/commit/0d71dc8fbfe55e4cefcafbfd827d1ac9e51ca1ed))
 * Small HTML message tweak ([`3939cde`](https://github.com/sandialabs/shell-logger/commit/3939cde840105fd961d01bb12ea5556aef5610e5))
-* Merge branch 'logger-output-change' into 'develop' ([`72ad3ab`](https://github.com/sandialabs/shell-logger/commit/72ad3ab05e8500f4b41557b182c972889e2ba1eb))
-
-  Logger output change
-
-  See merge request EM-Plasma/BuildScripts!516
 * Improve logger layout a bit ([`e60a10a`](https://github.com/sandialabs/shell-logger/commit/e60a10afd65be770ab0ac2bb2fdc459a07e02f62))
 
   * Less blank space
@@ -2162,26 +801,12 @@
   * Added partial support for aux data (TODO: add aux data to HTML)
     aux data includes environment, user, group, umask, ulimit, shell
 * Update documentation on stdin_redirect ([`d3b191e`](https://github.com/sandialabs/shell-logger/commit/d3b191ebf8c72fbe0e00e8ad0b2feca64e9d4cba))
-* Merge branch '477-allow-override-of-stdin-dev-null-for-logger-jobs' into 'develop' ([`2eb5e96`](https://github.com/sandialabs/shell-logger/commit/2eb5e96e639ec9bf71ffe95be2307e9c4f4fd024))
-
-  Resolve "Allow override of stdin=/dev/null for logger jobs"
-
-  Closes #477
-
-  See merge request EM-Plasma/BuildScripts!415
 * Resolve "Allow override of stdin=/dev/null for logger jobs" ([`2dc1424`](https://github.com/sandialabs/shell-logger/commit/2dc14245dc30ceee4ca9faa0c667ae8941b3e3c4))
 
   Closes #477
 
   See merge request EM-Plasma/BuildScripts!415
 * Deal with Paths in command lists ([`866f11c`](https://github.com/sandialabs/shell-logger/commit/866f11cd9ce06bf16a5180b41005fce2932539ce))
-* Merge branch '303-refactor-scripts-to-use-pathlib' into 'develop' ([`a4f919a`](https://github.com/sandialabs/shell-logger/commit/a4f919a07acf52247953b7f237f36a24b3c7ac47))
-
-  Resolve "Refactor Scripts to Use Pathlib"
-
-  Closes #303
-
-  See merge request EM-Plasma/BuildScripts!339
 * DEBUGGING ([`8f4cd85`](https://github.com/sandialabs/shell-logger/commit/8f4cd851f6bf5b2e6b636c149f08a48a46e59f4e))
 * test_logger ([`048735e`](https://github.com/sandialabs/shell-logger/commit/048735ebdc7aaecc101b30c137aba557cc4fc06d))
 * logger updates ([`ec18db4`](https://github.com/sandialabs/shell-logger/commit/ec18db41a57743ab4ef67b08568d4b9d632aa7bc))
@@ -2197,57 +822,22 @@
 * Create HTML Log File in Stream Directory ([`dbb5161`](https://github.com/sandialabs/shell-logger/commit/dbb5161a9fd13715f9d782c83e523bdb709d1994))
 
   Create it in the stream directory and let all the work happen there,
-  then create a symlink in the log directory pointing to it.  This is to
+  then create a symlink in the log directory pointing to it. This is to
   avoid multiple Loggers in the same workspace overwriting one another's
   HTML log file.
-* Merge branch '236-simultaneous-loggers-in-same-workspace' into 'develop' ([`b56ca76`](https://github.com/sandialabs/shell-logger/commit/b56ca7697437b767f91b6ac2268456819ae14463))
-
-  Resolve "Simultaneous Loggers in Same Workspace"
-
-  Closes #236
-
-  See merge request EM-Plasma/BuildScripts!270
 * Simultaneous Loggers in Same Workspace (#236) ([`28338f4`](https://github.com/sandialabs/shell-logger/commit/28338f4d5b4c2ffdd961d382144380ecfa16a754))
 
   Append microseconds to logger directory names to deconflict
   "simultaneous" directory creation.
-* Merge branch '228-have-timestamped-log-files-with-symlink-to-latest' into 'develop' ([`5039ffc`](https://github.com/sandialabs/shell-logger/commit/5039ffcc23c17a6549ef5c665a3b13cf00f2c745))
-
-  Resolve "Have Timestamped Log Files with Symlink to Latest"
-
-  Closes #228
-
-  See merge request EM-Plasma/BuildScripts!266
 * Remove files for recreated HTML logs. ([`e91b8b7`](https://github.com/sandialabs/shell-logger/commit/e91b8b74a991e08430ef40aa9e5e74d683fcd6ac))
 * Don't append '_latest_run' to the HTML file name. ([`5946a57`](https://github.com/sandialabs/shell-logger/commit/5946a57721a1ba9358597e80bd43fa7c02c76979))
 * Updated logger to symlink main HTML to newest run HTML. Have not run the test. ([`2bc9aea`](https://github.com/sandialabs/shell-logger/commit/2bc9aea7aed697c773a183504b30d9062cd5a7b6))
 * Shifted log method higher in the file since it is a more-used method ([`68a0ef3`](https://github.com/sandialabs/shell-logger/commit/68a0ef3dcc404b8ac096a5f7fcd439b830c16979))
-* Merge branch '162-integrate-update-trilinos-fork-py-into-the-pipeline' into 'develop' ([`15105c6`](https://github.com/sandialabs/shell-logger/commit/15105c6e82bd6cb1f775549bba6d3d343ca052ec))
-
-  Resolves "Integrate update_trilinos_fork.py into the Pipeline"
-
-  Closes #162
-
-  See merge request EM-Plasma/BuildScripts!215
 * Integrate update_trilinos_fork.py into... (#162) ([`8f33f28`](https://github.com/sandialabs/shell-logger/commit/8f33f28e43198d0dad694f7f3ac0869fbd7c8981))
 
   In the Trilinos sync pipeline, swap out the old bash updateTrilinosFork
   script for the new update_trilinos_fork.py Python one.
-* Merge branch '173-python-logger-json-is-not-pretty' into 'develop' ([`336328a`](https://github.com/sandialabs/shell-logger/commit/336328a1c37e216a411cdb68a692aaa784d8cd71))
-
-  Resolve "python logger json is not pretty"
-
-  Closes #173
-
-  See merge request EM-Plasma/BuildScripts!221
 * logger now does pretty printing of json ([`6a51733`](https://github.com/sandialabs/shell-logger/commit/6a517336d65960727d9210bbd9a18760a73ec02e))
-* Merge branch '166-build_empire-py-has-a-bug-if-not-invoked-in-buildscripts' into 'develop' ([`04c262f`](https://github.com/sandialabs/shell-logger/commit/04c262fffbacf02647b06ed09a612a2121467804))
-
-  Resolve "build_empire.py has a bug if not invoked in BuildScripts"
-
-  Closes #166
-
-  See merge request EM-Plasma/BuildScripts!216
 * Fixed build_empire.py when not called in BuildScripts ([`418e9cb`](https://github.com/sandialabs/shell-logger/commit/418e9cb0847d0ad765c003ff69008ee8e8ff8298))
 
   also sorted the Trilinos options when using --interactive.
