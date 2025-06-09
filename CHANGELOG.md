@@ -2,6 +2,11 @@
 
 
 
+## v3.0.2 (2025-06-09)
+
+### Patch
+* patch: Sign release commits and tags ([`9bbcc46`](https://github.com/sandialabs/shell-logger/commit/9bbcc46428540aeb8da3a63c5399da5cceea7e73))
+
 ## v3.0.1 (2025-05-27)
 
 ### Continuous integration

@@ -9,4 +9,4 @@
 from .shell_logger import ShellLogger, ShellLoggerDecoder, ShellLoggerEncoder
 
 __all__ = ["ShellLogger", "ShellLoggerDecoder", "ShellLoggerEncoder"]
-__version__ = "3.0.1"
+__version__ = "3.0.2"
