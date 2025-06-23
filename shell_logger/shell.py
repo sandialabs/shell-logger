@@ -24,7 +24,7 @@ from typing import IO, Optional, TextIO
 END_OF_READ = 4
 
 
-class Shell:
+class Shell:  # noqa: PLW1641
     """
     Manage interactions with the underlying shell.
 
