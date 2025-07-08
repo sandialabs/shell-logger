@@ -39,16 +39,15 @@ def stats_collectors(**kwargs) -> list[StatsCollector]:
     Returns:
         A collection of instances of :class:`StatsCollector` subclasses.
     """
-    collectors = []
     if "measure" in kwargs:
         interval = kwargs.get("interval", 1.0)
         manager = Manager()
-        collectors.extend(
+        return [
             collector(interval, manager)
             for collector in StatsCollector.subclasses
             if collector.stat_name in kwargs["measure"]
-        )
-    return collectors
+        ]
+    return []
 
 
 class StatsCollector:
