@@ -9,11 +9,11 @@
 import pkgutil
 import re
 import textwrap
-from collections.abc import Iterable, Mapping
+from collections.abc import Iterable, Iterator, Mapping
 from datetime import datetime
 from pathlib import Path
 from types import SimpleNamespace
-from typing import Iterator, TextIO, Union
+from typing import TextIO, Union
 
 
 def nested_simplenamespace_to_dict(
@@ -851,7 +851,7 @@ def sgr_4bit_color_and_style_to_html(sgr: str) -> str:
         "39": "color: inherit;",
         "49": "background-color: inherit;",
     }
-    return f'<span style="{sgr_to_css.get(sgr) or str()}">'
+    return f'<span style="{sgr_to_css.get(sgr) or ""}">'
 
 
 def sgr_8bit_color_to_html(sgr_params: list[str]) -> str:  # noqa: PLR0911

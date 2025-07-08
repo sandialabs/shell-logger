@@ -43,9 +43,11 @@ def stats_collectors(**kwargs) -> list[StatsCollector]:
     if "measure" in kwargs:
         interval = kwargs.get("interval", 1.0)
         manager = Manager()
-        for collector in StatsCollector.subclasses:
-            if collector.stat_name in kwargs["measure"]:
-                collectors.append(collector(interval, manager))
+        collectors.extend(
+            collector(interval, manager)
+            for collector in StatsCollector.subclasses
+            if collector.stat_name in kwargs["measure"]
+        )
     return collectors
 
 
@@ -307,7 +309,6 @@ else:
 
         def collect(self) -> None:
             """Don't collect any disk statistics."""
-            pass
 
         def unproxied_stats(self) -> None:
             """
@@ -342,7 +343,6 @@ else:
 
         def collect(self) -> None:
             """Don't collect any CPU statistics."""
-            pass
 
         def unproxied_stats(self) -> None:
             """
@@ -377,7 +377,6 @@ else:
 
         def collect(self) -> None:
             """Don't collect any memory statistics."""
-            pass
 
         def unproxied_stats(self) -> None:
             """

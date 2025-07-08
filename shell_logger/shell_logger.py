@@ -14,13 +14,13 @@ import random
 import shutil
 import string
 import tempfile
-from collections.abc import Iterable, Mapping
+from collections.abc import Iterable, Iterator, Mapping
 from datetime import datetime, timedelta
 from distutils import dir_util
 from pathlib import Path
 from tempfile import NamedTemporaryFile
 from types import SimpleNamespace
-from typing import Iterator, Optional, Union
+from typing import Optional, Union
 
 from .html_utilities import (
     append_html,
@@ -248,7 +248,7 @@ class ShellLogger:
         """
         self.done_time = datetime.now()
 
-    def __update_duration(self) -> None:
+    def update_duration(self) -> None:
         """
         Update the :attr:`duration` attribute.
 
@@ -385,7 +385,7 @@ class ShellLogger:
             msg:  The message to print and save to the log.
             end:  The string appended after the message:
         """
-        print(msg, end=end)
+        print(msg, end=end)  # noqa: T201
         log = {"msg": msg, "timestamp": str(datetime.now()), "cmd": None}
         self.log_book.append(log)
 
@@ -427,7 +427,7 @@ class ShellLogger:
             if isinstance(log, ShellLogger):
                 # Update the duration of this ShellLogger's commands.
                 if log.duration is None:
-                    log.__update_duration()
+                    log.update_duration()
                 html.append(child_logger_card(log))
 
             # Otherwise, if this is a message being logged...
@@ -559,7 +559,7 @@ class ShellLogger:
         # Print the command to be executed.
         with stdout_path.open("a"), stderr_path.open("a"):
             if verbose:
-                print(cmd)
+                print(cmd)  # noqa: T201
 
         # Initialize the log information.
         log = {
@@ -737,7 +737,7 @@ class ShellLoggerEncoder(json.JSONEncoder):
         """
         if isinstance(obj, ShellLogger):
             return {
-                **{"__type__": "ShellLogger"},
+                "__type__": "ShellLogger",
                 **{k: self.default(v) for k, v in obj.__dict__.items()},
             }
         if isinstance(obj, (int, float, str, bytes)):

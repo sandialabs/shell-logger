@@ -20,7 +20,6 @@ from time import time
 from types import SimpleNamespace
 from typing import IO, Optional, TextIO
 
-
 END_OF_READ = 4
 
 
@@ -118,7 +117,7 @@ class Shell:  # noqa: PLW1641
         ]:
             try:
                 os.close(fd)
-            except OSError as e:
+            except OSError as e:  # noqa: PERF203
                 if "Bad file descriptor" not in e.strerror:
                     raise
 
@@ -185,12 +184,12 @@ class Shell:  # noqa: PLW1641
 
         # Set the `RET_CODE` environment variable, such that we can
         # access it later.
-        os.write(self.aux_stdin_wfd, "RET_CODE=$?\n".encode())
+        os.write(self.aux_stdin_wfd, b"RET_CODE=$?\n")
 
         # Because these writes are non-blocking, tell the shell that the
         # writes are complete.
-        os.write(self.aux_stdin_wfd, "printf '\\4'\n".encode())
-        os.write(self.aux_stdin_wfd, "printf '\\4' 1>&2\n".encode())
+        os.write(self.aux_stdin_wfd, b"printf '\\4'\n")
+        os.write(self.aux_stdin_wfd, b"printf '\\4' 1>&2\n")
 
         # Tee the output to multiple sinks (files, strings,
         # `stdout`/`stderr`).
