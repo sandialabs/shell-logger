@@ -15,8 +15,6 @@ from pathlib import Path
 from time import sleep, time
 from typing import TYPE_CHECKING
 
-from .abstract_method import AbstractMethod
-
 if TYPE_CHECKING:
     from multiprocessing.managers import SyncManager
 
@@ -117,11 +115,7 @@ class StatsCollector:
         Instantaneously collect a statistic.
 
         This is meant to be called repeatedly after some time interval.
-
-        Raises:
-            AbstractMethod:  This must be overridden by subclasses.
         """
-        raise AbstractMethod
 
     @abstractmethod
     def unproxied_stats(self):
@@ -130,11 +124,7 @@ class StatsCollector:
 
         Convert from Python's Manager's data structures to base Python
         data structures.
-
-        Raises:
-            AbstractMethod:  This must be overridden by subclasses.
         """
-        raise AbstractMethod
 
     def finish(self):
         """

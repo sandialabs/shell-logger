@@ -8,7 +8,6 @@ shell-logger
 
    shell_logger
    shell
-   abstract_method
    stats_collector
    trace_collector
    html_utilities

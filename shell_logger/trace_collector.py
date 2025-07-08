@@ -11,8 +11,6 @@ from __future__ import annotations
 from abc import abstractmethod
 from pathlib import Path
 
-from .abstract_method import AbstractMethod
-
 
 def trace_collector(**kwargs) -> TraceCollector:
     """
@@ -87,11 +85,7 @@ class TraceCollector:
 
         The trace command and the arguments you pass to it, but not the
         command you're tracing.  E.g., return `strace -f -c -e "open"`.
-
-        Raises:
-            AbstractMethod:  This needs to be overridden by subclasses.
         """
-        raise AbstractMethod
 
     def command(self, command: str):
         """
