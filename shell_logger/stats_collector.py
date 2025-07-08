@@ -15,8 +15,6 @@ from pathlib import Path
 from time import sleep, time
 from typing import TYPE_CHECKING
 
-from .abstract_method import AbstractMethod
-
 if TYPE_CHECKING:
     from multiprocessing.managers import SyncManager
 
@@ -41,14 +39,15 @@ def stats_collectors(**kwargs) -> list[StatsCollector]:
     Returns:
         A collection of instances of :class:`StatsCollector` subclasses.
     """
-    collectors = []
     if "measure" in kwargs:
         interval = kwargs.get("interval", 1.0)
         manager = Manager()
-        for collector in StatsCollector.subclasses:
-            if collector.stat_name in kwargs["measure"]:
-                collectors.append(collector(interval, manager))
-    return collectors
+        return [
+            collector(interval, manager)
+            for collector in StatsCollector.subclasses
+            if collector.stat_name in kwargs["measure"]
+        ]
+    return []
 
 
 class StatsCollector:
@@ -117,11 +116,7 @@ class StatsCollector:
         Instantaneously collect a statistic.
 
         This is meant to be called repeatedly after some time interval.
-
-        Raises:
-            AbstractMethod:  This must be overridden by subclasses.
         """
-        raise AbstractMethod
 
     @abstractmethod
     def unproxied_stats(self):
@@ -130,11 +125,7 @@ class StatsCollector:
 
         Convert from Python's Manager's data structures to base Python
         data structures.
-
-        Raises:
-            AbstractMethod:  This must be overridden by subclasses.
         """
-        raise AbstractMethod
 
     def finish(self):
         """
@@ -317,7 +308,6 @@ else:
 
         def collect(self) -> None:
             """Don't collect any disk statistics."""
-            pass
 
         def unproxied_stats(self) -> None:
             """
@@ -352,7 +342,6 @@ else:
 
         def collect(self) -> None:
             """Don't collect any CPU statistics."""
-            pass
 
         def unproxied_stats(self) -> None:
             """
@@ -387,7 +376,6 @@ else:
 
         def collect(self) -> None:
             """Don't collect any memory statistics."""
-            pass
 
         def unproxied_stats(self) -> None:
             """
