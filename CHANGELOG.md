@@ -2,6 +2,42 @@
 
 
 
+## v3.0.3 (2025-07-16)
+
+### Chores
+* chore: Update Ruff linters ([`6ddc335`](https://github.com/sandialabs/shell-logger/commit/6ddc335f3a62a3e90bfe78b1f332c9520467cbb7))
+* chore: Ignore warning on missing __hash__ method ([`74ed2e0`](https://github.com/sandialabs/shell-logger/commit/74ed2e002138125513ff39cc73499a5ffe859a56))
+
+  Two `Shell`s are equal at a point in time if their types and working
+  directories match; however, a `Shell`'s working directory can change
+  over time, and as such, this class is not appropriate for hashing.
+
+### Patch
+* patch: Add SLSA provenance to release assets ([`05dab68`](https://github.com/sandialabs/shell-logger/commit/05dab68911645f7ded90e09285cc905a56ff7460))
+
+  See https://slsa.dev/ for motivation.
+
+  Creating a patch release to ensure these additions to the automated
+  release process work.
+
+  Note that the `release` job has been subdivided, because the SLSA
+  provenance reusable workflow cannot be used as a step within a job, but
+  must be used as a job on its own.
+
+### Refactoring
+* refactor: Improve clarity ([`76ba7c7`](https://github.com/sandialabs/shell-logger/commit/76ba7c7900bf272d9effd6f7c3963a02b5cc79a5))
+
+  Sourcery suggested:
+
+  In stats_collectors, using collectors.extend(generator) works but is
+  less self-documenting than a direct list comprehension; consider
+  assigning collectors = [collector(...) for collector in ...] to
+  match the declared return type and improve readability.
+* refactor: Remove AbstractMethod exception ([`3143e0d`](https://github.com/sandialabs/shell-logger/commit/3143e0d9c620bd9df02cce8c1cc95a76db0efa55))
+
+  I think its existence was a historical artifact of starting this project
+  before the @abstractmethod decorator was available.
+
 ## v3.0.2 (2025-06-09)
 
 ### Patch

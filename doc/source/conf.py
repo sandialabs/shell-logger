@@ -17,7 +17,7 @@ project_copyright = (
     "2024, National Technology & Engineering Solutions of Sandia, LLC (NTESS)"
 )
 author = "Josh Braun, David Collins, Jason M. Gates"
-version = "3.0.2"
+version = "3.0.3"
 release = version
 
 
