@@ -20,7 +20,6 @@ from distutils import dir_util
 from pathlib import Path
 from tempfile import NamedTemporaryFile
 from types import SimpleNamespace
-from typing import Optional
 
 from .html_utilities import (
     append_html,
@@ -135,15 +134,15 @@ class ShellLogger:
         self,
         name: str,
         *,
-        log_dir: Optional[Path] = None,
-        stream_dir: Optional[Path] = None,
-        html_file: Optional[Path] = None,
+        log_dir: Path | None = None,
+        stream_dir: Path | None = None,
+        html_file: Path | None = None,
         indent: int = 0,
         login_shell: bool = False,
-        log: Optional[list[object]] = None,
-        init_time: Optional[datetime] = None,
-        done_time: Optional[datetime] = None,
-        duration: Optional[str] = None,
+        log: list[object] | None = None,
+        init_time: datetime | None = None,
+        done_time: datetime | None = None,
+        duration: str | None = None,
     ) -> None:
         """
         Initialize a :class:`ShellLogger` object.
@@ -488,7 +487,7 @@ class ShellLogger:
         msg: str,
         cmd: str,
         *,
-        cwd: Optional[Path] = None,
+        cwd: Path | None = None,
         live_stdout: bool = False,
         live_stderr: bool = False,
         return_info: bool = False,
