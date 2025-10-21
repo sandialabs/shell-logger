@@ -2,6 +2,13 @@
 
 
 
+## v3.0.4 (2025-10-21)
+
+### Patch
+* patch: Drop support for Python 3.9 ([`43cf92f`](https://github.com/sandialabs/shell-logger/commit/43cf92fe1e04c96fba89a4b2a7e8d969e25e15b3))
+
+  Also add support for Python 3.14.
+
 ## v3.0.3 (2025-07-16)
 
 ### Chores
