@@ -18,7 +18,7 @@ from pathlib import Path
 from threading import Thread
 from time import time
 from types import SimpleNamespace
-from typing import IO, Optional, TextIO
+from typing import IO, TextIO
 
 END_OF_READ = 4
 
@@ -44,7 +44,7 @@ class Shell:  # noqa: PLW1641
     """
 
     def __init__(
-        self, pwd: Optional[Path] = None, *, login_shell: bool = False
+        self, pwd: Path | None = None, *, login_shell: bool = False
     ) -> None:
         """
         Initialize a :class:`Shell` object.
@@ -233,7 +233,7 @@ class Shell:  # noqa: PLW1641
 
     @staticmethod
     def tee(  # noqa: C901
-        stdout: Optional[IO[bytes]], stderr: Optional[IO[bytes]], **kwargs
+        stdout: IO[bytes] | None, stderr: IO[bytes] | None, **kwargs
     ) -> SimpleNamespace:
         """
         Write output/error streams to multiple files.
@@ -317,9 +317,7 @@ class Shell:  # noqa: PLW1641
                 file.close()
         return SimpleNamespace(stdout_str=stdout_str, stderr_str=stderr_str)
 
-    def auxiliary_command(
-        self, **kwargs
-    ) -> tuple[Optional[str], Optional[str]]:
+    def auxiliary_command(self, **kwargs) -> tuple[str | None, str | None]:
         """
         Run auxiliary commands like `umask`, `pwd`, `env`, etc.
 
