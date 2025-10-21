@@ -20,7 +20,7 @@ from distutils import dir_util
 from pathlib import Path
 from tempfile import NamedTemporaryFile
 from types import SimpleNamespace
-from typing import Optional, Union
+from typing import Optional
 
 from .html_utilities import (
     append_html,
@@ -180,7 +180,7 @@ class ShellLogger:
             generally be omitted.
         """
         self.name = name
-        self.log_book: list[Union[dict, ShellLogger]] = (
+        self.log_book: list[dict | ShellLogger] = (
             log if log is not None else []
         )
         self.init_time = datetime.now() if init_time is None else init_time
@@ -405,7 +405,7 @@ class ShellLogger:
         }
         self.log_book.append(log)
 
-    def to_html(self) -> Union[Iterator[str], list[Iterator[str]]]:
+    def to_html(self) -> Iterator[str] | list[Iterator[str]]:
         """
         Convert the log entries to HTML.
 

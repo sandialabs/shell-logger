@@ -6,6 +6,8 @@
 
 # SPDX-License-Identifier: BSD-3-Clause
 
+from __future__ import annotations
+
 import pkgutil
 import re
 import textwrap
@@ -13,12 +15,12 @@ from collections.abc import Iterable, Iterator, Mapping
 from datetime import datetime
 from pathlib import Path
 from types import SimpleNamespace
-from typing import TextIO, Union
+from typing import TextIO
 
 
 def nested_simplenamespace_to_dict(
-    namespace: Union[str, bytes, tuple, Mapping, Iterable, SimpleNamespace],
-) -> Union[str, bytes, tuple, dict, list]:
+    namespace: str | bytes | tuple | Mapping | Iterable | SimpleNamespace,
+) -> str | bytes | tuple | dict | list:
     """
     Convert a ``SimpleNamespace`` to a ``dict``.
 
@@ -85,7 +87,7 @@ def closing_html_text() -> str:
     return "</html>"
 
 
-def append_html(*args: Union[str, Iterator[str]], output: Path) -> None:
+def append_html(*args: str | Iterator[str], output: Path) -> None:
     """
     Append whatever is given to the ``output`` HTML file.
 
@@ -94,9 +96,7 @@ def append_html(*args: Union[str, Iterator[str]], output: Path) -> None:
         output:  The HTML file to append to.
     """
 
-    def _append_html(
-        f: TextIO, *inner_args: Union[str, bytes, Iterable]
-    ) -> None:
+    def _append_html(f: TextIO, *inner_args: str | bytes | Iterable) -> None:
         """
         Write some text to the given HTML log file.
 
@@ -135,7 +135,7 @@ def fixed_width(text: str) -> str:
     return f"<pre><code>{html_encode(text)}</code></pre>"
 
 
-def flatten(element: Union[str, bytes, Iterable]) -> Iterator[str]:
+def flatten(element: str | bytes | Iterable) -> Iterator[str]:
     """
     Turn a tree of lists into a flat iterable of strings.
 
@@ -212,7 +212,7 @@ def child_logger_card(log) -> Iterator[str]:
 
 
 def child_logger_card_html(
-    name: str, duration: str, *args: Union[Iterator[str], list[Iterator[str]]]
+    name: str, duration: str, *args: Iterator[str] | list[Iterator[str]]
 ) -> Iterator[str]:
     """
     Generate the HTML for a child logger card.
@@ -250,7 +250,7 @@ def child_logger_card_html(
 
 
 def command_card_html(
-    log: dict, *args: Iterator[Union[str, Iterable]]
+    log: dict, *args: Iterator[str | Iterable]
 ) -> Iterator[str]:
     """
     Generate the HTML for a command card.
@@ -551,7 +551,7 @@ def stat_chart_card(
 
 def output_block_card(
     title: str,
-    output: Union[Path, str],
+    output: Path | str,
     cmd_id: str,
     *,
     collapsed: bool = True,
@@ -587,9 +587,7 @@ def output_block_card(
     yield footer
 
 
-def output_block(
-    output: Union[Path, str], name: str, cmd_id: str
-) -> Iterator[str]:
+def output_block(output: Path | str, name: str, cmd_id: str) -> Iterator[str]:
     """
     Generate an output block.
 
@@ -645,7 +643,7 @@ def diagnostics_card(cmd_id: str, *args: Iterator[str]) -> Iterator[str]:
 
 
 def output_block_html(
-    lines: Union[TextIO, str], name: str, cmd_id: str
+    lines: TextIO | str, name: str, cmd_id: str
 ) -> Iterator[str]:
     """
     Generate the HTML for an output block.
