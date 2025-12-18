@@ -1,6 +1,6 @@
 # Requirements for building the `shell-logger` documentation.
 
-sphinx
+sphinx<=9.0.0
 sphinx-argparse
 sphinx-autodoc-typehints
 sphinx-copybutton
