@@ -59,6 +59,7 @@ python3 -m pip install shell-logger-sandialabs
 Once the package is installed, you can simply
 ```python
 from shell_logger import ShellLogger
+
 sl = ShellLogger("Title of Log File")
 sl.log("Execute my first command in the shell.", "echo 'Hello World'")
 sl.finalize()
