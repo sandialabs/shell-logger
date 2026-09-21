@@ -182,8 +182,12 @@ class ShellLogger:
         self.log_book: list[dict | ShellLogger] = (
             log if log is not None else []
         )
-        self.init_time = datetime.now() if init_time is None else init_time
-        self.done_time = datetime.now() if done_time is None else done_time
+        self.init_time = (
+            datetime.now().astimezone() if init_time is None else init_time
+        )
+        self.done_time = (
+            datetime.now().astimezone() if done_time is None else done_time
+        )
         self.duration = duration
         self.indent = indent
         self.login_shell = login_shell
@@ -245,7 +249,7 @@ class ShellLogger:
         :class:`ShellLogger` objects who might finish their commands
         before the parent finalizes everything.
         """
-        self.done_time = datetime.now()
+        self.done_time = datetime.now().astimezone()
 
     def update_duration(self) -> None:
         """
@@ -270,7 +274,8 @@ class ShellLogger:
             A string representation of the total duration.
         """
         return self.strfdelta(
-            datetime.now() - self.init_time, "{hrs}h {min}m {sec}s"
+            datetime.now().astimezone() - self.init_time,
+            "{hrs}h {min}m {sec}s",
         )
 
     def change_log_dir(self, new_log_dir: Path) -> None:
@@ -385,7 +390,11 @@ class ShellLogger:
             end:  The string appended after the message:
         """
         print(msg, end=end)  # noqa: T201
-        log = {"msg": msg, "timestamp": str(datetime.now()), "cmd": None}
+        log = {
+            "msg": msg,
+            "timestamp": str(datetime.now().astimezone()),
+            "cmd": None,
+        }
         self.log_book.append(log)
 
     def html_print(self, msg: str, msg_title: str = "HTML Message") -> None:
@@ -399,7 +408,7 @@ class ShellLogger:
         log = {
             "msg": msg,
             "msg_title": msg_title,
-            "timestamp": str(datetime.now()),
+            "timestamp": str(datetime.now().astimezone()),
             "cmd": None,
         }
         self.log_book.append(log)
@@ -536,7 +545,7 @@ class ShellLogger:
             To conserve memory, ``stdout`` and ``stderr`` will be
             written to files as they are being generated.
         """
-        start_time = datetime.now()
+        start_time = datetime.now().astimezone()
 
         # Create a unique command ID that will be used to find the
         # location of the `stdout`/`stderr` files in the temporary
@@ -750,8 +759,8 @@ class ShellLoggerEncoder(json.JSONEncoder):
         if isinstance(obj, datetime):
             return {
                 "__type__": "datetime",
-                "value": obj.strftime("%Y-%m-%d_%H:%M:%S:%f"),
-                "format": "%Y-%m-%d_%H:%M:%S:%f",
+                "value": obj.strftime("%Y-%m-%d_%H:%M:%S:%f%z"),
+                "format": "%Y-%m-%d_%H:%M:%S:%f%z",
             }
         if isinstance(obj, Path):
             return {"__type__": "Path", "value": str(obj)}
@@ -815,7 +824,18 @@ class ShellLoggerDecoder(json.JSONDecoder):
                 duration=obj["duration"],
             )
         if obj["__type__"] == "datetime":
-            return datetime.strptime(obj["value"], obj["format"])
+            # The serialized ``format`` includes ``%z`` (see
+            # ShellLoggerEncoder), so this yields a timezone-aware
+            # datetime.  Legacy logs written without a timezone offset
+            # produce a naive datetime, which we localize below.  ruff
+            # cannot see ``%z`` in the dynamic format string, hence the
+            # noqa.
+            parsed = datetime.strptime(  # noqa: DTZ007
+                obj["value"], obj["format"]
+            )
+            if parsed.tzinfo is None:
+                parsed = parsed.astimezone()
+            return parsed
         if obj["__type__"] == "Path":
             return Path(obj["value"])
         if obj["__type__"] == "tuple":
