@@ -12,7 +12,7 @@ import pkgutil
 import re
 import textwrap
 from collections.abc import Iterable, Iterator, Mapping
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 from types import SimpleNamespace
 from typing import TextIO
@@ -63,7 +63,11 @@ def get_human_time(milliseconds: float) -> str:
         A string representation of the date and time.
     """
     seconds = milliseconds / 1000.0
-    return datetime.fromtimestamp(seconds).strftime("%Y-%m-%d %H:%M:%S.%f")
+    return (
+        datetime.fromtimestamp(seconds, tz=timezone.utc)
+        .astimezone()
+        .strftime("%Y-%m-%d %H:%M:%S.%f")
+    )
 
 
 def opening_html_text() -> str:
